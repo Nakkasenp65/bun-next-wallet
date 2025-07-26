@@ -17,6 +17,7 @@ import WithdrawPage from "@/components/pages/WithdrawPage";
 import DepositPage from "@/components/pages/DepositPage";
 import GoalPage from "@/components/pages/GoalPage";
 import NotificationPage from "@/components/pages/NotificationPage";
+import ErrorComponent from "@/components/Ui/ErrorComponent";
 
 export default function HomePage() {
   const router = useRouter();
@@ -60,11 +61,7 @@ export default function HomePage() {
   }
 
   if (error) {
-    return (
-      <div className="bg-bg-dark flex h-screen items-center justify-center text-red-500">
-        <p>Error loading data: {error.message}</p>
-      </div>
-    );
+    return <ErrorComponent />;
   }
 
   if (!userData) {

@@ -71,12 +71,7 @@ export default function Page() {
       </div>
     );
 
-  if (error)
-    return (
-      <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
-        <ErrorComponent />
-      </div>
-    );
+  if (error) return <ErrorComponent />;
 
   return (
     <main id="setup-page" className="flex min-h-dvh flex-col bg-white">
