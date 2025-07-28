@@ -14,12 +14,12 @@ import { useLiff } from "@/components/provider/LiffProvider";
 
 // Helper functions remain the same
 const createGoal = async ({ userId, goalData }) => {
-  const { data } = await axios.post(`${process.env.NEXT_PUBLIC_LOCAL_API_URL}/goal/${userId}`, goalData);
+  const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/goal/${userId}`, goalData);
   return data;
 };
 
 const createUser = async ({ liffId, displayName, pictureUrl }) => {
-  const { data } = await axios.post(`${process.env.NEXT_PUBLIC_LOCAL_API_URL}/user`, {
+  const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
     liffId: liffId,
     username: displayName,
     userProfilePicUrl: pictureUrl,

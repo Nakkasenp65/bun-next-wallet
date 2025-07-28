@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 const createTransfer = async ({ walletId, formData }) => {
   // The backend route is POST /transaction/:walletId
   // We construct the URL with the provided walletId.
-  const url = `${process.env.NEXT_PUBLIC_LOCAL_API_URL}/transaction/${walletId}`;
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/transaction/${walletId}`;
 
   const { data } = await axios.post(url, formData, {
     headers: {

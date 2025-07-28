@@ -27,7 +27,7 @@ let currentMockTransactions = generateInitialMockTransactions();
 
 const fetchMockTransactions = async (year, month, walletId) => {
   // const userId = "U5d2998909721fdea596f8e9e91e7bf85";
-  const response = await axios.get(`${LOCAL_API}/transaction/${walletId}?year=${year}&month=${month}`);
+  const response = await axios.get(`${API_URL}/transaction/${walletId}?year=${year}&month=${month}`);
   return response.data;
   // console.log(`[MOCK] Fetching transactions for ${year}-${month + 1}`);
   // await new Promise((resolve) => setTimeout(resolve, 100));
