@@ -8,7 +8,6 @@ import Loading from "../Loading";
 export default function TransactionList({ walletId }) {
   const date = new Date();
   const { data: transactions, isLoading, error } = useTransactions(date.getFullYear(), date.getMonth(), walletId);
-  console.log("Transactions: ", transactions);
   if (isLoading || error) {
     return (
       <div className="h-56 flex items-center justify-center">

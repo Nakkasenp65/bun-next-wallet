@@ -84,6 +84,8 @@ export default function SetupContent({ goal, setGoal, isGoalSelected }) {
     }));
   }
 
+  console.log(goal);
+
   function handlePlan(plan, planId) {
     setGoal((prevGoal) => ({
       ...prevGoal,
@@ -110,41 +112,7 @@ export default function SetupContent({ goal, setGoal, isGoalSelected }) {
     <div className="flex grow flex-col gap-6 p-6">
       <div id="setup-phone-list" className="flex flex-col gap-6 border">
         <h2 className="text-lg font-bold text-neutral-800">1. เลือกเป้าหมายของคุณ</h2>
-        {/* Input Group: Recipient Name */}
-        <div className="flex flex-col gap-2">
-          <label htmlFor="transfer-recipient" className=" text-sm font-bold text-gray-500">
-            Brand
-          </label>
-          <div className="relative">
-            <IoIosArrowBack className="absolute top-3 right-3 text-3xl rotate-180 text-gray-400" />
-            <input
-              type="text"
-              id="transfer-recipient"
-              name="recipient"
-              value={formData.recipient}
-              onChange={handleInputChange}
-              placeholder="Apple, Samsung และ Google "
-              className="focus:border-primary-pink focus:ring-primary-pink/30 w-full rounded-xl border border-gray-300 p-4  focus:ring-2 focus:outline-none text-bg-dark"
-            />
-          </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <label htmlFor="transfer-recipient" className=" text-sm font-bold text-gray-500">
-            Model
-          </label>
-          <div className="relative">
-            <IoIosArrowBack className="absolute top-3 right-3 text-3xl rotate-180 text-gray-400" />
-            <input
-              type="text"
-              id="transfer-recipient"
-              name="recipient"
-              value={formData.recipient}
-              onChange={handleInputChange}
-              placeholder="Iphone 16 Pro และ Galaxy S20 Ultra "
-              className="focus:border-primary-pink focus:ring-primary-pink/30 w-full rounded-xl border border-gray-300 p-4  focus:ring-2 focus:outline-none text-bg-dark"
-            />
-          </div>
-        </div>
+
         {phones.map((phone) => (
           <GoalPhoneComponent
             key={phone.brand}
@@ -159,7 +127,7 @@ export default function SetupContent({ goal, setGoal, isGoalSelected }) {
           />
         ))}
       </div>
-      {isGoalSelected && (
+      {goal.brand && (
         <div className="border-divider border-t py-6">
           <h2 className="mb-6 text-lg font-bold text-neutral-800">2. เลือกแผนการออม (ระยะเวลา 6 เดือน)</h2>
 
