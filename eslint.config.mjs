@@ -1,14 +1,15 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+// eslint.config.mjs
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import next from "eslint-config-next";
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [...compat.extends("next/core-web-vitals")];
-
-export default eslintConfig;
+export default [
+  {
+    files: ["src/**/*.{js,jsx,ts,tsx}"], // Adjust glob if you don't use a 'src' directory
+    ...next,
+    rules: {
+      ...next.rules,
+      "react-hooks/exhaustive-deps": "error",
+      "@next/next/no-img-element": "off",
+    },
+  },
+];

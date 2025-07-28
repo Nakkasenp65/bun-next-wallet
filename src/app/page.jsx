@@ -75,7 +75,7 @@ export default function HomePage() {
   return (
     <>
       <NotificationPage
-        notifications={userData.notifications}
+        userId={userData.userId}
         showNotifications={showNotifications}
         setShowNotifications={setShowNotifications}
       />
@@ -86,8 +86,13 @@ export default function HomePage() {
       <div className="bg-bg-dark font-main relative flex h-dvh w-full flex-col overflow-hidden lg:mx-auto lg:max-w-[450px] lg:shadow-lg">
         <main className="flex-grow overflow-y-auto">
           {/* Profile Part */}
-          <section className="flex flex-col gap-6 p-6 ">
-            <WalletHeader userName={userData.username} setShowNotifications={setShowNotifications} />
+          <section className="flex flex-col gap-8 px-6 py-4 ">
+            <WalletHeader
+              userName={userData.username}
+              profileUrl={userData.userProfilePicUrl}
+              setShowNotifications={setShowNotifications}
+              notifications={userData.notifications}
+            />
             <SavingsGoalCard
               brand={userData.goal.mobileModel.brand.name}
               name={userData.goal.mobileModel.name}
@@ -107,7 +112,7 @@ export default function HomePage() {
             <div className="absolute top-3 flex h-2 w-full items-center justify-center">
               <span className="h-1.5 w-10 rounded-full bg-gray-300" />
             </div>
-            <TransactionList />
+            <TransactionList walletId={userData.wallet.id} />
             <SavingsMissionCard
               title={missionData.title}
               description={missionData.description}

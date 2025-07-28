@@ -5,9 +5,10 @@ import Loading from "../Loading";
 
 // Example data matching the original script
 
-export default function TransactionList() {
-  const { data: transactions, isLoading, error } = useTransactions(2025, 6);
-
+export default function TransactionList({ walletId }) {
+  const date = new Date();
+  const { data: transactions, isLoading, error } = useTransactions(date.getFullYear(), date.getMonth(), walletId);
+  console.log("Transactions: ", transactions);
   if (isLoading || error) {
     return (
       <div className="h-56 flex items-center justify-center">
@@ -20,7 +21,7 @@ export default function TransactionList() {
     <div className="flex w-full flex-col gap-2">
       <h2 className="text-bg-dark text-xl font-bold">รายการธุรกรรมล่าสุด</h2>
       <ul id="transaction-list-container">
-        {transactions.slice(0, 5).map((transaction) => {
+        {transactions.map((transaction) => {
           if (transaction.status !== "PENDING") return <Transaction key={transaction.id} transaction={transaction} />;
         })}
       </ul>

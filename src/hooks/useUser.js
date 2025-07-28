@@ -48,16 +48,10 @@ const MOCK_USER_DATA = {
 };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-let config = {
-  method: "get",
-  maxBodyLength: Infinity,
-  url: "https://bd80e7be1330.ngrok-free.app/v1/user/U5d2998909721fdea596f8e9e91e7bf85",
-  headers: {},
-};
+const LOCAL_API = process.env.NEXT_PUBLIC_LOCAL_API_URL;
 
 async function fetchMockUserData(userId) {
-  const response = await axios.get(`${API_URL}/user/${userId}`);
+  const response = await axios.get(`${LOCAL_API}/user/${userId}`);
   // const response = await axios.request(config);
   // console.log(response);
   // return MOCK_USER_DATA;

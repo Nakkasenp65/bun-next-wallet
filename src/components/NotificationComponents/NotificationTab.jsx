@@ -3,17 +3,28 @@ import TransactionNotification from "../TransactionComponents/TransactionNotific
 import { AiOutlineNotification } from "react-icons/ai";
 import { FiGift } from "react-icons/fi";
 
-export default function NotificationTab({ activeTab, notifications }) {
-  console.log("Notification Tab: ", notifications);
+export default function NotificationTab({ activeTab, notifications, onNotificationClick }) {
+  const transactionNotifications = notifications.filter((n) => n.type === "RECEIVE" || n.type === "SENT");
+  const promoNotifications = notifications.filter((n) => n.type === "SYSTEM" || n.type === "REWARD");
+
   if (activeTab === "promos") {
     return (
       <ul id="notification-list-promos" className="space-y-2">
-        {notifications.map((notification) => {
-          if (notification.type === "SYSTEM")
-            return <PromoNotification key={notification.id} promo={notification} displayIcon={AiOutlineNotification} />;
-          if (notification.type === "REWARD")
-            return <PromoNotification key={notification.id} promo={notification} displayIcon={FiGift} />;
-        })}
+        {promoNotifications.length > 0 ? (
+          promoNotifications.map((notification) => {
+            const displayIcon = notification.type === "SYSTEM" ? AiOutlineNotification : FiGift;
+            return (
+              <PromoNotification
+                key={notification.id}
+                promo={notification}
+                displayIcon={displayIcon}
+                onClick={() => onNotificationClick(notification)}
+              />
+            );
+          })
+        ) : (
+          <p className="text-center text-gray-500">No promotions yet.</p>
+        )}
       </ul>
     );
   }
@@ -21,10 +32,17 @@ export default function NotificationTab({ activeTab, notifications }) {
   if (activeTab === "transactions") {
     return (
       <ul id="notification-list-transactions" className="space-y-2">
-        {notifications.map((notification) => {
-          if (notification.type === "RECEIVE" || notification.type === "SENT")
-            return <TransactionNotification key={notification.id} transaction={notification} />;
-        })}
+        {transactionNotifications.length > 0 ? (
+          transactionNotifications.map((notification) => (
+            <TransactionNotification
+              key={notification.id}
+              transaction={notification}
+              onClick={() => onNotificationClick(notification)}
+            />
+          ))
+        ) : (
+          <p className="text-center text-gray-500">No transactions yet.</p>
+        )}
       </ul>
     );
   }

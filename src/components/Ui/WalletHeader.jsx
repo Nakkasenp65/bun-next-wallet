@@ -13,9 +13,9 @@ const getGreeting = () => {
   return "สวัสดีตอนเย็น,";
 };
 
-export default function WalletHeader({ userName, setShowNotifications }) {
+export default function WalletHeader({ userName, setShowNotifications, profileUrl, notifications }) {
   const greeting = getGreeting();
-  const unreadNotifications = 2;
+  const unreadNotifications = notifications?.filter((notification) => !notification.isRead).length || 0;
 
   return (
     <header className="relative z-10 flex items-center justify-between">
@@ -34,14 +34,14 @@ export default function WalletHeader({ userName, setShowNotifications }) {
 
       {/* Header Actions */}
       <div className="flex items-center gap-1">
-        <div id="lock-btn" className="text-secondary-text hover:text-primary-pink cursor-pointer text-2xl transition">
+        <div id="lock-btn" className="text-secondary-text hover:text-primary-pink  cursor-pointer text-2xl transition">
           <FontAwesomeIcon icon={faLock} />
         </div>
         <div
           onClick={() => setShowNotifications(true)}
           href={"/notification"}
           id="notification-bell-btn"
-          className="text-secondary-text hover:text-primary-pink relative cursor-pointer text-2xl transition"
+          className="text-secondary-text hover:text-primary-pink relative cursor-pointer text-2xl transition mr-2"
         >
           <FontAwesomeIcon icon={faBell} />
           {unreadNotifications > 0 && (
@@ -53,6 +53,15 @@ export default function WalletHeader({ userName, setShowNotifications }) {
             </>
           )}
         </div>
+        <Link href={"/"}>
+          <img
+            src={profileUrl}
+            width={50}
+            height={50}
+            alt="profile image"
+            className="border-primary-pink shadow-neon-pink  h-7 w-7 rounded-full border-2 object-cover"
+          />
+        </Link>
       </div>
     </header>
   );

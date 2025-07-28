@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { FaHouse } from "react-icons/fa6";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHouse, faIdCard, faQrcode, faFileLines, faHeadset } from "@fortawesome/free-solid-svg-icons";
 import NavItem from "./NavItem";

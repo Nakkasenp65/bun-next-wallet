@@ -31,10 +31,10 @@ export default function Transaction({ transaction }) {
   return (
     <li className="border-divider list-none border-b last:border-b-0">
       {/* Main Info Row */}
-      <div className="flex items-center py-4" onClick={() => setIsExpanded(!isExpanded)}>
+      <div className="flex gap-4 items-center py-4" onClick={() => setIsExpanded(!isExpanded)}>
         <FontAwesomeIcon
           icon={faChevronRight}
-          className={`mr-4 text-xs text-gray-400 transition-transform ${isExpanded ? "rotate-90" : ""}`}
+          className={` text-xs text-gray-400 transition-transform ${isExpanded ? "rotate-90" : ""}`}
         />
 
         {/* icon */}
@@ -45,11 +45,11 @@ export default function Transaction({ transaction }) {
         </div>
 
         {/* Time stamp */}
-        <div className="ml-4 flex-grow">
-          <div className="font-bold text-gray-800">{transaction.name}</div>
+        <div className=" ">
+          <div className="font-bold text-gray-800 w-32">{transaction.name}</div>
           <div className="text-sm text-gray-500">{formatRelativeTime(transaction.createdAt)}</div>
         </div>
-        <div className={`ml-2 font-bold ${amountColor}`}>
+        <div className={` w-max font-bold grow ${amountColor}`}>
           {amountSign}฿{transaction.amount.toLocaleString()}
         </div>
       </div>

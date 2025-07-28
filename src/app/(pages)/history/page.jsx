@@ -8,6 +8,7 @@ import { useTransactions } from "@/hooks/useTransactions"; // 1. Import hook ใ
 import CtaButton from "@/components/Ui/CtaButton";
 import Loading from "@/components/Loading";
 import Transaction from "@/components/TransactionComponents/Transaction";
+import { useUser } from "@/hooks/useUser";
 
 const thaiMonths = [
   "มกราคม",
@@ -27,7 +28,6 @@ const thaiMonths = [
 export default function HistoryPage() {
   const router = useRouter();
 
-  // 3. State สำหรับจัดการเดือนและปีที่กำลังแสดงผล
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const currentYear = currentDate.getFullYear();
@@ -35,10 +35,16 @@ export default function HistoryPage() {
 
   console.log("year: ", currentYear, " month: ", currentMonth);
 
-  // 4. ดึงข้อมูลธุรกรรมสำหรับเดือนและปีปัจจุบัน
-  const { data: transactions, isLoading, error } = useTransactions(currentYear, currentMonth);
+  const { data: userData, isLoading: userLoading, error: userError } = useUser("U5d2998909721fdea596f8e9e91e7bf85");
+  console.log(userData);
+  const {
+    data: transactions,
+    isLoading,
+    error,
+  } = useTransactions(currentYear, currentMonth, userData?.wallet.id, {
+    enabled: !!userData,
+  });
 
-  // --- ฟังก์ชันสำหรับจัดการการเปลี่ยนเดือน ---
   const handlePrevMonth = () => {
     setCurrentDate((prevDate) => {
       const newDate = new Date(prevDate);
@@ -55,7 +61,6 @@ export default function HistoryPage() {
     });
   };
 
-  // ตรวจสอบว่าเป็นเดือนปัจจุบันหรือไม่ เพื่อ disable ปุ่ม "ถัดไป"
   const isCurrentMonth = currentYear === new Date().getFullYear() && currentMonth === new Date().getMonth();
 
   return (

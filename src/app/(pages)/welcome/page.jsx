@@ -87,11 +87,7 @@ export default function Page() {
       {/* CONFIRM BUTTON */}
       <footer className="drop-shadow-behind w-full bg-white p-6 pb-12">
         {/* 4. ปรับปรุงปุ่มให้แสดง Loading spinner และ disable ขณะ submitting */}
-        <CtaButton
-          className={`${goal.plan && !isSubmitting && "shadow-neon-pink"}`}
-          disabled={goal.plan === null || isSubmitting}
-          onClick={handleSetGoal}
-        >
+        <CtaButton onClick={handleSetGoal}>
           {isSubmitting ? (
             <div className="flex items-center justify-center gap-2">
               <SpinnerIcon />
