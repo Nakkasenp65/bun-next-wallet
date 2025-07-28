@@ -10,6 +10,8 @@ const LiffContext = createContext({
   isLoading: true,
 });
 
+const liffenvId = process.env.NEXT_PUBLIC_LIFF_ID;
+
 export function LiffProvider({ children }) {
   const [liffProfile, setLiffProfile] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -18,7 +20,7 @@ export function LiffProvider({ children }) {
   useEffect(() => {
     const initialize = async () => {
       try {
-        await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID });
+        await liff.init({ liffId: liffenvId });
         if (liff.isLoggedIn()) {
           setIsLoggedIn(true);
           const profile = await liff.getProfile();
