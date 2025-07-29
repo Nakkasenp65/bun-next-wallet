@@ -20,17 +20,23 @@ import NotificationPage from "@/components/pages/NotificationPage";
 import ErrorComponent from "@/components/Ui/ErrorComponent";
 import { useUserStatus } from "@/hooks/useUserStatus";
 import { useLiff } from "@/components/provider/LiffProvider";
+import ContactPage from "@/components/pages/ContactPage";
 
 export default function HomePage() {
   const { liffProfile, isLoggedIn } = useLiff();
   const router = useRouter();
-  const liffId = "U5d2998909721fdea596f8e9e91e7bf85";
-
+  // const liffProfile = {
+  //   userId: "U5d2998909721fdea596f8e9e91e7bf85",
+  //   displayName: "Long👁️‍🗨️",
+  //   pictureUrl: "https://profile.line-scdn.net/0hPsTqIBJhD1x5CB7Ets…MbD5jU2oBcTpMFWpFQCxrN19jCnw6Yd8WCngJVG9EPUQAVmrA",
+  // };
+  // const isLoggedIn = true;
   const [showTransfer, setShowTransfer] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showDeposit, setShowDeposit] = useState(false);
   const [showGoal, setShowGoal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showContact, setShowContact] = useState(false);
 
   const missionData = {
     title: "First Savings Ever",
@@ -73,19 +79,16 @@ export default function HomePage() {
   if (liffProfile && isLoggedIn)
     return (
       <>
-        <NotificationPage
-          userId={userData.userId}
-          showNotifications={showNotifications}
-          setShowNotifications={setShowNotifications}
-        />
+        <NotificationPage userId={userData.userId} showNotifications={showNotifications} setShowNotifications={setShowNotifications} />
         <TransferPage userData={userData} showTransfer={showTransfer} setShowTransfer={setShowTransfer} />
         <WithdrawPage userData={userData} showWithdraw={showWithdraw} setShowWithdraw={setShowWithdraw} />
         <DepositPage userData={userData} showDeposit={showDeposit} setShowDeposit={setShowDeposit} />
         <GoalPage userData={userData} showGoal={showGoal} setShowGoal={setShowGoal} />
+        <ContactPage showContact={showContact} setShowContact={setShowContact} />
         <div className="bg-bg-dark font-main relative flex h-dvh w-full flex-col overflow-hidden lg:mx-auto lg:max-w-[450px] lg:shadow-lg">
           <main className="flex-grow overflow-y-auto">
             {/* Profile Part */}
-            <section className="flex flex-col gap-8 px-6 py-4 ">
+            <section className="flex flex-col gap-8 px-6 py-4">
               <WalletHeader
                 userName={userData.username}
                 profileUrl={userData.userProfilePicUrl}
@@ -123,7 +126,7 @@ export default function HomePage() {
           </main>
 
           {/* Bottom Navbar */}
-          <BottomNav />
+          <BottomNav setShowContact={setShowContact} />
         </div>
       </>
     );

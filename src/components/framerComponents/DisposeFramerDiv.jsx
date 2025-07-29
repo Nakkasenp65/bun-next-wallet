@@ -25,7 +25,13 @@ export default function DisposeFramerDiv({ isOpen, children, className }) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div className={className} variants={variants} initial="hidden" animate="visible" exit="hidden">
+        <motion.div
+          className={className}
+          variants={variants}
+          initial="hidden"
+          animate="visible"
+          exit="hidden"
+        >
           {children}
         </motion.div>
       )}

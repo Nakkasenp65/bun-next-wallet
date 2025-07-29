@@ -46,11 +46,11 @@ export default function SlideToConfirm({ onConfirm }) {
   return (
     <div
       ref={trackRef}
-      className="relative w-64 h-14 bg-gray-200/50 dark:bg-zinc-800 rounded-full flex items-center p-1 overflow-hidden shadow-neon-pink"
+      className="shadow-neon-pink relative flex h-14 w-64 items-center overflow-hidden rounded-full bg-gray-200/50 p-1 dark:bg-zinc-800"
     >
       {/* Gradient background that appears when sliding */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-pink-500 via-orange-500 to-purple-500 "
+        className="absolute inset-0 bg-gradient-to-r from-pink-500 via-orange-500 to-purple-500"
         style={{
           opacity,
           backgroundSize: "200% 200%",
@@ -66,7 +66,7 @@ export default function SlideToConfirm({ onConfirm }) {
       />
 
       <motion.div
-        className="absolute h-12 w-12 rounded-full cursor-grab flex items-center justify-center text-white  z-10 "
+        className="absolute z-10 flex h-12 w-12 cursor-grab items-center justify-center rounded-full text-white"
         style={{
           x,
           background: "linear-gradient(45deg, #ec4899, #f97316, #a855f7)",
@@ -81,7 +81,7 @@ export default function SlideToConfirm({ onConfirm }) {
 
         {/* Shine effect */}
         <motion.div
-          className="absolute inset-0 pointer-events-none"
+          className="pointer-events-none absolute inset-0"
           initial={{ opacity: 0 }}
           animate={{
             opacity: [0, 0.3, 0],
@@ -101,7 +101,7 @@ export default function SlideToConfirm({ onConfirm }) {
         />
       </motion.div>
 
-      <span className="absolute left-1/2 -translate-x-1/2 text-white  font-medium pointer-events-none z-0">
+      <span className="pointer-events-none absolute left-1/2 z-0 -translate-x-1/2 font-medium text-white">
         Slide to Confirm
       </span>
     </div>

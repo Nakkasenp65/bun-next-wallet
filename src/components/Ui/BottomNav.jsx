@@ -6,7 +6,7 @@ import { faHouse, faIdCard, faQrcode, faFileLines, faHeadset } from "@fortawesom
 import NavItem from "./NavItem";
 import Link from "next/link";
 
-export default function BottomNav() {
+export default function BottomNav({ setShowContact }) {
   const [activeNav, setActiveNav] = useState("home");
 
   const navItems = [
@@ -35,12 +35,7 @@ export default function BottomNav() {
       />
 
       {/* Center Scan Button */}
-      <Link
-        href={"/scan"}
-        id="scan-to-pay-btn"
-        className="group -mt-9 cursor-pointer"
-        onClick={() => setActiveNav("scan")}
-      >
+      <Link href={"/scan"} id="scan-to-pay-btn" className="group -mt-9 cursor-pointer" onClick={() => setActiveNav("scan")}>
         <div className="from-primary-pink to-primary-orange shadow-primary-pink/40 flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-gradient-to-r text-3xl text-white shadow-lg transition-transform group-hover:scale-110 group-hover:rotate-6">
           <FontAwesomeIcon icon={faQrcode} />
         </div>
@@ -54,13 +49,16 @@ export default function BottomNav() {
         onClick={() => setActiveNav(navItems[2].id)}
         url={navItems[2].url}
       />
-      <NavItem
-        label={navItems[3].label}
-        icon={navItems[3].icon}
-        isActive={activeNav === navItems[3].id}
-        onClick={() => setActiveNav(navItems[3].id)}
-        url={navItems[3].url}
-      />
+      <div
+        onClick={() => {
+          setActiveNav(navItems[3].id);
+          setShowContact(true);
+        }}
+        className="group hover:text-primary-pink relative flex flex-1 cursor-pointer flex-col items-center gap-1 pt-1 text-gray-500 transition-colors"
+      >
+        <FontAwesomeIcon icon={navItems[3].icon} className="text-xl transition-transform group-hover:-translate-y-1" />
+        <span className="text-xs font-bold">{navItems[3].label}</span>
+      </div>
     </nav>
   );
 }

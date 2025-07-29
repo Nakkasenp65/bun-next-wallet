@@ -3,13 +3,15 @@
 
 @font-face {
   font-family: "LINESeedSansTH";
-  src: url("https://cdn.jsdelivr.net/gh/ok1developer/NO1Money/LINESeedSansTH_W_Rg.woff") format("woff");
+  src: url("https://cdn.jsdelivr.net/gh/ok1developer/NO1Money/LINESeedSansTH_W_Rg.woff")
+    format("woff");
   font-weight: 400;
 }
 
 @font-face {
   font-family: "LINESeedSansTH";
-  src: url("https://cdn.jsdelivr.net/gh/ok1developer/NO1Money/LINESeedSansTH_W_Bd.woff") format("woff");
+  src: url("https://cdn.jsdelivr.net/gh/ok1developer/NO1Money/LINESeedSansTH_W_Bd.woff")
+    format("woff");
   font-weight: 700;
 }
 
@@ -83,8 +85,16 @@
   --bright-cyan: #4dd2ff;
   --bright-green: #4ccd99;
   --bright-yellow: #ffd700;
-  --primary-gradient: linear-gradient(135deg, var(--primary-pink), var(--primary-orange));
-  --secondary-gradient: linear-gradient(135deg, var(--vibrant-purple), var(--primary-pink));
+  --primary-gradient: linear-gradient(
+    135deg,
+    var(--primary-pink),
+    var(--primary-orange)
+  );
+  --secondary-gradient: linear-gradient(
+    135deg,
+    var(--vibrant-purple),
+    var(--primary-pink)
+  );
   --progress-gradient: linear-gradient(
     90deg,
     var(--bright-cyan) 0%,
@@ -108,9 +118,12 @@
   --gold-accent: #ffd700;
   --platinum-accent: #e5e4e2;
 
-  --neon-pink: 0 0 10px rgba(255, 45, 150, 0.8), 0 0 20px rgba(255, 45, 150, 0.6);
-  --neon-purple: 0 0 10px rgba(138, 79, 255, 0.8), 0 0 20px rgba(138, 79, 255, 0.6);
-  --neon-cyan: 0 0 10px rgba(77, 210, 255, 0.8), 0 0 20px rgba(77, 210, 255, 0.6);
+  --neon-pink:
+    0 0 10px rgba(255, 45, 150, 0.8), 0 0 20px rgba(255, 45, 150, 0.6);
+  --neon-purple:
+    0 0 10px rgba(138, 79, 255, 0.8), 0 0 20px rgba(138, 79, 255, 0.6);
+  --neon-cyan:
+    0 0 10px rgba(77, 210, 255, 0.8), 0 0 20px rgba(77, 210, 255, 0.6);
   --glass-bg: rgba(255, 255, 255, 0.1);
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
@@ -223,8 +236,16 @@ body::-webkit-scrollbar {
   --color-accent-platinum: #e5e4e2;
 
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, var(--primary-pink), var(--primary-orange));
-  --gradient-secondary: linear-gradient(135deg, var(--vibrant-purple), var(--primary-pink));
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--primary-pink),
+    var(--primary-orange)
+  );
+  --gradient-secondary: linear-gradient(
+    135deg,
+    var(--vibrant-purple),
+    var(--primary-pink)
+  );
   --gradient-progress: linear-gradient(
     90deg,
     var(--bright-cyan) 0%,
@@ -246,7 +267,8 @@ body::-webkit-scrollbar {
   --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.2);
 
   --shadow-neon-pink: 0 10px 25px rgba(255, 45, 150, 0.4), var(--neon-pink);
-  --shadow-neon-purple: 0 0 10px rgba(138, 79, 255, 0.8), 0 0 20px rgba(138, 79, 255, 0.6);
+  --shadow-neon-purple:
+    0 0 10px rgba(138, 79, 255, 0.8), 0 0 20px rgba(138, 79, 255, 0.6);
   --shadow-neon-gold: 0 0 8px rgba(255, 215, 0, 0.5);
 
   --drop-shadow-custom: 0 10px 25px rgba(255, 45, 150, 0.4), var(--neon-pink);
@@ -254,8 +276,10 @@ body::-webkit-scrollbar {
 
   --effect-glow-pink: 0 0 15px rgba(255, 45, 150, 0.5);
   --effect-glow-purple: 0 0 15px rgba(138, 79, 255, 0.5);
-  --effect-neon-pink: 0 0 10px rgba(255, 45, 150, 0.8), 0 0 20px rgba(255, 45, 150, 0.6);
-  --effect-neon-cyan: 0 0 10px rgba(77, 210, 255, 0.8), 0 0 20px rgba(77, 210, 255, 0.6);
+  --effect-neon-pink:
+    0 0 10px rgba(255, 45, 150, 0.8), 0 0 20px rgba(255, 45, 150, 0.6);
+  --effect-neon-cyan:
+    0 0 10px rgba(77, 210, 255, 0.8), 0 0 20px rgba(77, 210, 255, 0.6);
   --effect-glass-bg: rgba(255, 255, 255, 0.1);
   --effect-glass-border: rgba(255, 255, 255, 0.2);
   --effect-glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);

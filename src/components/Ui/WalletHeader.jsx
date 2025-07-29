@@ -13,9 +13,15 @@ const getGreeting = () => {
   return "สวัสดีตอนเย็น,";
 };
 
-export default function WalletHeader({ userName, setShowNotifications, profileUrl, notifications }) {
+export default function WalletHeader({
+  userName,
+  setShowNotifications,
+  profileUrl,
+  notifications,
+}) {
   const greeting = getGreeting();
-  const unreadNotifications = notifications?.filter((notification) => !notification.isRead).length || 0;
+  const unreadNotifications =
+    notifications?.filter((notification) => !notification.isRead).length || 0;
 
   return (
     <header className="relative z-10 flex items-center justify-between">
@@ -29,19 +35,28 @@ export default function WalletHeader({ userName, setShowNotifications, profileUr
 
       {/* App Logo (Centered) */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <Image src="/okNumberOne.png" alt="1 Wallet Logo" className="h-11 w-11  shadow-sm" width={100} height={100} />
+        <Image
+          src="/okNumberOne.png"
+          alt="1 Wallet Logo"
+          className="h-11 w-11 shadow-sm"
+          width={100}
+          height={100}
+        />
       </div>
 
       {/* Header Actions */}
       <div className="flex items-center gap-1">
-        <div id="lock-btn" className="text-secondary-text hover:text-primary-pink  cursor-pointer text-2xl transition">
+        <div
+          id="lock-btn"
+          className="text-secondary-text hover:text-primary-pink cursor-pointer text-2xl transition"
+        >
           <FontAwesomeIcon icon={faLock} />
         </div>
         <div
           onClick={() => setShowNotifications(true)}
           href={"/notification"}
           id="notification-bell-btn"
-          className="text-secondary-text hover:text-primary-pink relative cursor-pointer text-2xl transition mr-2"
+          className="text-secondary-text hover:text-primary-pink relative mr-2 cursor-pointer text-2xl transition"
         >
           <FontAwesomeIcon icon={faBell} />
           {unreadNotifications > 0 && (
@@ -59,7 +74,7 @@ export default function WalletHeader({ userName, setShowNotifications, profileUr
             width={50}
             height={50}
             alt="profile image"
-            className="border-primary-pink shadow-neon-pink  h-7 w-7 rounded-full border-2 object-cover"
+            className="border-primary-pink shadow-neon-pink h-7 w-7 rounded-full border-2 object-cover"
           />
         </Link>
       </div>

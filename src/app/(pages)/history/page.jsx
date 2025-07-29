@@ -2,7 +2,11 @@
 
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight, faDownload } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faChevronRight,
+  faDownload,
+} from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { useTransactions } from "@/hooks/useTransactions"; // 1. Import hook ใหม่
 import CtaButton from "@/components/Ui/CtaButton";
@@ -35,7 +39,11 @@ export default function HistoryPage() {
 
   console.log("year: ", currentYear, " month: ", currentMonth);
 
-  const { data: userData, isLoading: userLoading, error: userError } = useUser("U5d2998909721fdea596f8e9e91e7bf85");
+  const {
+    data: userData,
+    isLoading: userLoading,
+    error: userError,
+  } = useUser("U5d2998909721fdea596f8e9e91e7bf85");
   console.log(userData);
   const {
     data: transactions,
@@ -61,10 +69,15 @@ export default function HistoryPage() {
     });
   };
 
-  const isCurrentMonth = currentYear === new Date().getFullYear() && currentMonth === new Date().getMonth();
+  const isCurrentMonth =
+    currentYear === new Date().getFullYear() &&
+    currentMonth === new Date().getMonth();
 
   return (
-    <div id="history-overlay" className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm">
+    <div
+      id="history-overlay"
+      className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
+    >
       {/* Page Header */}
       <header className="flex flex-shrink-0 items-center border-b border-white/20 px-5 pt-10 pb-4">
         <button
@@ -84,7 +97,10 @@ export default function HistoryPage() {
         <div className="p-6">
           {/* Period Selector */}
           <div className="flex items-center justify-between rounded-lg bg-gray-100 p-3">
-            <button onClick={handlePrevMonth} className="text-gray-500 hover:text-black">
+            <button
+              onClick={handlePrevMonth}
+              className="text-gray-500 hover:text-black"
+            >
               <FontAwesomeIcon icon={faChevronLeft} />
             </button>
             <span className="text-bg-dark font-bold">
@@ -110,11 +126,17 @@ export default function HistoryPage() {
                 <Loading />
               </div>
             ) : error ? (
-              <p className="text-center text-red-500">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
+              <p className="text-center text-red-500">
+                เกิดข้อผิดพลาดในการโหลดข้อมูล
+              </p>
             ) : transactions && transactions.length > 0 ? (
-              transactions.map((transaction) => <Transaction key={transaction.id} transaction={transaction} />)
+              transactions.map((transaction) => (
+                <Transaction key={transaction.id} transaction={transaction} />
+              ))
             ) : (
-              <p className="p-8 text-center text-gray-500">ไม่พบรายการในเดือนนี้</p>
+              <p className="p-8 text-center text-gray-500">
+                ไม่พบรายการในเดือนนี้
+              </p>
             )}
           </ul>
         </div>

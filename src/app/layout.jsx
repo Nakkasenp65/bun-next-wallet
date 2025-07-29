@@ -35,12 +35,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={` antialiased`}>
+      <body className={`antialiased`}>
         <QueryProvider>
-          <LiffProvider>
-            {children}
-            <Toaster position="top-center" containerClassName="z-[9999]" toastOptions={toastOptions} />
-          </LiffProvider>
+          {/* <LiffProvider> */}
+          {children}
+          <Toaster position="top-center" containerClassName="z-[9999]" toastOptions={toastOptions} />
+          {/* </LiffProvider> */}
         </QueryProvider>
       </body>
     </html>

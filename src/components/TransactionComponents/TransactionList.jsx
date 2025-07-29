@@ -7,10 +7,14 @@ import Loading from "../Loading";
 
 export default function TransactionList({ walletId }) {
   const date = new Date();
-  const { data: transactions, isLoading, error } = useTransactions(date.getFullYear(), date.getMonth(), walletId);
+  const {
+    data: transactions,
+    isLoading,
+    error,
+  } = useTransactions(date.getFullYear(), date.getMonth(), walletId);
   if (isLoading || error) {
     return (
-      <div className="h-56 flex items-center justify-center">
+      <div className="flex h-56 items-center justify-center">
         <Loading textColor="text-black" />
       </div>
     );
@@ -21,7 +25,10 @@ export default function TransactionList({ walletId }) {
       <h2 className="text-bg-dark text-xl font-bold">รายการธุรกรรมล่าสุด</h2>
       <ul id="transaction-list-container">
         {transactions.map((transaction) => {
-          if (transaction.status !== "PENDING") return <Transaction key={transaction.id} transaction={transaction} />;
+          if (transaction.status !== "PENDING")
+            return (
+              <Transaction key={transaction.id} transaction={transaction} />
+            );
         })}
       </ul>
     </div>

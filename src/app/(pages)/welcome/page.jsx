@@ -32,11 +32,8 @@ export default function Page() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [goal, setGoal] = useState({});
-
-  // Get the LIFF ID safely
   const liffId = liffProfile?.userId;
 
-  // These queries are now automatically disabled by TanStack Query until `liffId` is available
   const { data: userStatus, isLoading: isStatusLoading, error: statusError } = useUserStatus(liffId);
   const { data: userData } = useUser(liffId);
 
@@ -45,6 +42,7 @@ export default function Page() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user", liffId] });
       queryClient.invalidateQueries({ queryKey: ["userStatus", liffId] });
+      toast.success("สร้างเป้าหมายการออมสำเร็จ!");
       router.push("/");
     },
     onError: (err) => {
@@ -52,29 +50,32 @@ export default function Page() {
     },
   });
 
-  // This mutation is for creating the user in our backend DB
+  const handleSetGoal = () => {
+    if (!goal.mobileId || !goal.planId || !userData?.id) return;
+    const goalData = { mobileId: goal.mobileId, planId: goal.planId };
+    goalMutation.mutate({ userId: userData.id, goalData });
+  };
+
   const createUserMutation = useMutation({
     mutationFn: createUser,
     onSuccess: () => {
-      // After creating the user, refetch their status to get the updated `firstTime` flag
+      queryClient.invalidateQueries({ queryKey: ["user", liffId] });
       queryClient.invalidateQueries({ queryKey: ["userStatus", liffId] });
     },
   });
 
   useEffect(() => {
-    console.log("LOG");
     if (!userStatus) {
       return;
     }
 
-    // If the user exists in our DB but shouldn't be on the setup page, redirect them
     if (!userStatus.isNewUser && !userStatus.firstTime) {
       router.push("/");
       return;
     }
 
     if (userStatus.isNewUser && liffProfile && createUserMutation.isIdle) {
-      console.log("LOG");
+      console.log("is new user");
 
       createUserMutation.mutate({
         liffId: liffProfile.userId,
@@ -84,13 +85,6 @@ export default function Page() {
     }
   }, [userStatus, router]);
 
-  const handleSetGoal = () => {
-    if (!goal.mobileId || !goal.planId || !userData?.id) return;
-    const goalData = { mobileId: goal.mobileId, planId: goal.planId };
-    goalMutation.mutate({ userId: userData.id, goalData });
-  };
-
-  // Show a loading screen while checking LIFF and user status
   if (isStatusLoading) {
     return (
       <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
@@ -101,7 +95,6 @@ export default function Page() {
 
   if (statusError) return <ErrorComponent message={statusError.message} />;
 
-  // The rest of your component remains the same
   return (
     <main id="setup-page" className="flex min-h-dvh flex-col bg-white">
       <header className="from-primary-pink to-primary-orange flex flex-col items-center justify-center gap-2 rounded-b-4xl bg-gradient-to-br p-6 pt-14 text-white drop-shadow-lg">

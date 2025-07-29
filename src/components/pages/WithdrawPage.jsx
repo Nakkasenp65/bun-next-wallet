@@ -2,11 +2,19 @@
 
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faHashtag, faUser } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faHashtag,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
 import CtaButton from "../Ui/CtaButton";
 import FramerDiv from "../framerComponents/FramerDiv";
 
-export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw }) {
+export default function WithdrawPage({
+  userData,
+  showWithdraw,
+  setShowWithdraw,
+}) {
   const [formData, setFormData] = useState({
     amount: "",
     accountNumber: "",
@@ -27,7 +35,10 @@ export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw }
       id="withdraw-overlay"
       className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
     >
-      <div id="withdraw-overlay" className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm">
+      <div
+        id="withdraw-overlay"
+        className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
+      >
         {/* Header */}
         <header className="flex flex-shrink-0 items-center border-b border-white/20 px-5 pt-10 pb-4">
           <button
@@ -57,7 +68,10 @@ export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw }
 
           {/* Input Group: Amount */}
           <div>
-            <label htmlFor="withdraw-amount" className="mb-2 block text-sm font-bold text-gray-500">
+            <label
+              htmlFor="withdraw-amount"
+              className="mb-2 block text-sm font-bold text-gray-500"
+            >
               จำนวนเงิน
             </label>
             <input
@@ -74,7 +88,10 @@ export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw }
 
           {/* Input Group: Bank (Placeholder) */}
           <div>
-            <label htmlFor="withdraw-bank-selector" className="mb-2 block text-sm font-bold text-gray-500">
+            <label
+              htmlFor="withdraw-bank-selector"
+              className="mb-2 block text-sm font-bold text-gray-500"
+            >
               ถอนไปยังบัญชีธนาคาร
             </label>
             <div
@@ -82,17 +99,26 @@ export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw }
               className="hover:border-vibrant-purple flex w-full cursor-pointer items-center justify-between rounded-xl border border-gray-300 p-4"
             >
               <span className="text-gray-400">เลือกธนาคาร</span>
-              <FontAwesomeIcon icon={faChevronLeft} className="rotate-180 text-gray-400" />
+              <FontAwesomeIcon
+                icon={faChevronLeft}
+                className="rotate-180 text-gray-400"
+              />
             </div>
           </div>
 
           {/* Input Group: Account Number */}
           <div>
-            <label htmlFor="withdraw-account-number" className="mb-2 block text-sm font-bold text-gray-500">
+            <label
+              htmlFor="withdraw-account-number"
+              className="mb-2 block text-sm font-bold text-gray-500"
+            >
               เลขบัญชี
             </label>
             <div className="relative">
-              <FontAwesomeIcon icon={faHashtag} className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400" />
+              <FontAwesomeIcon
+                icon={faHashtag}
+                className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400"
+              />
               <input
                 type="text"
                 id="withdraw-account-number"
@@ -107,11 +133,17 @@ export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw }
 
           {/* Input Group: Recipient Name */}
           <div>
-            <label htmlFor="withdraw-recipient" className="mb-2 block text-sm font-bold text-gray-500">
+            <label
+              htmlFor="withdraw-recipient"
+              className="mb-2 block text-sm font-bold text-gray-500"
+            >
               ชื่อบัญชีผู้รับ
             </label>
             <div className="relative">
-              <FontAwesomeIcon icon={faUser} className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400" />
+              <FontAwesomeIcon
+                icon={faUser}
+                className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400"
+              />
               <input
                 type="text"
                 id="withdraw-recipient"

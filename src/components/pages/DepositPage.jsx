@@ -3,7 +3,12 @@
 import React, { useState, useRef, use } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
-import { FaEllipsisH, FaExclamationTriangle, FaUniversity, FaUpload } from "react-icons/fa";
+import {
+  FaEllipsisH,
+  FaExclamationTriangle,
+  FaUniversity,
+  FaUpload,
+} from "react-icons/fa";
 import { FaQrcode } from "react-icons/fa6";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -49,8 +54,10 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
     <button
       onClick={onClick}
       className={clsx(
-        "flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-t-lg px-4 py-3 text-sm font-bold transition-all duration-300",
-        isActive ? "bg-white text-red-500 border-2 border-stone-100 " : "bg-gray-200 text-gray-400 hover:bg-gray-300"
+        "flex flex-1 items-center justify-center gap-2 rounded-t-lg px-4 py-3 text-sm font-bold whitespace-nowrap transition-all duration-300",
+        isActive
+          ? "border-2 border-stone-100 bg-white text-red-500"
+          : "bg-gray-200 text-gray-400 hover:bg-gray-300",
       )}
     >
       {icon}
@@ -105,7 +112,7 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
       <FramerDiv
         isOpen={showDeposit}
         id="topup-overlay"
-        className="fixed inset-0 z-20 flex h-dvh w-full flex-col bg-bg-dark/80 backdrop-blur-sm"
+        className="bg-bg-dark/80 fixed inset-0 z-20 flex h-dvh w-full flex-col backdrop-blur-sm"
       >
         <header className="flex flex-shrink-0 items-center px-5 pt-10 pb-4">
           <button
@@ -120,7 +127,7 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
           <div className="w-6"></div>
         </header>
 
-        <div className="flex flex-1 flex-col rounded-t-[30px] bg-white min-h-0">
+        <div className="flex min-h-0 flex-1 flex-col rounded-t-[30px] bg-white">
           <div className="flex-grow overflow-y-auto">
             <div className="grid grid-cols-1 gap-4 p-6">
               <div className="rounded-lg bg-gray-100 p-3 text-center text-sm text-gray-600">
@@ -135,7 +142,10 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
               </div>
 
               <div>
-                <label htmlFor="payment-amount" className="mb-2 block text-sm font-bold text-gray-600">
+                <label
+                  htmlFor="payment-amount"
+                  className="mb-2 block text-sm font-bold text-gray-600"
+                >
                   ยอดการฝาก (บาท)
                 </label>
                 <input
@@ -145,25 +155,34 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
                   onChange={(e) => setAmount(e.target.value)}
                   inputMode="decimal"
                   placeholder="0.00"
-                  className="w-full rounded-xl border border-gray-300 p-3 text-center text-lg font-bold text-bg-dark outline-none focus:border-primary-pink focus:ring-2 focus:ring-primary-pink/30"
+                  className="text-bg-dark focus:border-primary-pink focus:ring-primary-pink/30 w-full rounded-xl border border-gray-300 p-3 text-center text-lg font-bold outline-none focus:ring-2"
                 />
               </div>
 
               <div className="flex items-center justify-center gap-2">
-                <FaUniversity color="#f36" size={24} className="animate-bounce" />
-                <h1 className="text-xl font-bold text-[#f36]">เลือกช่องทางการชำระเงิน</h1>
+                <FaUniversity
+                  color="#f36"
+                  size={24}
+                  className="animate-bounce"
+                />
+                <h1 className="text-xl font-bold text-[#f36]">
+                  เลือกช่องทางการชำระเงิน
+                </h1>
               </div>
 
               <div className="flex items-start gap-3 rounded-lg bg-yellow-50 p-3 text-yellow-800">
                 <FaExclamationTriangle className="mt-1 flex-shrink-0 text-yellow-500" />
                 <p className="text-[12px]">
-                  <span className="font-bold">ข้อแนะนำ:</span> โปรดหลีกเลี่ยงการชำระเงินช่วงเวลา{" "}
-                  <span className="font-bold text-red-600">00:00 - 01:00น.</span>{" "}
+                  <span className="font-bold">ข้อแนะนำ:</span>{" "}
+                  โปรดหลีกเลี่ยงการชำระเงินช่วงเวลา{" "}
+                  <span className="font-bold text-red-600">
+                    00:00 - 01:00น.
+                  </span>{" "}
                   เพื่อป้องกันข้อผิดพลาดช่วงเวลาธนาคารปิดปรับปรุงระบบ
                 </p>
               </div>
 
-              <div className="rounded-xl  ">
+              <div className="rounded-xl">
                 <div className="noscrollbar flex gap-1 overflow-x-auto p-1">
                   {tabs.map((tab) => (
                     <TabButton
@@ -176,10 +195,13 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
                   ))}
                 </div>
                 <div className="bg-white p-1">
-                  {activeTab === "transfer" && <TransferContent amount={amount} />}
+                  {activeTab === "transfer" && (
+                    <TransferContent amount={amount} />
+                  )}
                   {activeTab === "promptpay" && <QrContent amount={amount} />}
                   {activeTab === "other" && <OtherMethodsContent />}
-                  {(activeTab === "spaylater" || activeTab === "creditcard") && (
+                  {(activeTab === "spaylater" ||
+                    activeTab === "creditcard") && (
                     <div className="p-16 text-center text-gray-400">
                       <p>ช่องทางนี้ยังไม่เปิดให้บริการ</p>
                     </div>
@@ -193,7 +215,7 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
                 </p>
                 <div
                   onClick={() => fileInputRef.current.click()}
-                  className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 p-6 text-center transition-all hover:border-primary-pink hover:bg-pink-50"
+                  className="hover:border-primary-pink flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 p-6 text-center transition-all hover:bg-pink-50"
                 >
                   {previewUrl ? (
                     <Image
@@ -206,7 +228,9 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
                   ) : (
                     <>
                       <FaUpload className="text-3xl text-gray-400" />
-                      <p className="mt-2 font-medium text-gray-700">คลิกเพื่อแนบสลิป</p>
+                      <p className="mt-2 font-medium text-gray-700">
+                        คลิกเพื่อแนบสลิป
+                      </p>
                       <p className="text-xs text-gray-500">รองรับ: JPG, PNG</p>
                     </>
                   )}
@@ -225,9 +249,13 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
           <div className="flex-shrink-0 bg-white p-4 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
             <CtaButton
               onClick={handleSubmit}
-              disabled={!selectedFile || !amount || createTransactionMutation.isPending}
+              disabled={
+                !selectedFile || !amount || createTransactionMutation.isPending
+              }
             >
-              {createTransactionMutation.isPending ? "กำลังส่ง..." : "ยืนยันการชำระเงิน"}
+              {createTransactionMutation.isPending
+                ? "กำลังส่ง..."
+                : "ยืนยันการชำระเงิน"}
             </CtaButton>
           </div>
         </div>

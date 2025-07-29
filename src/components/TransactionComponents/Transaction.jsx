@@ -1,7 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronRight, faArrowUpFromBracket, faArrowDown } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronRight,
+  faArrowUpFromBracket,
+  faArrowDown,
+} from "@fortawesome/free-solid-svg-icons";
 
 const formatRelativeTime = (dateString) => {
   const timestamp = new Date(dateString).getTime();
@@ -31,25 +35,30 @@ export default function Transaction({ transaction }) {
   return (
     <li className="border-divider list-none border-b last:border-b-0">
       {/* Main Info Row */}
-      <div className="flex gap-4 items-center py-4" onClick={() => setIsExpanded(!isExpanded)}>
+      <div
+        className="flex items-center gap-4 py-4"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
         <FontAwesomeIcon
           icon={faChevronRight}
-          className={` text-xs text-gray-400 transition-transform ${isExpanded ? "rotate-90" : ""}`}
+          className={`text-xs text-gray-400 transition-transform ${isExpanded ? "rotate-90" : ""}`}
         />
 
         {/* icon */}
         <div
-          className={` flex h-11 w-11  items-center justify-center rounded-full bg-gray-100 text-xl drop-shadow-md drop-shadow-black/15 ${amountColor}`}
+          className={`flex h-11 w-11 items-center justify-center rounded-full bg-gray-100 text-xl drop-shadow-md drop-shadow-black/15 ${amountColor}`}
         >
           <FontAwesomeIcon icon={icon} />
         </div>
 
         {/* Time stamp */}
         <div className=" ">
-          <div className="font-bold text-gray-800 w-32">{transaction.name}</div>
-          <div className="text-sm text-gray-500">{formatRelativeTime(transaction.createdAt)}</div>
+          <div className="w-32 font-bold text-gray-800">{transaction.name}</div>
+          <div className="text-sm text-gray-500">
+            {formatRelativeTime(transaction.createdAt)}
+          </div>
         </div>
-        <div className={` w-max font-bold grow ${amountColor}`}>
+        <div className={`w-max grow font-bold ${amountColor}`}>
           {amountSign}฿{transaction.amount.toLocaleString()}
         </div>
       </div>
@@ -61,24 +70,26 @@ export default function Transaction({ transaction }) {
         }`}
       >
         <ul className="grid grid-cols-1 gap-1 rounded-lg bg-gray-50 p-3 text-sm">
-          <li className="flex justify-between items-center">
-            <span className="text-gray-600 font-bold">จาก:</span>
-            <span className=" text-gray-800">{transaction.from}</span>
+          <li className="flex items-center justify-between">
+            <span className="font-bold text-gray-600">จาก:</span>
+            <span className="text-gray-800">{transaction.from}</span>
           </li>
-          <li className="flex justify-between items-center">
-            <span className="text-gray-600 font-bold">ไปยัง:</span>
-            <span className=" text-gray-800">{transaction.to}</span>
+          <li className="flex items-center justify-between">
+            <span className="font-bold text-gray-600">ไปยัง:</span>
+            <span className="text-gray-800">{transaction.to}</span>
           </li>
-          <li className="flex justify-between items-center">
-            <span className="text-gray-600 font-bold">สถานะ:</span>
+          <li className="flex items-center justify-between">
+            <span className="font-bold text-gray-600">สถานะ:</span>
             <span
               className={`text-xs font-bold ${transaction.status === "SUCCESS" ? "text-green-500" : "text-amber-500"}`}
             >
               {transaction.status}
             </span>
           </li>
-          <li className="flex flex-col mt-2">
-            <span className="text-gray-500 text-xs ">เลขที่รายการ: {transaction.id}</span>
+          <li className="mt-2 flex flex-col">
+            <span className="text-xs text-gray-500">
+              เลขที่รายการ: {transaction.id}
+            </span>
           </li>
         </ul>
       </div>

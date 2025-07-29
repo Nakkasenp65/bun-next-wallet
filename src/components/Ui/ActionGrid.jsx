@@ -1,7 +1,17 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowUpRightFromSquare, faWallet, faPlusCircle, faBullseye } from "@fortawesome/free-solid-svg-icons";
-export default function ActionGrid({ setShowTransfer, setShowWithdraw, setShowDeposit, setShowGoal }) {
+import {
+  faArrowUpRightFromSquare,
+  faWallet,
+  faPlusCircle,
+  faBullseye,
+} from "@fortawesome/free-solid-svg-icons";
+export default function ActionGrid({
+  setShowTransfer,
+  setShowWithdraw,
+  setShowDeposit,
+  setShowGoal,
+}) {
   const actionItems = [
     {
       label: "โอนเงิน",

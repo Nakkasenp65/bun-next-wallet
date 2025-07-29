@@ -19,8 +19,7 @@ export default function SavingsGoalCard({ brand, name, target, balance = 0 }) {
   return (
     <div
       id="savings-goal-card"
-      className="text-light-text shadow-neon-purple relative flex flex-col gap-4 overflow-hidden rounded-3xl p-4
-       [background:linear-gradient(135deg,_#2a2155_0%,_#3a2e6d_100%)]"
+      className="text-light-text shadow-neon-purple relative flex flex-col gap-4 overflow-hidden rounded-3xl p-4 [background:linear-gradient(135deg,_#2a2155_0%,_#3a2e6d_100%)]"
     >
       <div className="flex justify-between">
         {/* Profile Picture */}
@@ -34,12 +33,12 @@ export default function SavingsGoalCard({ brand, name, target, balance = 0 }) {
 
         {/* Card Title */}
         <div id="card-title" className="flex flex-5/6 flex-col gap-6">
-          <div className="flex flex-col w-3/4  ">
-            <div className="flex gap-0.5 items-center ">
+          <div className="flex w-3/4 flex-col">
+            <div className="flex items-center gap-0.5">
               <IoMdTrophy className="text-accent-gold drop-shadow-accent-gold/50 mb-0.5 h-4 w-4 drop-shadow-sm" />
               <span className="text-xs">เป้าหมาย:</span>
             </div>
-            <span className=" text-base">
+            <span className="text-base">
               {brand} {name}
             </span>
           </div>
@@ -48,7 +47,7 @@ export default function SavingsGoalCard({ brand, name, target, balance = 0 }) {
 
       {/* Saved Amount */}
       <div className="flex flex-col">
-        <div className="text-xs  text-white/50">ยอดเงินคงเหลือ</div>
+        <div className="text-xs text-white/50">ยอดเงินคงเหลือ</div>
         <div className="from-primary-pink to-primary-orange bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent">
           {formatCurrency(balance)}
         </div>
@@ -56,17 +55,23 @@ export default function SavingsGoalCard({ brand, name, target, balance = 0 }) {
 
       {/* Progress Bar */}
       <div className="relative flex flex-col gap-2">
-        <div className="text-accent-gold absolute -top-5 right-0 text-xs font-bold">{Math.round(progress)}%</div>
+        <div className="text-accent-gold absolute -top-5 right-0 text-xs font-bold">
+          {Math.round(progress)}%
+        </div>
         <div className="h-3 rounded-full bg-black/25 shadow-inner">
           <div
             className="h-full rounded-full [background:linear-gradient(90deg,_var(--gold-accent)_0%,_var(--primary-pink)_100%)]"
             style={{ width: `${progress}%` }}
           />
         </div>
-        <div className="flex items-center justify-between text-xs  text-white/90">
-          <span className="rounded-full bg-black/25 px-2 py-1.5">เป้าหมาย: {formatCurrency(target)}</span>
+        <div className="flex items-center justify-between text-xs text-white/90">
           <span className="rounded-full bg-black/25 px-2 py-1.5">
-            {isAchieved ? "สำเร็จแล้ว!" : `ขาดอีก: ${formatCurrency(remainingAmount)}`}
+            เป้าหมาย: {formatCurrency(target)}
+          </span>
+          <span className="rounded-full bg-black/25 px-2 py-1.5">
+            {isAchieved
+              ? "สำเร็จแล้ว!"
+              : `ขาดอีก: ${formatCurrency(remainingAmount)}`}
           </span>
         </div>
       </div>

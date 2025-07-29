@@ -3,16 +3,25 @@ import TransactionNotification from "../TransactionComponents/TransactionNotific
 import { AiOutlineNotification } from "react-icons/ai";
 import { FiGift } from "react-icons/fi";
 
-export default function NotificationTab({ activeTab, notifications, onNotificationClick }) {
-  const transactionNotifications = notifications.filter((n) => n.type === "RECEIVE" || n.type === "SENT");
-  const promoNotifications = notifications.filter((n) => n.type === "SYSTEM" || n.type === "REWARD");
+export default function NotificationTab({
+  activeTab,
+  notifications,
+  onNotificationClick,
+}) {
+  const transactionNotifications = notifications.filter(
+    (n) => n.type === "RECEIVE" || n.type === "SENT",
+  );
+  const promoNotifications = notifications.filter(
+    (n) => n.type === "SYSTEM" || n.type === "REWARD",
+  );
 
   if (activeTab === "promos") {
     return (
       <ul id="notification-list-promos" className="space-y-2">
         {promoNotifications.length > 0 ? (
           promoNotifications.map((notification) => {
-            const displayIcon = notification.type === "SYSTEM" ? AiOutlineNotification : FiGift;
+            const displayIcon =
+              notification.type === "SYSTEM" ? AiOutlineNotification : FiGift;
             return (
               <PromoNotification
                 key={notification.id}

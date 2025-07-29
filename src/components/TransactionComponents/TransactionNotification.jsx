@@ -1,5 +1,9 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowDown, faArrowUp, faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowDown,
+  faArrowUp,
+  faChevronDown,
+} from "@fortawesome/free-solid-svg-icons";
 import React, { useState } from "react";
 
 export default function TransactionNotification({ transaction, onClick }) {
@@ -30,11 +34,15 @@ export default function TransactionNotification({ transaction, onClick }) {
         <div className="flex-grow">
           <p className="font-bold text-gray-800">{transaction.title}</p>
           <p className="text-sm text-gray-600">{transaction.body}</p>
-          <p className="mt-1 text-xs text-gray-400">{new Date(transaction.createdAt).toLocaleString()}</p>
+          <p className="mt-1 text-xs text-gray-400">
+            {new Date(transaction.createdAt).toLocaleString()}
+          </p>
         </div>
         {/* Unread Dot & Chevron */}
         <div className="flex flex-col items-center gap-2">
-          {!transaction.isRead && <div className="h-2 w-2 rounded-full bg-primary-pink" />}
+          {!transaction.isRead && (
+            <div className="bg-primary-pink h-2 w-2 rounded-full" />
+          )}
           {transaction.transaction && (
             <FontAwesomeIcon
               icon={faChevronDown}
@@ -47,9 +55,10 @@ export default function TransactionNotification({ transaction, onClick }) {
       {/* Expanded Details */}
       {isExpanded && transaction.transaction && (
         <div className="mt-3 border-t pt-3 pl-12 text-sm text-gray-700">
-          <h4 className="font-bold mb-1">Transaction Details:</h4>
+          <h4 className="mb-1 font-bold">Transaction Details:</h4>
           <p>
-            <strong>Amount:</strong> {transaction.transaction.amount.toLocaleString()} THB
+            <strong>Amount:</strong>{" "}
+            {transaction.transaction.amount.toLocaleString()} THB
           </p>
           <p>
             <strong>Status:</strong> {transaction.transaction.status}

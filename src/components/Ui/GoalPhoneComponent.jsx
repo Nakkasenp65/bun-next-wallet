@@ -3,7 +3,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
 
-export default function GoalPhoneComponent({ handleSelected, selected, phoneDetails, formatPrice }) {
+export default function GoalPhoneComponent({
+  handleSelected,
+  selected,
+  phoneDetails,
+  formatPrice,
+}) {
   //
   //set the goal to brand and price
   function onPhoneCardClick() {

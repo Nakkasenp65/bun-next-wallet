@@ -12,7 +12,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import axios from "axios";
 
-export default function TransferPage({ userData, setShowTransfer, showTransfer }) {
+export default function TransferPage({
+  userData,
+  setShowTransfer,
+  showTransfer,
+}) {
   const [showBankModal, setShowBankModal] = useState(false);
   const [selectedBank, setSelectedBank] = useState(null);
   const [formData, setFormData] = useState({
@@ -23,7 +27,10 @@ export default function TransferPage({ userData, setShowTransfer, showTransfer }
 
   const createTransferTransaction = async (transactionData) => {
     const { walletId, ...payload } = transactionData;
-    const { data } = await axios.post(`${process.env.NEXT_PUBLIC_LOCAL_API_URL}/transaction/${walletId}`, payload);
+    const { data } = await axios.post(
+      `${process.env.NEXT_PUBLIC_LOCAL_API_URL}/transaction/${walletId}`,
+      payload,
+    );
     console.log("Clicked");
     return data;
   };
@@ -57,9 +64,11 @@ export default function TransferPage({ userData, setShowTransfer, showTransfer }
 
   const handleConfirmTransfer = () => {
     const numericAmount = parseFloat(formData.amount);
-    if (isNaN(numericAmount) || numericAmount <= 0) return toast.error("Please enter a valid amount.");
+    if (isNaN(numericAmount) || numericAmount <= 0)
+      return toast.error("Please enter a valid amount.");
     if (!selectedBank) return toast.error("Please select a bank.");
-    if (!formData.recipient || !formData.account) return toast.error("Please fill in all recipient details.");
+    if (!formData.recipient || !formData.account)
+      return toast.error("Please fill in all recipient details.");
 
     const transactionData = {
       walletId: userData.wallet.id,
@@ -75,7 +84,8 @@ export default function TransferPage({ userData, setShowTransfer, showTransfer }
     transferMutation.mutate(transactionData);
   };
 
-  const accountInputPlaceholder = selectedBank?.id === "promptpay" ? "กรอกเบอร์โทรศัพท์" : "กรอกเลขบัญชี";
+  const accountInputPlaceholder =
+    selectedBank?.id === "promptpay" ? "กรอกเบอร์โทรศัพท์" : "กรอกเลขบัญชี";
 
   return (
     <>
@@ -94,17 +104,21 @@ export default function TransferPage({ userData, setShowTransfer, showTransfer }
       <FramerDiv
         isOpen={showTransfer}
         id="transfer-overlay"
-        className="fixed bg-bg-dark/80 inset-0 z-20 flex flex-col backdrop-blur-xl"
+        className="bg-bg-dark/80 fixed inset-0 z-20 flex flex-col backdrop-blur-xl"
       >
         {/* Page Header */}
         <header className="flex items-center px-5 pt-10 pb-4">
-          <div onClick={() => setShowTransfer(false)} className="text-secondary-text text-2xl">
+          <div
+            onClick={() => setShowTransfer(false)}
+            className="text-secondary-text text-2xl"
+          >
             <IoIosArrowBack className="text-3xl" />
           </div>
           <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
             โอนเงิน
           </h2>
-          <div className="w-6" /> {/* Spacer to keep title perfectly centered */}
+          <div className="w-6" />{" "}
+          {/* Spacer to keep title perfectly centered */}
         </header>
 
         {/* Page Content */}
@@ -123,7 +137,10 @@ export default function TransferPage({ userData, setShowTransfer, showTransfer }
 
           {/* Input Group: Amount */}
           <div className="flex flex-col gap-2">
-            <label htmlFor="transfer-amount" className=" block text-sm font-bold text-gray-500">
+            <label
+              htmlFor="transfer-amount"
+              className="block text-sm font-bold text-gray-500"
+            >
               จำนวนเงิน
             </label>
             <input
@@ -139,7 +156,10 @@ export default function TransferPage({ userData, setShowTransfer, showTransfer }
 
           {/* Input Group: Recipient Name */}
           <div className="flex flex-col gap-2">
-            <label htmlFor="transfer-recipient" className=" text-sm font-bold text-gray-500">
+            <label
+              htmlFor="transfer-recipient"
+              className="text-sm font-bold text-gray-500"
+            >
               ผู้รับโอน
             </label>
             <div className="relative">
@@ -150,32 +170,42 @@ export default function TransferPage({ userData, setShowTransfer, showTransfer }
                 value={formData.recipient}
                 onChange={handleInputChange}
                 placeholder="ชื่อ-นามสกุล"
-                className="focus:border-primary-pink focus:ring-primary-pink/30 w-full rounded-xl border border-gray-300 p-4 pl-12 focus:ring-2 focus:outline-none text-bg-dark"
+                className="focus:border-primary-pink focus:ring-primary-pink/30 text-bg-dark w-full rounded-xl border border-gray-300 p-4 pl-12 focus:ring-2 focus:outline-none"
               />
             </div>
           </div>
 
           {/* Input Group: Bank (Placeholder for now) */}
           <div className="flex flex-col gap-2">
-            <label htmlFor="transfer-bank-selector" className="text-sm font-bold text-gray-500">
+            <label
+              htmlFor="transfer-bank-selector"
+              className="text-sm font-bold text-gray-500"
+            >
               ธนาคารผู้รับ
             </label>
             <div
               id="transfer-bank-selector"
               onClick={() => setShowBankModal(true)} // 6. Open the modal on click
-              className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-gray-300 p-3 hover:border-vibrant-purple"
+              className="hover:border-vibrant-purple flex w-full cursor-pointer items-center justify-between rounded-xl border border-gray-300 p-3"
             >
               {/* 7. Display the selected bank name or the placeholder */}
-              <span className={selectedBank ? "font-semibold text-bg-dark" : "text-gray-400"}>
+              <span
+                className={
+                  selectedBank ? "text-bg-dark font-semibold" : "text-gray-400"
+                }
+              >
                 {selectedBank ? selectedBank.name : "เลือกธนาคาร / พร้อมเพย์"}
               </span>
-              <IoIosArrowBack className="text-3xl rotate-180 text-gray-400" />
+              <IoIosArrowBack className="rotate-180 text-3xl text-gray-400" />
             </div>
           </div>
 
           {/* Input Group: Account Number */}
           <div className="flex flex-col gap-2">
-            <label htmlFor="transfer-account" className="text-sm font-bold text-gray-500">
+            <label
+              htmlFor="transfer-account"
+              className="text-sm font-bold text-gray-500"
+            >
               เลขบัญชี / เบอร์โทรศัพท์
             </label>
             <div className="relative">
@@ -187,7 +217,7 @@ export default function TransferPage({ userData, setShowTransfer, showTransfer }
                 value={formData.account}
                 onChange={handleInputChange}
                 placeholder={accountInputPlaceholder} // 8. Use the dynamic placeholder
-                className="w-full rounded-xl border border-gray-300 p-4 pl-12 text-bg-dark outline-none focus:border-primary-pink focus:ring-2 focus:ring-primary-pink/30"
+                className="text-bg-dark focus:border-primary-pink focus:ring-primary-pink/30 w-full rounded-xl border border-gray-300 p-4 pl-12 outline-none focus:ring-2"
               />
             </div>
           </div>

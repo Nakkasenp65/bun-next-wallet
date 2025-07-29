@@ -2,13 +2,21 @@ import React from "react";
 import { faGift, faBullseye } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export default function SavingsMissionCard({ title, description, currentProgress, targetProgress, rewardAmount }) {
+export default function SavingsMissionCard({
+  title,
+  description,
+  currentProgress,
+  targetProgress,
+  rewardAmount,
+}) {
   const progressPercentage = (currentProgress / targetProgress) * 100;
   const isComplete = currentProgress >= targetProgress;
 
   return (
     <section className="flex w-full flex-col gap-4">
-      <h2 className="text-bg-dark text-start text-xl font-bold">ภารกิจการออม</h2>
+      <h2 className="text-bg-dark text-start text-xl font-bold">
+        ภารกิจการออม
+      </h2>
       <div
         id="mission-card"
         className="flex flex-col gap-4 rounded-3xl p-5 text-white shadow-md [background:linear-gradient(135deg,_var(--vibrant-purple),_var(--primary-pink))]"
@@ -37,7 +45,9 @@ export default function SavingsMissionCard({ title, description, currentProgress
           </div>
           <button
             className={`rounded-xl px-5 py-2.5 text-sm font-bold shadow-md transition-transform hover:-translate-y-0.5 ${
-              isComplete ? "bg-bright-yellow text-bg-dark" : "text-primary-pink bg-white"
+              isComplete
+                ? "bg-bright-yellow text-bg-dark"
+                : "text-primary-pink bg-white"
             }`}
           >
             {isComplete ? "รับรางวัล!" : "ออมเลย!"}

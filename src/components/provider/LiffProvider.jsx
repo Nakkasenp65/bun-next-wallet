@@ -22,8 +22,8 @@ export function LiffProvider({ children }) {
       try {
         await liff.init({ liffId: liffenvId });
         if (liff.isLoggedIn()) {
-          setIsLoggedIn(true);
           const profile = await liff.getProfile();
+          setIsLoggedIn(true);
           setLiffProfile(profile);
         } else {
           liff.login();
@@ -37,29 +37,13 @@ export function LiffProvider({ children }) {
     initialize();
   }, []);
 
-  // const login = () => {
-  //   liff.login();
-  // };
-
   if (isLoading) {
     return (
-      <div className="flex h-dvh w-full items-center justify-center bg-bg-dark">
+      <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
         <Loading />
       </div>
     );
   }
-
-  // If not logged in, show a login button. This might appear on pages other than /welcome if accessed directly.
-  // if (!isLoggedIn) {
-  //   return (
-  //     <div className="flex h-dvh w-full flex-col items-center justify-center bg-bg-dark p-8 text-center">
-  //       <h1 className="text-2xl font-bold text-white">Welcome to 1Wallet</h1>
-  //       <div className="mt-8 w-full max-w-xs">
-  //         <CtaButton onClick={login}>Login with LINE</CtaButton>
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   return <LiffContext.Provider value={{ liffProfile, isLoggedIn, isLoading }}>{children}</LiffContext.Provider>;
 }

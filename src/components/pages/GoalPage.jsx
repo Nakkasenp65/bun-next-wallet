@@ -2,7 +2,11 @@
 
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faPenToSquare, faCalendarCheck } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faPenToSquare,
+  faCalendarCheck,
+} from "@fortawesome/free-solid-svg-icons";
 import CtaButton from "../Ui/CtaButton";
 import ChangeGoalPage from "./ChangeGoalPage";
 import FramerDiv from "../framerComponents/FramerDiv";
@@ -12,8 +16,13 @@ export default function GoalPage({ userData, showGoal, setShowGoal }) {
 
   const savedAmount = userData.wallet.balance;
   const progressPercentage =
-    userData.goal.mobileModel.price > 0 ? (savedAmount / userData.goal.mobileModel.price) * 100 : 0;
-  const remainingAmount = Math.max(0, userData.goal.mobileModel.price - savedAmount);
+    userData.goal.mobileModel.price > 0
+      ? (savedAmount / userData.goal.mobileModel.price) * 100
+      : 0;
+  const remainingAmount = Math.max(
+    0,
+    userData.goal.mobileModel.price - savedAmount,
+  );
 
   return (
     <>
@@ -50,9 +59,12 @@ export default function GoalPage({ userData, showGoal, setShowGoal }) {
             alt={userData.goal.brand}
             className="mx-auto w-1/2 max-w-[200px] rounded-2xl shadow-lg transition-transform hover:scale-105"
           />
-          <h2 className="text-bg-dark mt-5 text-2xl font-bold">{userData.goal.brand}</h2>
+          <h2 className="text-bg-dark mt-5 text-2xl font-bold">
+            {userData.goal.brand}
+          </h2>
           <p className="mb-5 text-base text-gray-500">
-            ราคาเป้าหมาย: ฿{userData.goal.mobileModel.price.toLocaleString("en-US")}
+            ราคาเป้าหมาย: ฿
+            {userData.goal.mobileModel.price.toLocaleString("en-US")}
           </p>
 
           {/* Progress Bar */}
@@ -70,7 +82,9 @@ export default function GoalPage({ userData, showGoal, setShowGoal }) {
 
           {/* Progress Details */}
           <div className="text-bg-dark flex w-full justify-between text-sm font-bold">
-            <span>ออมแล้ว: ฿{userData.wallet.balance.toLocaleString("en-US")}</span>
+            <span>
+              ออมแล้ว: ฿{userData.wallet.balance.toLocaleString("en-US")}
+            </span>
             <span>ขาดอีก: ฿{remainingAmount.toLocaleString("en-US")}</span>
           </div>
 
@@ -78,14 +92,21 @@ export default function GoalPage({ userData, showGoal, setShowGoal }) {
           <div className="mt-5 flex w-full flex-col gap-1.5 rounded-lg bg-gray-50 p-4 text-left">
             <div className="flex w-full justify-between">
               <span className="flex items-center gap-2 text-gray-600">
-                <FontAwesomeIcon icon={faCalendarCheck} className="text-primary-pink" />
+                <FontAwesomeIcon
+                  icon={faCalendarCheck}
+                  className="text-primary-pink"
+                />
                 แผนการออม
               </span>
-              <span className="text-bg-dark font-bold">{userData.goal.plan.displayName}</span>
+              <span className="text-bg-dark font-bold">
+                {userData.goal.plan.displayName}
+              </span>
             </div>
             <div className="flex w-full justify-between text-lg">
               <span className="text-gray-600">ยอดที่ต้องออม</span>
-              <span className="text-bg-dark font-bold">฿{userData.goal.mobileModel.price.toLocaleString("en-US")}</span>
+              <span className="text-bg-dark font-bold">
+                ฿{userData.goal.mobileModel.price.toLocaleString("en-US")}
+              </span>
             </div>
           </div>
 

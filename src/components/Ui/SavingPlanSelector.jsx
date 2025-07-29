@@ -25,11 +25,18 @@ const calculateSavingsPlans = (price) => {
  */
 export default function SavingsPlanSelector({ goalPhone }) {
   // useMemo ensures that we only recalculate the plans when the phone's price changes.
-  const savingsPlans = useMemo(() => calculateSavingsPlans(goalPhone.price), [goalPhone.price]);
+  const savingsPlans = useMemo(
+    () => calculateSavingsPlans(goalPhone.price),
+    [goalPhone.price],
+  );
 
   // If no goal is selected, we can show a placeholder or nothing at all.
   if (!goalPhone.price) {
-    return <div className="text-center text-neutral-500">กรุณาเลือกเป้าหมายการออมก่อน</div>;
+    return (
+      <div className="text-center text-neutral-500">
+        กรุณาเลือกเป้าหมายการออมก่อน
+      </div>
+    );
   }
 
   return (
@@ -45,10 +52,12 @@ export default function SavingsPlanSelector({ goalPhone }) {
         return (
           <div
             key={plan.label} // The key is crucial for React lists
-            className="cursor-pointer rounded-xl border-2 border-transparent bg-gray-100 p-4 text-center transition-colors hover:border-soft-purple"
+            className="hover:border-soft-purple cursor-pointer rounded-xl border-2 border-transparent bg-gray-100 p-4 text-center transition-colors"
           >
-            <p className="font-bold text-bg-dark">{plan.label}</p>
-            <p className="my-1 text-xl font-bold text-primary-pink">฿{formattedAmount}</p>
+            <p className="text-bg-dark font-bold">{plan.label}</p>
+            <p className="text-primary-pink my-1 text-xl font-bold">
+              ฿{formattedAmount}
+            </p>
             <p className="text-xs text-neutral-500">{plan.period}</p>
           </div>
         );

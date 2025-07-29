@@ -2,7 +2,10 @@
 
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTriangleExclamation, faRotateRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faTriangleExclamation,
+  faRotateRight,
+} from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 
 export default function ErrorComponent({
@@ -29,7 +32,9 @@ export default function ErrorComponent({
       </div>
 
       {/* Title Text: Styled to stand out but fit the theme */}
-      <h1 className="text-light-text text-2xl font-bold drop-shadow-md">{title}</h1>
+      <h1 className="text-light-text text-2xl font-bold drop-shadow-md">
+        {title}
+      </h1>
 
       {/* Message Text: A softer, secondary color for the description */}
       <p className="text-secondary-text mt-2 max-w-sm">{message}</p>
