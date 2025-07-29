@@ -51,6 +51,7 @@ export default function Page() {
   });
 
   const handleSetGoal = () => {
+    console.log("test");
     if (!goal.mobileId || !goal.planId || !userData?.id) return;
     const goalData = { mobileId: goal.mobileId, planId: goal.planId };
     goalMutation.mutate({ userId: userData.id, goalData });
