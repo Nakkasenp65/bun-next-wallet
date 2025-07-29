@@ -18,10 +18,10 @@ export function useCreateTransfer({ onSuccessCallback }) {
 
   return useMutation({
     mutationFn: createTransfer,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success(data?.message || "Slip sent successfully! Awaiting confirmation.");
-      queryClient.invalidateQueries({ queryKey: ["user"] });
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      await queryClient.invalidateQueries({ queryKey: ["user"] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
       if (onSuccessCallback) {
         onSuccessCallback();
       }

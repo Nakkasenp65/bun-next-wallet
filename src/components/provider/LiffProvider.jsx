@@ -2,7 +2,6 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import liff from "@line/liff";
 import Loading from "@/components/Loading";
-import CtaButton from "@/components/Ui/CtaButton";
 
 const LiffContext = createContext({
   liffProfile: null,
@@ -22,8 +21,8 @@ export function LiffProvider({ children }) {
       try {
         await liff.init({ liffId: liffenvId });
         if (liff.isLoggedIn()) {
-          const profile = await liff.getProfile();
           setIsLoggedIn(true);
+          const profile = await liff.getProfile();
           setLiffProfile(profile);
         } else {
           liff.login();

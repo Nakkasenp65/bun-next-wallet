@@ -23,14 +23,8 @@ import { useLiff } from "@/components/provider/LiffProvider";
 import ContactPage from "@/components/pages/ContactPage";
 
 export default function HomePage() {
-  const { liffProfile, isLoggedIn } = useLiff();
   const router = useRouter();
-  // const liffProfile = {
-  //   userId: "U5d2998909721fdea596f8e9e91e7bf85",
-  //   displayName: "Long👁️‍🗨️",
-  //   pictureUrl: "https://profile.line-scdn.net/0hPsTqIBJhD1x5CB7Ets…MbD5jU2oBcTpMFWpFQCxrN19jCnw6Yd8WCngJVG9EPUQAVmrA",
-  // };
-  // const isLoggedIn = true;
+  const { liffProfile, isLoggedIn } = useLiff();
   const [showTransfer, setShowTransfer] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showDeposit, setShowDeposit] = useState(false);
@@ -47,16 +41,17 @@ export default function HomePage() {
   };
   const { data: userStatus, isLoading: isStatusLoading, error: statusError } = useUserStatus(liffProfile?.userId);
   const { data: userData, isLoading, error } = useUser(liffProfile?.userId);
-  console.log("UserData From Page: ", userData);
-  console.log(liffProfile);
+
+  console.log(userStatus);
+  console.log("User Data: ", userData);
 
   useEffect(() => {
-    if ((liffProfile && userStatus?.isNewUser) || userStatus?.firstTime) {
+    if (!isStatusLoading && liffProfile && userStatus && (userStatus.isNewUser || userStatus.firstTime)) {
       router.push("/welcome");
     }
-  }, [userData, router]);
+  }, [userStatus, isStatusLoading, liffProfile, router]);
 
-  if (isLoading || !userData) {
+  if (!liffProfile || !isLoggedIn) {
     return (
       <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
         <Loading />
@@ -64,11 +59,17 @@ export default function HomePage() {
     );
   }
 
-  if (error) {
+  if (error || statusError) {
     return <ErrorComponent />;
   }
 
-  if (liffProfile && isLoggedIn)
+  if (isLoading || isStatusLoading || !userData) {
+    return (
+      <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
+        <Loading />
+      </div>
+    );
+  } else
     return (
       <>
         <NotificationPage userId={userData.userId} showNotifications={showNotifications} setShowNotifications={setShowNotifications} />
@@ -77,6 +78,7 @@ export default function HomePage() {
         <DepositPage userData={userData} showDeposit={showDeposit} setShowDeposit={setShowDeposit} />
         <GoalPage userData={userData} showGoal={showGoal} setShowGoal={setShowGoal} />
         <ContactPage showContact={showContact} setShowContact={setShowContact} />
+
         <div className="bg-bg-dark font-main relative flex h-dvh w-full flex-col overflow-hidden lg:mx-auto lg:max-w-[450px] lg:shadow-lg">
           <main className="flex-grow overflow-y-auto">
             {/* Profile Part */}

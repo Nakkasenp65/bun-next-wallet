@@ -1,7 +1,11 @@
 import { Toaster } from "react-hot-toast";
+
 import "./globals.css";
 import QueryProvider from "@/components/provider/QueryProvider";
 import { LiffProvider } from "@/components/provider/LiffProvider";
+import { Suspense } from "react";
+import ErrorBoundary from "@/components/Ui/ErrorBoundary";
+import Loading from "@/components/Loading";
 
 export const toastOptions = {
   style: {
@@ -36,12 +40,28 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`antialiased`}>
-        <QueryProvider>
-          <LiffProvider>
-            {children}
-            <Toaster position="top-center" containerClassName="z-[9999]" toastOptions={toastOptions} />
-          </LiffProvider>
-        </QueryProvider>
+        <ErrorBoundary
+          fallback={
+            <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
+              <p className="text-white">เกิดข้อผิดพลาด กรุณารีเฟรช</p>
+            </div>
+          }
+        >
+          <Suspense
+            fallback={
+              <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
+                <Loading />
+              </div>
+            }
+          >
+            <QueryProvider>
+              <LiffProvider>
+                <Toaster position="top-center" containerClassName="z-[9999]" toastOptions={toastOptions} />
+                {children}
+              </LiffProvider>
+            </QueryProvider>
+          </Suspense>
+        </ErrorBoundary>
       </body>
     </html>
   );

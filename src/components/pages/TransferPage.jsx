@@ -12,11 +12,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import axios from "axios";
 
-export default function TransferPage({
-  userData,
-  setShowTransfer,
-  showTransfer,
-}) {
+export default function TransferPage({ userData, setShowTransfer, showTransfer }) {
   const [showBankModal, setShowBankModal] = useState(false);
   const [selectedBank, setSelectedBank] = useState(null);
   const [formData, setFormData] = useState({
@@ -27,11 +23,7 @@ export default function TransferPage({
 
   const createTransferTransaction = async (transactionData) => {
     const { walletId, ...payload } = transactionData;
-    const { data } = await axios.post(
-      `${process.env.NEXT_PUBLIC_LOCAL_API_URL}/transaction/${walletId}`,
-      payload,
-    );
-    console.log("Clicked");
+    const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/transaction/${walletId}`, payload);
     return data;
   };
 
@@ -39,13 +31,14 @@ export default function TransferPage({
   const transferMutation = useMutation({
     mutationFn: createTransferTransaction,
     onSuccess: () => {
-      toast.success("Transfer successful!");
-      queryClient.invalidateQueries({ queryKey: ["user"] }); // Refetch user balance
-      queryClient.invalidateQueries({ queryKey: ["transactions"] }); // Refetch transactions
+      toast.success("สร้างรายการโอนเงินสำเร็จ!");
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
       setShowTransfer(false);
+      setFormData(null);
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Transfer failed.");
+      toast.error(error.response?.data?.message || "สร้างรายการโอนเงินล้มเหลว");
     },
   });
 
@@ -64,11 +57,9 @@ export default function TransferPage({
 
   const handleConfirmTransfer = () => {
     const numericAmount = parseFloat(formData.amount);
-    if (isNaN(numericAmount) || numericAmount <= 0)
-      return toast.error("Please enter a valid amount.");
+    if (isNaN(numericAmount) || numericAmount <= 0) return toast.error("Please enter a valid amount.");
     if (!selectedBank) return toast.error("Please select a bank.");
-    if (!formData.recipient || !formData.account)
-      return toast.error("Please fill in all recipient details.");
+    if (!formData.recipient || !formData.account) return toast.error("Please fill in all recipient details.");
 
     const transactionData = {
       walletId: userData.wallet.id,
@@ -84,16 +75,11 @@ export default function TransferPage({
     transferMutation.mutate(transactionData);
   };
 
-  const accountInputPlaceholder =
-    selectedBank?.id === "promptpay" ? "กรอกเบอร์โทรศัพท์" : "กรอกเลขบัญชี";
+  const accountInputPlaceholder = selectedBank?.id === "promptpay" ? "กรอกเบอร์โทรศัพท์" : "กรอกเลขบัญชี";
 
   return (
     <>
-      <BankSelectionModal
-        isOpen={showBankModal}
-        onClose={() => setShowBankModal(false)}
-        onBankSelect={handleBankSelect}
-      />
+      <BankSelectionModal isOpen={showBankModal} onClose={() => setShowBankModal(false)} onBankSelect={handleBankSelect} />
 
       {transferMutation.isPending && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -101,24 +87,16 @@ export default function TransferPage({
         </div>
       )}
 
-      <FramerDiv
-        isOpen={showTransfer}
-        id="transfer-overlay"
-        className="bg-bg-dark/80 fixed inset-0 z-20 flex flex-col backdrop-blur-xl"
-      >
+      <FramerDiv isOpen={showTransfer} id="transfer-overlay" className="bg-bg-dark/80 fixed inset-0 z-20 flex flex-col backdrop-blur-xl">
         {/* Page Header */}
         <header className="flex items-center px-5 pt-10 pb-4">
-          <div
-            onClick={() => setShowTransfer(false)}
-            className="text-secondary-text text-2xl"
-          >
+          <div onClick={() => setShowTransfer(false)} className="text-secondary-text text-2xl">
             <IoIosArrowBack className="text-3xl" />
           </div>
           <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
             โอนเงิน
           </h2>
-          <div className="w-6" />{" "}
-          {/* Spacer to keep title perfectly centered */}
+          <div className="w-6" /> {/* Spacer to keep title perfectly centered */}
         </header>
 
         {/* Page Content */}
@@ -137,10 +115,7 @@ export default function TransferPage({
 
           {/* Input Group: Amount */}
           <div className="flex flex-col gap-2">
-            <label
-              htmlFor="transfer-amount"
-              className="block text-sm font-bold text-gray-500"
-            >
+            <label htmlFor="transfer-amount" className="block text-sm font-bold text-gray-500">
               จำนวนเงิน
             </label>
             <input
@@ -156,10 +131,7 @@ export default function TransferPage({
 
           {/* Input Group: Recipient Name */}
           <div className="flex flex-col gap-2">
-            <label
-              htmlFor="transfer-recipient"
-              className="text-sm font-bold text-gray-500"
-            >
+            <label htmlFor="transfer-recipient" className="text-sm font-bold text-gray-500">
               ผู้รับโอน
             </label>
             <div className="relative">
@@ -177,10 +149,7 @@ export default function TransferPage({
 
           {/* Input Group: Bank (Placeholder for now) */}
           <div className="flex flex-col gap-2">
-            <label
-              htmlFor="transfer-bank-selector"
-              className="text-sm font-bold text-gray-500"
-            >
+            <label htmlFor="transfer-bank-selector" className="text-sm font-bold text-gray-500">
               ธนาคารผู้รับ
             </label>
             <div
@@ -189,11 +158,7 @@ export default function TransferPage({
               className="hover:border-vibrant-purple flex w-full cursor-pointer items-center justify-between rounded-xl border border-gray-300 p-3"
             >
               {/* 7. Display the selected bank name or the placeholder */}
-              <span
-                className={
-                  selectedBank ? "text-bg-dark font-semibold" : "text-gray-400"
-                }
-              >
+              <span className={selectedBank ? "text-bg-dark font-semibold" : "text-gray-400"}>
                 {selectedBank ? selectedBank.name : "เลือกธนาคาร / พร้อมเพย์"}
               </span>
               <IoIosArrowBack className="rotate-180 text-3xl text-gray-400" />
@@ -202,10 +167,7 @@ export default function TransferPage({
 
           {/* Input Group: Account Number */}
           <div className="flex flex-col gap-2">
-            <label
-              htmlFor="transfer-account"
-              className="text-sm font-bold text-gray-500"
-            >
+            <label htmlFor="transfer-account" className="text-sm font-bold text-gray-500">
               เลขบัญชี / เบอร์โทรศัพท์
             </label>
             <div className="relative">
