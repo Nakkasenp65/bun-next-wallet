@@ -11,7 +11,7 @@ import ErrorComponent from "../Ui/ErrorComponent";
 import axios from "axios";
 
 const fetchNotifications = async (userId) => {
-  const { data } = await axios.get(`${process.env.NEXT_PUBLIC_LOCAL_API_URL}/notification/${userId}`);
+  const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/notification/${userId}`);
   return data.data;
 };
 
@@ -19,13 +19,13 @@ const markAsReadMutationFn = async ({ notificationId, userMongoId }) => {
   if (!notificationId || !userMongoId) {
     throw new Error("Notification ID and User ID are required.");
   }
-  const url = `${process.env.NEXT_PUBLIC_LOCAL_API_URL}/notification/${notificationId}/${userMongoId}/read`;
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/notification/${notificationId}/${userMongoId}/read`;
   const { data } = await axios.patch(url);
   return data.data;
 };
 
 const clearNotificationsMutationFn = async (type) => {
-  const { data } = await axios.delete(`${process.env.NEXT_PUBLIC_LOCAL_API_URL}/notification/clear?type=${type}`);
+  const { data } = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/notification/clear?type=${type}`);
   return data.data;
 };
 
