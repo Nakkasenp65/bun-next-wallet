@@ -37,10 +37,10 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`antialiased`}>
         <QueryProvider>
-          {/* <LiffProvider> */}
-          {children}
-          <Toaster position="top-center" containerClassName="z-[9999]" toastOptions={toastOptions} />
-          {/* </LiffProvider> */}
+          <LiffProvider>
+            {children}
+            <Toaster position="top-center" containerClassName="z-[9999]" toastOptions={toastOptions} />
+          </LiffProvider>
         </QueryProvider>
       </body>
     </html>

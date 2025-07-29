@@ -11,6 +11,7 @@ import ErrorComponent from "@/components/Ui/ErrorComponent";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLiff } from "@/components/provider/LiffProvider";
+import toast from "react-hot-toast";
 
 // Helper functions remain the same
 const createGoal = async ({ userId, goalData }) => {
@@ -27,6 +28,7 @@ const createUser = async ({ liffId, displayName, pictureUrl }) => {
   return data;
 };
 
+// Page
 export default function Page() {
   const { liffProfile } = useLiff();
   const router = useRouter();

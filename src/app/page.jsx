@@ -56,7 +56,7 @@ export default function HomePage() {
     }
   }, [userData, router]);
 
-  if (isLoading) {
+  if (isLoading || !userData) {
     return (
       <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
         <Loading />
@@ -66,14 +66,6 @@ export default function HomePage() {
 
   if (error) {
     return <ErrorComponent />;
-  }
-
-  if (!userData) {
-    return (
-      <div className="bg-bg-dark flex h-screen items-center justify-center text-yellow-400">
-        <p>User not found.</p>
-      </div>
-    );
   }
 
   if (liffProfile && isLoggedIn)

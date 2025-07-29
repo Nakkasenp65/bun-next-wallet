@@ -84,8 +84,6 @@ export default function SetupContent({ goal, setGoal, isGoalSelected }) {
     }));
   }
 
-  console.log(goal);
-
   function handlePlan(plan, planId) {
     setGoal((prevGoal) => ({
       ...prevGoal,
@@ -111,9 +109,7 @@ export default function SetupContent({ goal, setGoal, isGoalSelected }) {
   return (
     <div className="flex grow flex-col gap-6 p-6">
       <div id="setup-phone-list" className="flex flex-col gap-6 border">
-        <h2 className="text-lg font-bold text-neutral-800">
-          1. เลือกเป้าหมายของคุณ
-        </h2>
+        <h2 className="text-lg font-bold text-neutral-800">1. เลือกเป้าหมายของคุณ</h2>
 
         {phones.map((phone) => (
           <GoalPhoneComponent
@@ -131,9 +127,7 @@ export default function SetupContent({ goal, setGoal, isGoalSelected }) {
       </div>
       {goal.brand && (
         <div className="border-divider border-t py-6">
-          <h2 className="mb-6 text-lg font-bold text-neutral-800">
-            2. เลือกแผนการออม (ระยะเวลา 6 เดือน)
-          </h2>
+          <h2 className="mb-6 text-lg font-bold text-neutral-800">2. เลือกแผนการออม (ระยะเวลา 6 เดือน)</h2>
 
           <div id="setup-savings-plan-list" className="grid grid-cols-2 gap-3">
             {plans.map((plan) => (
@@ -147,9 +141,7 @@ export default function SetupContent({ goal, setGoal, isGoalSelected }) {
                 onClick={() => handlePlan(plan.variable, plan.planId)}
               >
                 <p className="text-bg-dark font-bold">{plan.label}</p>
-                <p className="text-primary-pink my-1 text-xl font-bold">
-                  ฿{plan.amount}
-                </p>
+                <p className="text-primary-pink my-1 text-xl font-bold">฿{plan.amount}</p>
               </div>
             ))}
           </div>
