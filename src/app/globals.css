@@ -3,15 +3,13 @@
 
 @font-face {
   font-family: "LINESeedSansTH";
-  src: url("https://cdn.jsdelivr.net/gh/ok1developer/NO1Money/LINESeedSansTH_W_Rg.woff")
-    format("woff");
+  src: url("https://cdn.jsdelivr.net/gh/ok1developer/NO1Money/LINESeedSansTH_W_Rg.woff") format("woff");
   font-weight: 400;
 }
 
 @font-face {
   font-family: "LINESeedSansTH";
-  src: url("https://cdn.jsdelivr.net/gh/ok1developer/NO1Money/LINESeedSansTH_W_Bd.woff")
-    format("woff");
+  src: url("https://cdn.jsdelivr.net/gh/ok1developer/NO1Money/LINESeedSansTH_W_Bd.woff") format("woff");
   font-weight: 700;
 }
 
@@ -48,6 +46,12 @@
   }
 }
 
+@keyframes shining {
+  to {
+    background-position: -200% 0;
+  }
+}
+
 @keyframes pulseUp {
   0% {
     box-shadow: 0 0 0 0 rgba(255, 77, 109, 0.7);
@@ -74,6 +78,18 @@
   }
 }
 
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 25%;
+  }
+  50% {
+    background-position: 75% 25%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -85,22 +101,9 @@
   --bright-cyan: #4dd2ff;
   --bright-green: #4ccd99;
   --bright-yellow: #ffd700;
-  --primary-gradient: linear-gradient(
-    135deg,
-    var(--primary-pink),
-    var(--primary-orange)
-  );
-  --secondary-gradient: linear-gradient(
-    135deg,
-    var(--vibrant-purple),
-    var(--primary-pink)
-  );
-  --progress-gradient: linear-gradient(
-    90deg,
-    var(--bright-cyan) 0%,
-    var(--bright-green) 50%,
-    var(--bright-yellow) 100%
-  );
+  --primary-gradient: linear-gradient(135deg, var(--primary-pink), var(--primary-orange));
+  --secondary-gradient: linear-gradient(135deg, var(--vibrant-purple), var(--primary-pink));
+  --progress-gradient: linear-gradient(90deg, var(--bright-cyan) 0%, var(--bright-green) 50%, var(--bright-yellow) 100%);
   --light-text: #ffffff;
   --secondary-text: #d0c8f0;
   --card-bg-dark: #2a2155;
@@ -118,15 +121,17 @@
   --gold-accent: #ffd700;
   --platinum-accent: #e5e4e2;
 
-  --neon-pink:
-    0 0 10px rgba(255, 45, 150, 0.8), 0 0 20px rgba(255, 45, 150, 0.6);
-  --neon-purple:
-    0 0 10px rgba(138, 79, 255, 0.8), 0 0 20px rgba(138, 79, 255, 0.6);
-  --neon-cyan:
-    0 0 10px rgba(77, 210, 255, 0.8), 0 0 20px rgba(77, 210, 255, 0.6);
+  --neon-pink: 0 0 10px rgba(255, 45, 150, 0.8), 0 0 20px rgba(255, 45, 150, 0.6);
+  --neon-purple: 0 0 10px rgba(138, 79, 255, 0.8), 0 0 20px rgba(138, 79, 255, 0.6);
+  --neon-cyan: 0 0 10px rgba(77, 210, 255, 0.8), 0 0 20px rgba(77, 210, 255, 0.6);
   --glass-bg: rgba(255, 255, 255, 0.1);
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+
+  --color-theme-primary: #ff3366;
+  --color-theme-secondary: #9c27b0;
+  --color-theme-primary-disabled: #f8a5b7;
+  --color-theme-secondary-disabled: #e1bee7;
 }
 
 html {
@@ -147,6 +152,12 @@ body {
   text-rendering: optimizeLegibility;
   font-size: 16px;
   scrollbar-width: none;
+}
+
+.gradient-background {
+  background: linear-gradient(240deg, #311b92, #4a146b, #120424);
+  background-size: 180% 180%;
+  animation: gradient-animation 24s ease infinite;
 }
 
 div,
@@ -207,17 +218,14 @@ body::-webkit-scrollbar {
 }
 
 @theme inline {
-  /* Default Theme Variables */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Converted Color Palette */
   --color-bg-dark: #1a103d;
   --color-content-bg: #ffffff;
   --color-light-pink-bg: #fff2f8;
-
   --color-primary-pink: #ff2d96;
   --color-primary-orange: #ff6b35;
   --color-vibrant-purple: #8a4fff;
@@ -235,40 +243,28 @@ body::-webkit-scrollbar {
   --color-accent-gold: #ffd700;
   --color-accent-platinum: #e5e4e2;
 
-  /* Gradients */
-  --gradient-primary: linear-gradient(
-    135deg,
-    var(--primary-pink),
-    var(--primary-orange)
-  );
-  --gradient-secondary: linear-gradient(
-    135deg,
-    var(--vibrant-purple),
-    var(--primary-pink)
-  );
-  --gradient-progress: linear-gradient(
-    90deg,
-    var(--bright-cyan) 0%,
-    var(--bright-green) 50%,
-    var(--bright-yellow) 100%
-  );
+  --gradient-primary: linear-gradient(135deg, var(--primary-pink), var(--primary-orange));
+  --gradient-secondary: linear-gradient(135deg, var(--vibrant-purple), var(--primary-pink));
+  --gradient-progress: linear-gradient(90deg, var(--bright-cyan) 0%, var(--bright-green) 50%, var(--bright-yellow) 100%);
 
   --animate-pulse-border: pulseBorder 2s infinite;
   --animate-gradientBG: gradientBG 3s ease infinite;
-  --animate-shine: shine 3s infinite;
+  --animate-shine: shining 3s infinite;
   --animate-pulseUp: pulseUp 2s infinite;
+  --animate-shining: shining 3s infinite linear;
 
-  /* Fonts */
   --font-family-main: "LINESeedSansTH", sans-serif;
 
-  /* Shadows & Effects */
+  --inset-shadow-md: inset 0 2px 3px rgba(0, 0, 0, 0.25);
+  --inset-shadow-lg: inset 0px 0px 24px 24px rgba(0, 0, 0, 24);
+
   --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.1);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.15);
   --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.2);
 
   --shadow-neon-pink: 0 10px 25px rgba(255, 45, 150, 0.4), var(--neon-pink);
-  --shadow-neon-purple:
-    0 0 10px rgba(138, 79, 255, 0.8), 0 0 20px rgba(138, 79, 255, 0.6);
+  --shadow-neon-pink-sm: 0 0 8px 4px rgba(255, 45, 150, 0.1), var(--neon-pink);
+  --shadow-neon-purple: 0 0 10px rgba(138, 79, 255, 0.8), 0 0 20px rgba(138, 79, 255, 0.6);
   --shadow-neon-gold: 0 0 8px rgba(255, 215, 0, 0.5);
 
   --drop-shadow-custom: 0 10px 25px rgba(255, 45, 150, 0.4), var(--neon-pink);
@@ -276,10 +272,8 @@ body::-webkit-scrollbar {
 
   --effect-glow-pink: 0 0 15px rgba(255, 45, 150, 0.5);
   --effect-glow-purple: 0 0 15px rgba(138, 79, 255, 0.5);
-  --effect-neon-pink:
-    0 0 10px rgba(255, 45, 150, 0.8), 0 0 20px rgba(255, 45, 150, 0.6);
-  --effect-neon-cyan:
-    0 0 10px rgba(77, 210, 255, 0.8), 0 0 20px rgba(77, 210, 255, 0.6);
+  --effect-neon-pink: 0 0 10px rgba(255, 45, 150, 0.8), 0 0 20px rgba(255, 45, 150, 0.6);
+  --effect-neon-cyan: 0 0 10px rgba(77, 210, 255, 0.8), 0 0 20px rgba(77, 210, 255, 0.6);
   --effect-glass-bg: rgba(255, 255, 255, 0.1);
   --effect-glass-border: rgba(255, 255, 255, 0.2);
   --effect-glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);

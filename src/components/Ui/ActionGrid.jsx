@@ -1,17 +1,7 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowUpRightFromSquare,
-  faWallet,
-  faPlusCircle,
-  faBullseye,
-} from "@fortawesome/free-solid-svg-icons";
-export default function ActionGrid({
-  setShowTransfer,
-  setShowWithdraw,
-  setShowDeposit,
-  setShowGoal,
-}) {
+import { faArrowUpRightFromSquare, faWallet, faPlusCircle, faBullseye } from "@fortawesome/free-solid-svg-icons";
+export default function ActionGrid({ setShowTransfer, setShowWithdraw, setShowDeposit, setShowGoal }) {
   const actionItems = [
     {
       label: "โอนเงิน",
@@ -51,7 +41,7 @@ export default function ActionGrid({
           key={item.key}
           className="group text-secondary-text hover:text-light-text flex cursor-pointer flex-col items-center gap-2 transition-all hover:-translate-y-1"
         >
-          <div className="bg-card-bg-dark group-hover:bg-vibrant-purple/50 flex h-[55px] w-[55px] items-center justify-center rounded-full text-xl shadow-sm transition-all">
+          <div className="group-hover:bg-vibrant-purple/50 flex h-[55px] w-[55px] items-center justify-center rounded-xl bg-black/50 text-xl shadow-sm transition-all">
             <FontAwesomeIcon icon={item.icon} />
           </div>
           <span className="text-xs font-bold">{item.label}</span>

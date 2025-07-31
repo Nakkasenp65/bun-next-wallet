@@ -1,20 +1,44 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
-async function fetchUserData(userId) {
-  const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/${userId}`);
-  return response.data;
+const BACKEND_API = process.env.NEXT_PUBLIC_API_URL;
+
+export function useUser(liffId) {
+  return useQuery({
+    queryKey: ["user", liffId],
+    queryFn: async () => {
+      const response = await axios.get(`${BACKEND_API}/user/${liffId}`);
+      return response.data;
+    },
+    enabled: !!liffId,
+  });
 }
 
-export function useUser(userId) {
-  return useQuery({
-    queryKey: ["user", userId],
-    queryFn: () => {
-      if (!userId) {
-        return Promise.reject(new Error("LIFF ID is required to fetch user data."));
-      }
-      return fetchUserData(userId);
+export function useCreateGoal() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: async (goalData) => {
+      const { data } = await axios.post(`${BACKEND_API}/user`, goalData);
+      return data;
     },
-    enabled: !!userId,
+    // `onSuccess` จะได้รับ (data, variables, context)
+    // data : mutationFn
+    // variables : goalData ที่เราส่งเข้ามา
+    onSuccess: async (data, variables) => {
+      const { liffId } = variables;
+      // queryClient.setQueryData(["user", liffId], data);
+      await queryClient.invalidateQueries(["user", liffId]);
+      toast.success("สร้างเป้าหมายการออมเงินสำเร็จ!");
+      router.push("/");
+    },
+    onError: (error) => {
+      console.error("Error creating goal:", error);
+      const errorMessage = error.response?.data?.message || "สร้างเป้าหมายการออมเงินไม่สำเร็จ";
+      toast.error(errorMessage);
+    },
   });
 }

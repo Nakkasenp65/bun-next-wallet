@@ -38,7 +38,7 @@ export function LiffProvider({ children }) {
 
   if (isLoading) {
     return (
-      <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
+      <div className="gradient-background flex h-dvh w-full items-center justify-center">
         <Loading />
       </div>
     );

@@ -1,15 +1,18 @@
-import React from "react";
+"use client";
 
-const Loading = ({ textColor = "text-white" }) => {
+export default function Loading({ message }) {
   return (
-    <div
-      id="loading-overlay"
-      className="flex flex-col items-center justify-center gap-2"
-    >
-      <div className="h-12 w-12 animate-[spin_1.5s_linear_infinite] rounded-full border-[5px] border-solid border-[rgba(255,255,255,0.3)] border-t-[var(--primary-pink)] border-r-[var(--vibrant-purple)] border-b-[var(--primary-orange)] border-l-[var(--bright-cyan)]" />
-      <span className={`${textColor}`}>กำลังประมวลผล...</span>
+    <div className=".gradient-background fixed inset-0 z-[999] flex items-center justify-center bg-gradient-to-br transition-opacity duration-500">
+      <div className="relative flex flex-col items-center">
+        <span className="animate-shining drop-shadow-primary-pink/50 from-primary-pink overflow-hidden bg-gradient-to-l via-purple-700 to-[#ff0073] bg-[length:200%_100%] bg-clip-text text-5xl font-bold whitespace-nowrap text-transparent drop-shadow-md">
+          NO1Money+
+        </span>
+        {message && (
+          <div className="animate-shining drop-shadow-primary-pink/50 from-primary-pink overflow-hidden bg-gradient-to-l via-purple-700 to-[#ff0073] bg-[length:200%_100%] bg-clip-text text-lg font-bold whitespace-nowrap text-transparent drop-shadow-md">
+            {message}
+          </div>
+        )}
+      </div>
     </div>
   );
-};
-
-export default Loading;
+}

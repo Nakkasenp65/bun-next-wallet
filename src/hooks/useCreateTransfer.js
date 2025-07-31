@@ -2,8 +2,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import toast from "react-hot-toast";
 
+const BACKEND_API = process.env.NEXT_PUBLIC_API_URL;
+
 const createTransfer = async ({ walletId, formData }) => {
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/transaction/${walletId}`;
+  const url = `${BACKEND_API}/transaction/${walletId}`;
 
   const { data } = await axios.post(url, formData, {
     headers: {

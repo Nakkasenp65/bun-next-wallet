@@ -1,31 +1,34 @@
 import { Toaster } from "react-hot-toast";
-
+import { RiErrorWarningLine } from "react-icons/ri";
+import { FaRegCircleCheck } from "react-icons/fa6";
 import "./globals.css";
 import QueryProvider from "@/components/provider/QueryProvider";
 import { LiffProvider } from "@/components/provider/LiffProvider";
 import { Suspense } from "react";
 import ErrorBoundary from "@/components/Ui/ErrorBoundary";
 import Loading from "@/components/Loading";
+import ErrorComponent from "@/components/Ui/ErrorComponent";
+
+const toastIconClass = "mr-4 h-8 w-auto animate-pulse";
 
 export const toastOptions = {
   style: {
-    background: "linear-gradient(45deg, #ec4899, #f97316, #a855f7)",
+    background: "linear-gradient(45deg, #259B24, #57C785, #BCED53)",
     color: "#fff",
     fontWeight: "bold",
     borderRadius: "12px",
     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-    padding: "16px 32px",
+    padding: "8px 32px",
+    fontSize: "18px",
   },
   success: {
-    iconTheme: {
-      primary: "#fff",
-      secondary: "#a855f7",
-    },
+    icon: <FaRegCircleCheck className={toastIconClass} />,
   },
   error: {
     style: {
-      background: "linear-gradient(45deg, #ef4444, #dc2626)",
+      background: "linear-gradient(45deg, #ff7b00, #dc2626)",
     },
+    icon: <RiErrorWarningLine className={toastIconClass} />,
   },
   position: "top-center",
   duration: 4000,
@@ -40,28 +43,16 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`antialiased`}>
-        <ErrorBoundary
-          fallback={
-            <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
-              <p className="text-white">เกิดข้อผิดพลาด กรุณารีเฟรช</p>
-            </div>
-          }
-        >
-          <Suspense
-            fallback={
-              <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
-                <Loading />
-              </div>
-            }
-          >
-            <QueryProvider>
-              <LiffProvider>
-                <Toaster position="top-center" containerClassName="z-[9999]" toastOptions={toastOptions} />
-                {children}
-              </LiffProvider>
-            </QueryProvider>
-          </Suspense>
-        </ErrorBoundary>
+        <QueryProvider>
+          <LiffProvider>
+            {children}
+            <Toaster
+              position="top-center"
+              containerClassName="mx-auto z-[9999] w-4/5"
+              toastOptions={toastOptions}
+            />
+          </LiffProvider>
+        </QueryProvider>
       </body>
     </html>
   );

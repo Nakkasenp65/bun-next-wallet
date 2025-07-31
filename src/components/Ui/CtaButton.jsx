@@ -1,16 +1,18 @@
 "use client";
+import clsx from "clsx";
 import { motion } from "framer-motion";
 import React from "react";
 
-export default function CtaButton({ children, ...props }) {
+export default function CtaButton({ children, className, ...props }) {
   return (
     <motion.button
-      whileTap={{ scale: 0.98 }}
+      whileTap={{ scale: 0.9 }}
       transition={{ type: "spring", stiffness: 300, damping: 10 }}
       {...props}
-      className={
-        "cta-button cta-gradient-bg font-main relative z-10 w-full cursor-pointer overflow-hidden rounded-2xl p-4 text-lg font-bold text-white"
-      }
+      className={clsx(
+        "cta-button cta-gradient-bg relative cursor-pointer overflow-hidden text-white",
+        className,
+      )}
     >
       {children}
     </motion.button>

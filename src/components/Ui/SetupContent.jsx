@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import GoalPhoneComponent from "./GoalPhoneComponent";
-import { IoIosArrowBack } from "react-icons/io";
 
 export default function SetupContent({ goal, setGoal, isGoalSelected }) {
   const phones = [

@@ -1,10 +1,11 @@
 "use client";
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { MdLock } from "react-icons/md";
+import { FiBell } from "react-icons/fi";
 import { faLock } from "@fortawesome/free-solid-svg-icons";
 import { faBell } from "@fortawesome/free-regular-svg-icons";
 import Image from "next/image";
-import Link from "next/link";
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -20,16 +21,26 @@ export default function WalletHeader({
   notifications,
 }) {
   const greeting = getGreeting();
-  const unreadNotifications =
-    notifications?.filter((notification) => !notification.isRead).length || 0;
+  // const unreadNotifications =
+  //   notifications?.filter((notification) => !notification.isRead).length || 0;
+  const unreadNotifications = 9;
 
   return (
     <header className="relative z-10 flex items-center justify-between">
       {/* Welcome Text */}
-      <div>
-        <div className="text-secondary-text text-[0.9rem]">{greeting}</div>
-        <div className="from-vibrant-purple to-primary-pink inline-block bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent text-shadow-lg">
-          {userName}
+      <div className="flex items-center justify-center gap-2">
+        <img
+          src={profileUrl}
+          width={50}
+          height={50}
+          alt="profile image"
+          className="border-primary-pink shadow-neon-pink-sm h-8 w-8 rounded-full border-2 object-cover"
+        />
+        <div>
+          <div className="text-secondary-text text-xs">{greeting}</div>
+          <div className="from-vibrant-purple to-primary-pink inline-block bg-gradient-to-r bg-clip-text text-sm font-bold text-transparent text-shadow-lg">
+            {userName}
+          </div>
         </div>
       </div>
 
@@ -38,7 +49,7 @@ export default function WalletHeader({
         <Image
           src="/okNumberOne.png"
           alt="1 Wallet Logo"
-          className="h-11 w-11 shadow-sm"
+          className="h-9 w-9 shadow-sm"
           width={100}
           height={100}
         />
@@ -46,37 +57,30 @@ export default function WalletHeader({
 
       {/* Header Actions */}
       <div className="flex items-center gap-1">
+        {/* Lock Icon: Notification */}
         <div
           id="lock-btn"
           className="text-secondary-text hover:text-primary-pink cursor-pointer text-2xl transition"
         >
-          <FontAwesomeIcon icon={faLock} />
+          <MdLock className="h-auto w-6" />
         </div>
+        {/* Bell Icon: Notification */}
         <div
           onClick={() => setShowNotifications(true)}
           href={"/notification"}
           id="notification-bell-btn"
-          className="text-secondary-text hover:text-primary-pink relative mr-2 cursor-pointer text-2xl transition"
+          className="text-secondary-text hover:text-primary-pink relative cursor-pointer text-2xl transition"
         >
-          <FontAwesomeIcon icon={faBell} />
+          <FiBell className="h-auto w-6" />
           {unreadNotifications > 0 && (
             <>
-              <span className="border-bg-dark bg-danger-red animate-pulseUp absolute -top-1.5 -right-2 flex h-6 w-6 items-center justify-center rounded-full border-2 text-xs font-bold text-white shadow-lg" />
-              <span className="border-bg-dark bg-danger-red absolute -top-1.5 -right-2 flex h-6 w-6 items-center justify-center rounded-full border-2 text-xs font-bold text-white shadow-lg">
+              <span className="bg-danger-red animate-pulseUp absolute -top-1.5 -right-2 flex h-5 w-5 items-center justify-center rounded-full border-2 border-none text-[12px] font-bold text-white shadow-lg" />
+              <span className="bg-danger-red absolute -top-1.5 -right-2 flex h-5 w-5 items-center justify-center rounded-full border-2 border-none text-[12px] font-bold text-white shadow-lg">
                 <p className="absolute">{unreadNotifications}</p>
               </span>
             </>
           )}
         </div>
-        <Link href={"/"}>
-          <img
-            src={profileUrl}
-            width={50}
-            height={50}
-            alt="profile image"
-            className="border-primary-pink shadow-neon-pink h-7 w-7 rounded-full border-2 object-cover"
-          />
-        </Link>
       </div>
     </header>
   );

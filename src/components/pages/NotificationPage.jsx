@@ -10,8 +10,10 @@ import Loading from "../Loading";
 import ErrorComponent from "../Ui/ErrorComponent";
 import axios from "axios";
 
+const BACKEND_API = process.env.NEXT_PUBLIC_API_URL;
+
 const fetchNotifications = async (userId) => {
-  const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/notification/${userId}`);
+  const { data } = await axios.get(`${BACKEND_API}/notification/${userId}`);
   return data.data;
 };
 
@@ -19,13 +21,13 @@ const markAsReadMutationFn = async ({ notificationId, userMongoId }) => {
   if (!notificationId || !userMongoId) {
     throw new Error("Notification ID and User ID are required.");
   }
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/notification/${notificationId}/${userMongoId}/read`;
+  const url = `${BACKEND_API}/notification/${notificationId}/${userMongoId}/read`;
   const { data } = await axios.patch(url);
   return data.data;
 };
 
 const clearNotificationsMutationFn = async (type) => {
-  const { data } = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/notification/clear?type=${type}`);
+  const { data } = await axios.delete(`${BACKEND_API}/notification/clear?type=${type}`);
   return data.data;
 };
 
@@ -125,7 +127,10 @@ export default function NotificationPage({ userId, showNotifications, setShowNot
       className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
     >
       <header className="flex flex-shrink-0 items-center border-b border-white/20 px-5 pt-10 pb-4">
-        <button onClick={() => setShowNotifications(false)} className="text-secondary-text text-2xl transition-colors hover:text-white">
+        <button
+          onClick={() => setShowNotifications(false)}
+          className="text-secondary-text text-2xl transition-colors hover:text-white"
+        >
           <IoIosArrowBack className="text-3xl" />
         </button>
         <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
@@ -139,7 +144,9 @@ export default function NotificationPage({ userId, showNotifications, setShowNot
           <div className="flex flex-shrink-0 grow border-b border-gray-200 px-4">
             <button
               className={`flex-1 py-4 text-center font-bold transition-colors ${
-                activeTab === "transactions" ? "border-primary-pink text-primary-pink border-b-2" : "hover:text-primary-pink text-gray-500"
+                activeTab === "transactions"
+                  ? "border-primary-pink text-primary-pink border-b-2"
+                  : "hover:text-primary-pink text-gray-500"
               } `}
               onClick={() => setActiveTab("transactions")} /* ... */
             >
@@ -147,7 +154,9 @@ export default function NotificationPage({ userId, showNotifications, setShowNot
             </button>
             <button
               className={`flex-1 py-4 text-center font-bold transition-colors ${
-                activeTab === "promos" ? "border-primary-pink text-primary-pink border-b-2" : "hover:text-primary-pink text-gray-500"
+                activeTab === "promos"
+                  ? "border-primary-pink text-primary-pink border-b-2"
+                  : "hover:text-primary-pink text-gray-500"
               }`}
               onClick={() => setActiveTab("promos")} /* ... */
             >

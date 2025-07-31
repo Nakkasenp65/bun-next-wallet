@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import { IoMdPerson } from "react-icons/io";
 import { FaHashtag } from "react-icons/fa6";
@@ -16,16 +16,29 @@ export default function TransferPage({ userData, setShowTransfer, showTransfer }
   const [showBankModal, setShowBankModal] = useState(false);
   const [selectedBank, setSelectedBank] = useState(null);
   const [formData, setFormData] = useState({
-    amount: "",
+    // amount: "",
     recipient: "",
     account: "",
   });
 
   const createTransferTransaction = async (transactionData) => {
     const { walletId, ...payload } = transactionData;
-    const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/transaction/${walletId}`, payload);
+    const { data } = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/transaction/${walletId}`,
+      payload,
+    );
     return data;
   };
+
+  useEffect(() => {
+    setFormData({
+      // amount: "",
+      recipient: "",
+      account: "",
+    });
+    setSelectedBank(null);
+    setShowBankModal(false);
+  }, [showTransfer]);
 
   const queryClient = useQueryClient();
   const transferMutation = useMutation({
@@ -57,9 +70,11 @@ export default function TransferPage({ userData, setShowTransfer, showTransfer }
 
   const handleConfirmTransfer = () => {
     const numericAmount = parseFloat(formData.amount);
-    if (isNaN(numericAmount) || numericAmount <= 0) return toast.error("Please enter a valid amount.");
+    if (isNaN(numericAmount) || numericAmount <= 0)
+      return toast.error("Please enter a valid amount.");
     if (!selectedBank) return toast.error("Please select a bank.");
-    if (!formData.recipient || !formData.account) return toast.error("Please fill in all recipient details.");
+    if (!formData.recipient || !formData.account)
+      return toast.error("Please fill in all recipient details.");
 
     const transactionData = {
       walletId: userData.wallet.id,
@@ -75,11 +90,16 @@ export default function TransferPage({ userData, setShowTransfer, showTransfer }
     transferMutation.mutate(transactionData);
   };
 
-  const accountInputPlaceholder = selectedBank?.id === "promptpay" ? "กรอกเบอร์โทรศัพท์" : "กรอกเลขบัญชี";
+  const accountInputPlaceholder =
+    selectedBank?.id === "promptpay" ? "กรอกเบอร์โทรศัพท์" : "กรอกเลขบัญชี";
 
   return (
     <>
-      <BankSelectionModal isOpen={showBankModal} onClose={() => setShowBankModal(false)} onBankSelect={handleBankSelect} />
+      <BankSelectionModal
+        isOpen={showBankModal}
+        onClose={() => setShowBankModal(false)}
+        onBankSelect={handleBankSelect}
+      />
 
       {transferMutation.isPending && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -87,7 +107,11 @@ export default function TransferPage({ userData, setShowTransfer, showTransfer }
         </div>
       )}
 
-      <FramerDiv isOpen={showTransfer} id="transfer-overlay" className="bg-bg-dark/80 fixed inset-0 z-20 flex flex-col backdrop-blur-xl">
+      <FramerDiv
+        isOpen={showTransfer}
+        id="transfer-overlay"
+        className="bg-bg-dark/80 fixed inset-0 z-20 flex flex-col backdrop-blur-xl"
+      >
         {/* Page Header */}
         <header className="flex items-center px-5 pt-10 pb-4">
           <div onClick={() => setShowTransfer(false)} className="text-secondary-text text-2xl">
@@ -191,8 +215,13 @@ export default function TransferPage({ userData, setShowTransfer, showTransfer }
           </div>
 
           {/* CTA Button */}
-          <div className="mt-auto">
-            <CtaButton onClick={handleConfirmTransfer}>ต่อไป</CtaButton>
+          <div className="flex justify-center">
+            <CtaButton
+              className={"z-10 w-48 rounded-xl p-4 text-lg font-bold"}
+              onClick={handleConfirmTransfer}
+            >
+              ต่อไป
+            </CtaButton>
           </div>
         </div>
       </FramerDiv>

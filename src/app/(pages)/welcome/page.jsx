@@ -3,125 +3,125 @@
 import CtaButton from "@/components/Ui/CtaButton";
 import React, { useEffect, useState } from "react";
 import SetupContent from "@/components/Ui/SetupContent";
-import { useUserStatus } from "@/hooks/useUserStatus";
-import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
-import Loading from "@/components/Loading";
-import ErrorComponent from "@/components/Ui/ErrorComponent";
 import axios from "axios";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLiff } from "@/components/provider/LiffProvider";
 import toast from "react-hot-toast";
+import { useCreateGoal } from "@/hooks/useUser";
+import UserInputMonthly from "@/components/pages/UserInputMonthly";
+import Loading from "@/components/Loading";
+import ProductTabs from "@/components/welcomeComponents/ProductTabs";
+import GoalSetter from "@/components/Ui/GoalSetter";
 
-const createGoal = async ({ userId, goalData }) => {
-  const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/goal/${userId}`, goalData);
-  return data;
-};
-
-const createUser = async ({ liffId, displayName, pictureUrl }) => {
-  const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
-    liffId: liffId,
-    username: displayName,
-    userProfilePicUrl: pictureUrl,
-  });
-  return data;
-};
+// GET https://checkuserdb.vercel.app/api/check-user/:liffID เช็คว่าเป็นสมาชิกหรือยัง
+// 1. Check ว่าเป็นสมาชิกกับ database เดิมไหม
+// 2. เป็นสมาชิกให้เลือก Goal ได้เลย
+// 3. ไม่เป็นสมาชิกให้ redirect ไปสมัครที่ https://liff.line.me/2006703040-RYAyYAyA
 
 export default function Page() {
-  const { liffProfile } = useLiff();
+  // const { liffProfile } = useLiff();
+  const [liffProfile, setLiffProfile] = useState({
+    userId: "U5d2998909721fdea596f8e9e91e7bf85",
+    displayName: "Long👁️‍🗨️",
+    pictureUrl:
+      "https://profile.line-scdn.net/0hPsTqIBJhD1x5CB7EtsVxYglYDDZaeVZOVjxHahgOUGhMPU9ZVDxIORwJAj5BOhxZAWxBakoIV21bTUB3DWgHYz9BU24mUxsKPhhEezdwJwJNQTdDFRZGXRB2BRAsbhxKUDFHXDVTUDIMbD5jU2oBcTpMFWpFQCxrN19jCnw6Yd8WCngJVG9EPUQAVmrA",
+  });
   const router = useRouter();
-  const queryClient = useQueryClient();
   const [goal, setGoal] = useState({});
-  const [onWait, setOnWait] = useState(true);
-  const liffId = liffProfile?.userId;
-  const { data: userStatus, isLoading: isStatusLoading, error: statusError } = useUserStatus(liffId);
-  const { data: userData } = useUser(liffId);
+  const [uiStep, setUiStep] = useState("input");
+  const [monthlyPayment, setMonthlyPayment] = useState("");
+  const [suggestedPhone, setSuggestedPhone] = useState(null);
+  const { mutate: createGoalMutate, isPending: createGoalPending } = useCreateGoal();
 
-  const createGoalMutation = useMutation({
-    mutationFn: createGoal,
-    onSuccess: async () => {
-      try {
-        await queryClient.invalidateQueries({ queryKey: ["user", liffId] });
-        await queryClient.invalidateQueries({ queryKey: ["userStatus", liffId] });
-        toast.success("สร้างเป้าหมายการออมเงินสำเร็จ!");
-        router.push("/");
-      } catch (error) {
-        setOnWait(false);
-        console.error("Failed to refetch data after goal creation:", error);
-        toast.error("ไม่สามารถโหลดข้อมูลล่าสุดได้ โปรดลองอีกครั้ง");
-      }
-    },
-    onError: (err) => {
-      setOnWait(false);
-      console.error("Error creating goal:", err);
-      toast.error("สร้างเป้าหมายการออมเงินไม่สำเร็จ");
-    },
-  });
-
-  const createUserMutation = useMutation({
-    mutationFn: createUser,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["user", liffId] });
-      await queryClient.invalidateQueries({ queryKey: ["userStatus", liffId] });
-    },
-    onError: (err) => {
-      console.error("Error creating user:", err);
-      toast.error("เกิดข้อผิดพลาดในการสร้างบัญชีผู้ใช้");
-    },
-  });
-
-  const handleSetGoal = () => {
-    if (!goal.mobileId || !goal.planId || !userData?.id) return;
-    setOnWait(true);
-    const goalData = { mobileId: goal.mobileId, planId: goal.planId };
-    createGoalMutation.mutate({ userId: userData.id, goalData });
+  const handleGoalUpdate = (newGoal) => {
+    setGoal((prev) => ({ ...prev, mobileId: newGoal.mobileId, planId: newGoal.planId }));
+    console.log(goal);
   };
 
-  useEffect(() => {
-    if (!userStatus) return;
+  const handleSetGoal = () => {
+    console.log(goal);
+    if (!goal.mobileId || !goal.planId) {
+      toast.error("กรุณาเลือกเป้าหมายการออมให้ครบถ้วน");
+    }
+    const { userId: liffId, displayName, pictureUrl } = liffProfile;
+    const { mobileId, planId } = goal;
+    // console.log({ liffId, displayName, pictureUrl, mobileId, planId });
+    createGoalMutate({ liffId, displayName, pictureUrl, mobileId, planId });
+  };
 
-    if (!userStatus.isNewUser && !userStatus.firstTime) {
-      router.push("/");
+  const handleUserRedirect = async (userId) => {
+    try {
+      // const response = await axios.get(`https://checkuserdb.vercel.app/api/check-user/${userId} `);
+      // if (response) toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
+    } catch (error) {
+      console.log("new user: ", error.status === 404);
+      // router.replace("https://liff.line.me/2006703040-RYAyYAyA");
+    }
+  };
+
+  const handleCalculateClick = async () => {
+    if (!monthlyPayment || monthlyPayment < 500) {
+      toast.error("กรุณาระบุจำนวนเงิน: ขั้นต่ำ 500 บาท");
       return;
     }
 
-    if (userStatus.isNewUser && liffProfile && createUserMutation.isIdle) {
-      createUserMutation.mutate({
-        liffId: liffProfile.userId,
-        displayName: liffProfile.displayName,
-        pictureUrl: liffProfile.pictureUrl,
-      });
-    }
-    setOnWait(false);
-  }, [userStatus, liffProfile, router, createUserMutation]);
+    const potentialPrice = monthlyPayment * 6;
+    const phones = await axios.get(`http://localhost:4000/v1/product?maxPrice=${potentialPrice}`);
+    const { data } = phones;
+    console.log(data);
+    setSuggestedPhone(data);
+    console.log("Converted: ", suggestedPhone);
+    setUiStep("calculate");
+  };
 
-  if (isStatusLoading || createUserMutation.isPending || onWait) {
-    return (
-      <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
-        <Loading />
-      </div>
-    );
-  }
+  console.log("GOAL FROM WELCOME PAGE: ", goal);
 
-  if (statusError) {
-    return <ErrorComponent message={statusError.message} />;
-  }
+  useEffect(() => {
+    handleUserRedirect(liffProfile?.userId);
+  }, [liffProfile]);
 
-  if (!onWait)
-    return (
-      <main id="setup-page" className="flex min-h-dvh flex-col bg-white">
-        <header className="from-primary-pink to-primary-orange flex flex-col items-center justify-center gap-2 rounded-b-4xl bg-gradient-to-br p-6 pt-14 text-white drop-shadow-lg">
-          <h1 className="text-2xl font-bold text-white drop-shadow-md drop-shadow-black/30">ตั้งค่าเป้าหมายการออม</h1>
-          <p className="text-xs">เลือกสิ่งที่คุณอยากได้ แล้วมาเริ่มวางแผนการออมกัน!</p>
-        </header>
+  useEffect(() => {
+    if (uiStep === "calculate") setTimeout(() => setUiStep("main"), 4000);
+  }, [uiStep]);
 
-        <SetupContent goal={goal} setGoal={setGoal} />
+  console.log(goal);
 
-        <footer className="w-full bg-white p-6 pb-12 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-          <CtaButton onClick={handleSetGoal} disabled={createGoalMutation.isPending || !goal.planId || !goal.mobileId}>
-            {createGoalMutation.isPending ? "กำลังบันทึก..." : "เริ่มต้นการออม"}
-          </CtaButton>
-        </footer>
-      </main>
-    );
+  return (
+    <main id="setup-page" className="flex min-h-dvh flex-col overflow-x-hidden bg-white">
+      {uiStep === "input" && (
+        <UserInputMonthly
+          isOpen={uiStep === "input" ? true : false}
+          monthlyPayment={monthlyPayment}
+          setMonthlyPayment={setMonthlyPayment}
+          onCalculate={handleCalculateClick}
+        />
+      )}
+
+      {uiStep === "calculate" && <Loading message={"กำลังประมวลผล..."} />}
+      {uiStep === "main" && suggestedPhone && (
+        <div className="flex flex-col gap-4">
+          <header className="from-primary-pink to-primary-orange flex flex-col items-center justify-center gap-2 rounded-b-4xl bg-gradient-to-br p-6 pt-14 text-white drop-shadow-lg">
+            <h1 className="text-2xl font-bold text-white drop-shadow-md drop-shadow-black/30">
+              ตั้งค่าเป้าหมายการออม
+            </h1>
+            <p className="text-xs">เลือกสิ่งที่คุณอยากได้ แล้วมาเริ่มวางแผนการออมกัน!</p>
+          </header>
+
+          {/* <SetupContent goal={goal} setGoal={setGoal} /> */}
+          {/* <ProductTabs products={suggestedPhone} /> */}
+          <GoalSetter products={suggestedPhone} onGoalChange={handleGoalUpdate} />
+
+          <footer className="flex w-full items-center justify-center bg-white p-6 pb-12 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+            <CtaButton
+              onClick={handleSetGoal}
+              disabled={createGoalPending}
+              className={"z-10 w-48 rounded-xl p-4 text-lg font-bold"}
+            >
+              {createGoalPending ? "กำลังบันทึก..." : "เริ่มต้นการออม"}
+            </CtaButton>
+          </footer>
+        </div>
+      )}
+    </main>
+  );
 }

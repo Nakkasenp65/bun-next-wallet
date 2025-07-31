@@ -2,7 +2,13 @@
 import React, { useState } from "react";
 import { FaHouse } from "react-icons/fa6";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHouse, faIdCard, faQrcode, faFileLines, faHeadset } from "@fortawesome/free-solid-svg-icons";
+import {
+  faHouse,
+  faIdCard,
+  faQrcode,
+  faFileLines,
+  faHeadset,
+} from "@fortawesome/free-solid-svg-icons";
 import NavItem from "./NavItem";
 import Link from "next/link";
 
@@ -17,7 +23,7 @@ export default function BottomNav({ setShowContact }) {
   ];
 
   return (
-    <nav className="absolute bottom-0 z-10 flex w-full items-center justify-around border-t bg-white/95 pt-2.5 pb-5 shadow-md shadow-black/75 backdrop-blur-lg">
+    <nav className="absolute bottom-0 z-10 flex w-full items-center justify-around border-t bg-white/95 py-2.5 shadow-md shadow-black/75 backdrop-blur-lg">
       {/* Left side items */}
       <NavItem
         label={navItems[0].label}
@@ -35,7 +41,12 @@ export default function BottomNav({ setShowContact }) {
       />
 
       {/* Center Scan Button */}
-      <Link href={"/scan"} id="scan-to-pay-btn" className="group -mt-9 cursor-pointer" onClick={() => setActiveNav("scan")}>
+      <Link
+        href={"/scan"}
+        id="scan-to-pay-btn"
+        className="group -mt-9 cursor-pointer"
+        onClick={() => setActiveNav("scan")}
+      >
         <div className="from-primary-pink to-primary-orange shadow-primary-pink/40 flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-gradient-to-r text-3xl text-white shadow-lg transition-transform group-hover:scale-110 group-hover:rotate-6">
           <FontAwesomeIcon icon={faQrcode} />
         </div>
@@ -56,7 +67,10 @@ export default function BottomNav({ setShowContact }) {
         }}
         className="group hover:text-primary-pink relative flex flex-1 cursor-pointer flex-col items-center gap-1 pt-1 text-gray-500 transition-colors"
       >
-        <FontAwesomeIcon icon={navItems[3].icon} className="text-xl transition-transform group-hover:-translate-y-1" />
+        <FontAwesomeIcon
+          icon={navItems[3].icon}
+          className="text-xl transition-transform group-hover:-translate-y-1"
+        />
         <span className="text-xs font-bold">{navItems[3].label}</span>
       </div>
     </nav>

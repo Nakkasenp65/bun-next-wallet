@@ -21,10 +21,18 @@ import ErrorComponent from "@/components/Ui/ErrorComponent";
 import { useUserStatus } from "@/hooks/useUserStatus";
 import { useLiff } from "@/components/provider/LiffProvider";
 import ContactPage from "@/components/pages/ContactPage";
+import FloatingContact from "@/components/Ui/FloatingContact";
 
 export default function HomePage() {
   const router = useRouter();
   const { liffProfile, isLoggedIn } = useLiff();
+  // const [liffProfile, setLiffProfile] = useState({
+  //   userId: "U5d2998909721fdea596f8e9e91e7bf85",
+  //   displayName: "Long👁️‍🗨️",
+  //   pictureUrl:
+  //     "https://profile.line-scdn.net/0hPsTqIBJhD1x5CB7EtsVxYglYDDZaeVZOVjxHahgOUGhMPU9ZVDxIORwJAj5BOhxZAWxBakoIV21bTUB3DWgHYz9BU24mUxsKPhhEezdwJwJNQTdDFRZGXRB2BRAsbhxKUDFHXDVTUDIMbD5jU2oBcTpMFWpFQCxrN19jCnw6Yd8WCngJVG9EPUQAVmrA",
+  // });
+  // const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showDeposit, setShowDeposit] = useState(false);
@@ -39,19 +47,25 @@ export default function HomePage() {
     targetProgress: 1,
     rewardAmount: 20,
   };
-  const { data: userStatus, isLoading: isStatusLoading, error: statusError } = useUserStatus(liffProfile?.userId);
-  const { data: userData, isLoading, error } = useUser(liffProfile?.userId);
 
-  console.log(userStatus);
-  console.log("User Data: ", userData);
+  const {
+    data: userStatus,
+    isLoading: isStatusLoading,
+    error: statusError,
+  } = useUserStatus("U5d2998909721fdea596f8e9e91e7bf85");
+  const { data: userData, isLoading, error } = useUser(liffProfile?.userId);
+  // const { data: userData, isLoading, error } = useUser("U5d2998909721fdea596f8e9e91e7bf85");
 
   useEffect(() => {
-    if (!isStatusLoading && liffProfile && userStatus && (userStatus.isNewUser || userStatus.firstTime)) {
-      router.push("/welcome");
-    }
-  }, [userStatus, isStatusLoading, liffProfile, router]);
+    setTimeout(() => {
+      if (userStatus?.isNewUser) {
+        router.push("/welcome");
+      }
+      // else setIsLoggedIn(true);
+    }, 1000);
+  }, [userStatus, isStatusLoading, liffProfile]);
 
-  if (!liffProfile || !isLoggedIn) {
+  if (!liffProfile || !isLoggedIn || isStatusLoading || isLoading) {
     return (
       <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
         <Loading />
@@ -63,65 +77,82 @@ export default function HomePage() {
     return <ErrorComponent />;
   }
 
-  if (isLoading || isStatusLoading || !userData) {
+  // if (isLoading || isStatusLoading || !userData) {
+  if (!userData) {
     return (
       <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
         <Loading />
       </div>
     );
-  } else
-    return (
-      <>
-        <NotificationPage userId={userData.userId} showNotifications={showNotifications} setShowNotifications={setShowNotifications} />
-        <TransferPage userData={userData} showTransfer={showTransfer} setShowTransfer={setShowTransfer} />
-        <WithdrawPage userData={userData} showWithdraw={showWithdraw} setShowWithdraw={setShowWithdraw} />
-        <DepositPage userData={userData} showDeposit={showDeposit} setShowDeposit={setShowDeposit} />
-        <GoalPage userData={userData} showGoal={showGoal} setShowGoal={setShowGoal} />
-        <ContactPage showContact={showContact} setShowContact={setShowContact} />
+  }
 
-        <div className="bg-bg-dark font-main relative flex h-dvh w-full flex-col overflow-hidden lg:mx-auto lg:max-w-[450px] lg:shadow-lg">
-          <main className="flex-grow overflow-y-auto">
-            {/* Profile Part */}
-            <section className="flex flex-col gap-8 px-6 py-4">
-              <WalletHeader
-                userName={userData.username}
-                profileUrl={userData.userProfilePicUrl}
-                setShowNotifications={setShowNotifications}
-                notifications={userData.notifications}
-              />
-              <SavingsGoalCard
-                brand={userData.goal.mobileModel.brand.name}
-                name={userData.goal.mobileModel.name}
-                target={userData.goal.mobileModel.price}
-                balance={userData.wallet.balance}
-              />
-              <ActionGrid
-                setShowTransfer={setShowTransfer}
-                setShowWithdraw={setShowWithdraw}
-                setShowDeposit={setShowDeposit}
-                setShowGoal={setShowGoal}
-              />
-            </section>
+  return (
+    <>
+      {/* <FloatingContact /> */}
+      <NotificationPage
+        userId={userData.userId}
+        showNotifications={showNotifications}
+        setShowNotifications={setShowNotifications}
+      />
+      <TransferPage
+        userData={userData}
+        showTransfer={showTransfer}
+        setShowTransfer={setShowTransfer}
+      />
+      <WithdrawPage
+        userData={userData}
+        showWithdraw={showWithdraw}
+        setShowWithdraw={setShowWithdraw}
+      />
+      <DepositPage userData={userData} showDeposit={showDeposit} setShowDeposit={setShowDeposit} />
+      <GoalPage userData={userData} showGoal={showGoal} setShowGoal={setShowGoal} />
+      <ContactPage showContact={showContact} setShowContact={setShowContact} />
 
-            {/* Transaction Part */}
-            <section className="relative flex flex-col items-center gap-4 rounded-t-3xl bg-white px-6 pt-6 pb-28 shadow-lg">
-              <div className="absolute top-3 flex h-2 w-full items-center justify-center">
-                <span className="h-1.5 w-10 rounded-full bg-gray-300" />
-              </div>
-              <TransactionList walletId={userData.wallet.id} />
-              <SavingsMissionCard
-                title={missionData.title}
-                description={missionData.description}
-                currentProgress={missionData.currentProgress}
-                targetProgress={missionData.targetProgress}
-                rewardAmount={missionData.rewardAmount}
-              />
-            </section>
-          </main>
+      <div className="gradient-background font-main relative flex h-dvh w-full flex-col overflow-hidden lg:mx-auto lg:max-w-[450px] lg:shadow-lg">
+        <main className="flex-grow overflow-y-auto">
+          {/* Profile Part */}
+          <section className="flex flex-col gap-8 px-6 py-4 pb-8">
+            <WalletHeader
+              userName={userData.username}
+              profileUrl={userData.userProfilePicUrl}
+              setShowNotifications={setShowNotifications}
+              notifications={userData.notifications}
+            />
+            <SavingsGoalCard
+              brand={userData.goal.product.brand}
+              name={userData.goal.product.model}
+              target={userData.goal.product.price}
+              // balance={userData.wallet.balance}
+              imageUrl={userData.goal.product.imageUrl}
+            />
+            <ActionGrid
+              setShowTransfer={setShowTransfer}
+              setShowWithdraw={setShowWithdraw}
+              setShowDeposit={setShowDeposit}
+              setShowGoal={setShowGoal}
+            />
+          </section>
 
-          {/* Bottom Navbar */}
-          <BottomNav setShowContact={setShowContact} />
-        </div>
-      </>
-    );
+          {/* Transaction Part */}
+          <section className="relative flex flex-col items-center gap-6 rounded-t-3xl bg-white px-6 pt-10 pb-28 shadow-lg">
+            <div className="absolute top-3 flex h-2 w-full items-center justify-center">
+              <span className="h-1.5 w-10 rounded-full bg-gray-300" />
+            </div>
+
+            <SavingsMissionCard
+              title={missionData.title}
+              description={missionData.description}
+              currentProgress={missionData.currentProgress}
+              targetProgress={missionData.targetProgress}
+              rewardAmount={missionData.rewardAmount}
+            />
+            <TransactionList walletId={userData.wallet.id} />
+          </section>
+        </main>
+
+        {/* Bottom Navbar */}
+        <BottomNav setShowContact={setShowContact} />
+      </div>
+    </>
+  );
 }
