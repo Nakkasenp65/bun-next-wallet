@@ -19,13 +19,13 @@ import GoalSetter from "@/components/Ui/GoalSetter";
 // 3. ไม่เป็นสมาชิกให้ redirect ไปสมัครที่ https://liff.line.me/2006703040-RYAyYAyA
 
 export default function Page() {
-  // const { liffProfile } = useLiff();
-  const [liffProfile, setLiffProfile] = useState({
-    userId: "U5d2998909721fdea596f8e9e91e7bf85",
-    displayName: "Long👁️‍🗨️",
-    pictureUrl:
-      "https://profile.line-scdn.net/0hPsTqIBJhD1x5CB7EtsVxYglYDDZaeVZOVjxHahgOUGhMPU9ZVDxIORwJAj5BOhxZAWxBakoIV21bTUB3DWgHYz9BU24mUxsKPhhEezdwJwJNQTdDFRZGXRB2BRAsbhxKUDFHXDVTUDIMbD5jU2oBcTpMFWpFQCxrN19jCnw6Yd8WCngJVG9EPUQAVmrA",
-  });
+  const { liffProfile } = useLiff();
+  // const [liffProfile, setLiffProfile] = useState({
+  //   userId: "U5d2998909721fdea596f8e9e91e7bf85",
+  //   displayName: "Long👁️‍🗨️",
+  //   pictureUrl:
+  //     "https://profile.line-scdn.net/0hPsTqIBJhD1x5CB7EtsVxYglYDDZaeVZOVjxHahgOUGhMPU9ZVDxIORwJAj5BOhxZAWxBakoIV21bTUB3DWgHYz9BU24mUxsKPhhEezdwJwJNQTdDFRZGXRB2BRAsbhxKUDFHXDVTUDIMbD5jU2oBcTpMFWpFQCxrN19jCnw6Yd8WCngJVG9EPUQAVmrA",
+  // });
   const router = useRouter();
   const [goal, setGoal] = useState({});
   const [uiStep, setUiStep] = useState("input");
