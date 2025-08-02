@@ -2,10 +2,11 @@
 import Image from "next/image";
 import { useState, useMemo, useEffect } from "react";
 import DropDownComponent from "@/components/Ui/DropDownComponent";
+import FramerButton from "../framerComponents/FramerButton";
 
 // This component now accepts an `onGoalChange` prop function
 // to communicate its state back to the parent component.
-export default function GoalSetter({ products, onGoalChange = () => {} }) {
+export default function GoalSetter({ products, onGoalChange = () => {}, onBack }) {
   // Data Grouping Logic - No changes needed
   const groupedData = useMemo(() => {
     if (!products || products.length === 0) return {};
@@ -155,12 +156,15 @@ export default function GoalSetter({ products, onGoalChange = () => {} }) {
     );
   }
 
-  // --- MODIFIED: JSX Render ---
-  // The component is now self-contained within a single div,
-  // removing the full-page layout, header, and fixed footer button.
   return (
     <div className="w-full max-w-md bg-white p-5">
-      <div className="rounded-xl bg-white p-1 shadow-inner shadow-slate-200">
+      <FramerButton
+        onClick={onBack}
+        className="text-md bg-primary-pink mb-4 rounded-md px-2 py-1 text-white"
+      >
+        ย้อนกลับ
+      </FramerButton>
+      <div className="rounded-xl bg-white p-4 shadow-inner shadow-slate-200">
         <DropDownComponent
           name="brand"
           value={selectedBrand}
@@ -181,8 +185,8 @@ export default function GoalSetter({ products, onGoalChange = () => {} }) {
               priority
             />
           ) : (
-            <div className="flex h-40 w-40 items-center justify-center rounded-lg bg-slate-100 text-sm text-slate-400">
-              No Image
+            <div className="flex h-40 w-40 items-center justify-center rounded-lg bg-slate-100 p-2 text-center text-sm text-slate-400">
+              NO1Money+ Product:{selectedProduct.model}
             </div>
           )}
         </div>
@@ -192,7 +196,7 @@ export default function GoalSetter({ products, onGoalChange = () => {} }) {
             value={selectedModel}
             onChange={(e) => handleModelChange(e.target.value, selectedBrand)}
             options={models}
-            buttonClassName="w-full text-xl font-bold text-slate-800"
+            buttonClassName="w-full text-md font-bold text-slate-800"
             optionsContainerClassName="p-2"
             optionClassName="rounded-lg font-semibold"
           />

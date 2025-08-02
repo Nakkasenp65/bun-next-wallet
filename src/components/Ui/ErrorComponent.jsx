@@ -14,7 +14,7 @@ export default function ErrorComponent({
 
   // Function to refresh the page
   const handleRetry = () => {
-    router.refresh();
+    location.reload();
   };
 
   return (

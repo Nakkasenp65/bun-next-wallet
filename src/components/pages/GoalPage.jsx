@@ -25,7 +25,7 @@ export default function GoalPage({ userData, showGoal, setShowGoal }) {
         className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
       >
         {/* Page Header */}
-        <header className="flex flex-shrink-0 items-center border-b border-white/20 px-5 pt-10 pb-4">
+        <header className="flex flex-shrink-0 items-center px-5 pt-10 pb-4">
           <button
             onClick={() => setShowGoal((prev) => !prev)}
             className="text-secondary-text text-2xl transition-colors hover:text-white"

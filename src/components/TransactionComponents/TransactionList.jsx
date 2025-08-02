@@ -9,20 +9,18 @@ export default function TransactionList({ walletId }) {
   const date = new Date();
   const {
     data: transactions,
-    isLoading,
-    error,
+    isLoading: transactionLoading,
+    error: transactionError,
   } = useTransactions(date.getFullYear(), date.getMonth(), walletId);
 
-  console.log(transactions);
-  if (isLoading || error) {
+  console.log("TRANSACTIONS: ", transactions);
+  if (transactionLoading || transactionError) {
     return (
       <div className="flex h-56 items-center justify-center">
         <Loading textColor="text-black" />
       </div>
     );
   }
-
-  console.log(transactions);
 
   if (transactions.length > 0)
     return (

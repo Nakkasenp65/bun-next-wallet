@@ -17,7 +17,7 @@ import Loading from "@/components/Loading";
 import TransferContent from "../Payment/TransferContent";
 import QrContent from "../Payment/QrContent";
 import OtherMethodsContent from "../Payment/OtherMethodsContent";
-import { useCreateTransfer } from "@/hooks/useCreateTransfer"; // Assuming this hook exists and is correctly named
+import { useCreateSavingTransaction } from "@/hooks/useCreateTransfer";
 
 export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
   const [activeTab, setActiveTab] = useState("transfer");
@@ -26,7 +26,6 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
   const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
 
-  const queryClient = useQueryClient();
   const closePage = () => {
     setSelectedFile(null);
     setPreviewUrl(null);
@@ -35,7 +34,7 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
     setShowDeposit(false);
   };
 
-  const createTransactionMutation = useCreateTransfer({
+  const createTransactionMutation = useCreateSavingTransaction({
     onSuccessCallback: closePage,
   });
 
@@ -73,25 +72,20 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
   };
 
   const handleSubmit = () => {
+    // Send file to googleDrive and receive url -> save to backend database
     const numericAmount = parseFloat(amount);
-    // if (isNaN(numericAmount) || numericAmount <= 0) {
-    //   return toast.error("กรุณาระบุยอดเงินที่จะฝาก");
-    // }
+
     if (!selectedFile) {
       return toast.error("กรุณาแนบสลิปการโอนเงิน");
     }
 
     const formData = new FormData();
-    formData.append("slipImage", selectedFile);
-    formData.append("name", "ฝากเงิน (โอนชำระ)");
-    formData.append("amount", numericAmount);
-    formData.append("from", userData.username);
-    formData.append("to", "My Wallet");
-    formData.append("type", "INCOME");
-    formData.append("status", "PENDING");
+    formData.append("myFile", selectedFile);
+    formData.append("userId", userData.wallet.id);
 
     createTransactionMutation.mutate({
       walletId: userData.wallet.id,
+      username: userData.username,
       formData: formData,
     });
   };
@@ -111,7 +105,7 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
       >
         <header className="flex flex-shrink-0 items-center px-5 pt-10 pb-4">
           <button
-            onClick={() => setShowDeposit(false)}
+            onClick={closePage}
             className="text-secondary-text text-2xl transition-colors hover:text-white"
           >
             <FontAwesomeIcon icon={faChevronLeft} />
@@ -135,24 +129,6 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
                   })}
                 </span>
               </div>
-
-              {/* <div>
-                <label
-                  htmlFor="payment-amount"
-                  className="mb-2 block text-sm font-bold text-gray-600"
-                >
-                  ยอดการฝาก (บาท)
-                </label>
-                <input
-                  type="number"
-                  id="payment-amount"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  inputMode="decimal"
-                  placeholder="0.00"
-                  className="text-bg-dark focus:border-primary-pink focus:ring-primary-pink/30 w-full rounded-xl border border-gray-300 p-3 text-center text-lg font-bold outline-none focus:ring-2"
-                />
-              </div> */}
 
               <div className="flex items-center justify-center gap-2">
                 <FaUniversity color="#f36" size={24} className="animate-bounce" />

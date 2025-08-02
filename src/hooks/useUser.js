@@ -26,11 +26,11 @@ export function useCreateGoal() {
       return data;
     },
     // `onSuccess` จะได้รับ (data, variables, context)
-    // data : mutationFn
-    // variables : goalData ที่เราส่งเข้ามา
+    // data from { data } = await axios.post
+    // variables from goalData ที่เราส่งเข้ามา
     onSuccess: async (data, variables) => {
       const { liffId } = variables;
-      // queryClient.setQueryData(["user", liffId], data);
+      queryClient.setQueryData(["user", liffId], data);
       await queryClient.invalidateQueries(["user", liffId]);
       toast.success("สร้างเป้าหมายการออมเงินสำเร็จ!");
       router.push("/");

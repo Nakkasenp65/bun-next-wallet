@@ -22,7 +22,7 @@ export default function SavingsGoalCard({ brand, name, target, balance = 20000, 
       className="text-light-text shadow-neon-purple inset-shadow-lg relative flex flex-col gap-4 overflow-hidden rounded-3xl p-6 inset-shadow-black/36 [background:linear-gradient(45deg,_#230640_0%,_#402E99_100%)]"
     >
       <Image
-        className="drop-shadow-primary-pink absolute -right-14 -bottom-2 h-auto w-[200px] -rotate-6 drop-shadow-2xl sm:-bottom-12 sm:w-[300px] sm:-rotate-10"
+        className="animate-floating drop-shadow-primary-pink absolute -right-18 -bottom-4 h-auto w-[240px] -rotate-6 drop-shadow-2xl sm:-bottom-12 sm:w-[300px] sm:-rotate-10"
         src={imageUrl}
         alt="mobile phone image"
         width={300}

@@ -21,9 +21,9 @@ export default function WalletHeader({
   notifications,
 }) {
   const greeting = getGreeting();
-  // const unreadNotifications =
-  //   notifications?.filter((notification) => !notification.isRead).length || 0;
-  const unreadNotifications = 9;
+  const unreadNotifications =
+    notifications?.filter((notification) => !notification.isRead).length || 0;
+  // const unreadNotifications = 9;
 
   return (
     <header className="relative z-10 flex items-center justify-between">
@@ -36,8 +36,8 @@ export default function WalletHeader({
           alt="profile image"
           className="border-primary-pink shadow-neon-pink-sm h-8 w-8 rounded-full border-2 object-cover"
         />
-        <div>
-          <div className="text-secondary-text text-xs">{greeting}</div>
+        <div className="flex flex-col">
+          <div className="text-secondary-text text-x -mb-1">สวัสดี</div>
           <div className="from-vibrant-purple to-primary-pink inline-block bg-gradient-to-r bg-clip-text text-sm font-bold text-transparent text-shadow-lg">
             {userName}
           </div>

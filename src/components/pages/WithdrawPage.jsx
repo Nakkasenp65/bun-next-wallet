@@ -2,19 +2,11 @@
 
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faChevronLeft,
-  faHashtag,
-  faUser,
-} from "@fortawesome/free-solid-svg-icons";
+import { faChevronLeft, faHashtag, faUser } from "@fortawesome/free-solid-svg-icons";
 import CtaButton from "../Ui/CtaButton";
 import FramerDiv from "../framerComponents/FramerDiv";
 
-export default function WithdrawPage({
-  userData,
-  showWithdraw,
-  setShowWithdraw,
-}) {
+export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw }) {
   const [formData, setFormData] = useState({
     amount: "",
     accountNumber: "",
@@ -40,7 +32,7 @@ export default function WithdrawPage({
         className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
       >
         {/* Header */}
-        <header className="flex flex-shrink-0 items-center border-b border-white/20 px-5 pt-10 pb-4">
+        <header className="flex flex-shrink-0 items-center px-5 pt-10 pb-4">
           <button
             onClick={() => setShowWithdraw((prev) => !prev)}
             className="text-secondary-text text-2xl transition-colors hover:text-white"
@@ -68,10 +60,7 @@ export default function WithdrawPage({
 
           {/* Input Group: Amount */}
           <div>
-            <label
-              htmlFor="withdraw-amount"
-              className="mb-2 block text-sm font-bold text-gray-500"
-            >
+            <label htmlFor="withdraw-amount" className="mb-2 block text-sm font-bold text-gray-500">
               จำนวนเงิน
             </label>
             <input
@@ -99,10 +88,7 @@ export default function WithdrawPage({
               className="hover:border-vibrant-purple flex w-full cursor-pointer items-center justify-between rounded-xl border border-gray-300 p-4"
             >
               <span className="text-gray-400">เลือกธนาคาร</span>
-              <FontAwesomeIcon
-                icon={faChevronLeft}
-                className="rotate-180 text-gray-400"
-              />
+              <FontAwesomeIcon icon={faChevronLeft} className="rotate-180 text-gray-400" />
             </div>
           </div>
 

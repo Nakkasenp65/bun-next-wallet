@@ -9,7 +9,7 @@ import WalletHeader from "../components/Ui/WalletHeader";
 import SavingsGoalCard from "../components/Ui/SavingGoalCard";
 import ActionGrid from "../components/Ui/ActionGrid";
 import TransactionList from "../components/TransactionComponents/TransactionList";
-import SavingsMissionCard from "../components/Ui/SavingsMissionCard";
+import SavingsMission from "../components/Ui/SavingsMission";
 import BottomNav from "../components/Ui/BottomNav";
 
 import TransferPage from "@/components/pages/TransferPage";
@@ -22,6 +22,8 @@ import { useUserStatus } from "@/hooks/useUserStatus";
 import { useLiff } from "@/components/provider/LiffProvider";
 import ContactPage from "@/components/pages/ContactPage";
 import FloatingContact from "@/components/Ui/FloatingContact";
+import { useGetMissions } from "@/hooks/useMission";
+import MainTransactionList from "@/components/TransactionComponents/MainTransactionList";
 
 export default function HomePage() {
   const router = useRouter();
@@ -32,7 +34,20 @@ export default function HomePage() {
   //   pictureUrl:
   //     "https://profile.line-scdn.net/0hPsTqIBJhD1x5CB7EtsVxYglYDDZaeVZOVjxHahgOUGhMPU9ZVDxIORwJAj5BOhxZAWxBakoIV21bTUB3DWgHYz9BU24mUxsKPhhEezdwJwJNQTdDFRZGXRB2BRAsbhxKUDFHXDVTUDIMbD5jU2oBcTpMFWpFQCxrN19jCnw6Yd8WCngJVG9EPUQAVmrA",
   // });
-  // const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const {
+    data: userData,
+    isLoading: isUserDataLoading,
+    error: isUserDataError,
+  } = useUser(liffProfile?.userId);
+  const {
+    data: userStatus,
+    isLoading: isStatusLoading,
+    error: statusError,
+  } = useUserStatus("U5d2998909721fdea596f8e9e91e7bf85");
+
+  const { data: missionData, isLoading: missionLoading, error: missionError } = useGetMissions();
+
   const [showTransfer, setShowTransfer] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showDeposit, setShowDeposit] = useState(false);
@@ -40,51 +55,36 @@ export default function HomePage() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showContact, setShowContact] = useState(false);
 
-  const missionData = {
-    title: "First Savings Ever",
-    description: "ออมเงินครั้งแรก",
-    currentProgress: 0,
-    targetProgress: 1,
-    rewardAmount: 20,
-  };
-
-  const {
-    data: userStatus,
-    isLoading: isStatusLoading,
-    error: statusError,
-  } = useUserStatus("U5d2998909721fdea596f8e9e91e7bf85");
-  const { data: userData, isLoading, error } = useUser(liffProfile?.userId);
-  // const { data: userData, isLoading, error } = useUser("U5d2998909721fdea596f8e9e91e7bf85");
+  console.log(userData);
+  console.log(userStatus);
 
   useEffect(() => {
-    setTimeout(() => {
-      if (userStatus?.isNewUser) {
-        router.push("/welcome");
-      }
-      // else setIsLoggedIn(true);
-    }, 1000);
+    if (userStatus?.isNewUser) {
+      router.push("/welcome");
+    }
+    // else setIsLoggedIn(true);
   }, [userStatus, isStatusLoading, liffProfile]);
 
-  if (!liffProfile || !isLoggedIn || isStatusLoading || isLoading) {
+  if (!liffProfile || !isLoggedIn || isStatusLoading || isUserDataLoading || missionLoading) {
     return (
-      <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
+      <div className="gradient-background flex h-dvh w-full items-center justify-center">
         <Loading />
       </div>
     );
   }
 
-  if (error || statusError) {
+  if (isUserDataError || statusError) {
     return <ErrorComponent />;
   }
 
   // if (isLoading || isStatusLoading || !userData) {
-  if (!userData) {
-    return (
-      <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
-        <Loading />
-      </div>
-    );
-  }
+  // if (isUserDataLoading || isStatusLoading || !liffProfile) {
+  //   return (
+  //     <div className="bg-bg-dark flex h-dvh w-full items-center justify-center">
+  //       <Loading />
+  //     </div>
+  //   );
+  // }
 
   return (
     <>
@@ -122,7 +122,7 @@ export default function HomePage() {
               brand={userData.goal.product.brand}
               name={userData.goal.product.model}
               target={userData.goal.product.price}
-              // balance={userData.wallet.balance}
+              balance={userData.wallet.balance}
               imageUrl={userData.goal.product.imageUrl}
             />
             <ActionGrid
@@ -139,14 +139,8 @@ export default function HomePage() {
               <span className="h-1.5 w-10 rounded-full bg-gray-300" />
             </div>
 
-            <SavingsMissionCard
-              title={missionData.title}
-              description={missionData.description}
-              currentProgress={missionData.currentProgress}
-              targetProgress={missionData.targetProgress}
-              rewardAmount={missionData.rewardAmount}
-            />
-            <TransactionList walletId={userData.wallet.id} />
+            <SavingsMission missions={missionData} />
+            <MainTransactionList walletId={userData.wallet.id} />
           </section>
         </main>
 

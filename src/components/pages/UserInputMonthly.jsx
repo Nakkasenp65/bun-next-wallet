@@ -19,26 +19,29 @@ const variants = {
   }),
 };
 
-export default function UserInputMonthly({ monthlyPayment, setMonthlyPayment, onCalculate }) {
+export default function UserInputMonthly({ inputData, setInputData, onCalculate }) {
   const [page, setPage] = useState(0);
   const [direction, setDirection] = useState(1);
   const [waitFetch, setWaitFetch] = useState(false);
-  const [formData, setFormData] = useState({
-    age: "",
-    occupation: "",
-    monthlyPayment: "",
-  });
 
-  useEffect(() => {
-    setFormData((prev) => ({ ...prev, monthlyPayment }));
-  }, [monthlyPayment]);
+  // const [formData, setFormData] = useState({
+  //   age: "",
+  //   occupation: "",
+  //   monthlyPayment: "",
+  // });
+
+  // useEffect(() => {
+  //   setInputData((prev) => ({ ...prev, inputData }));
+  // }, [monthlyPayment]);
 
   const handleChange = (e) => {
+    //set ...prev, inputData[name]:value
     const { name, value } = e.target;
-    if (name === "monthlyPayment") {
-      setMonthlyPayment(value);
-    }
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setInputData((prev) => ({ ...prev, [name]: value }));
+    // if (name === "monthlyPayment") {
+    //   setMonthlyPayment(value);
+    // }
+    // setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const pages = [
@@ -77,7 +80,16 @@ export default function UserInputMonthly({ monthlyPayment, setMonthlyPayment, on
   ];
 
   const currentPageData = pages[page];
-  const isStepValid = formData[currentPageData.field]?.trim() !== "";
+  const isStepValid = (() => {
+    const standardCheck = inputData[currentPageData.field]?.trim() !== "";
+    if (currentPageData.field === "occupation" && inputData.occupation === "อื่นๆ") {
+      return inputData.customOccupation?.trim() !== "";
+    }
+    if (currentPageData.field === "monthlyPayment") {
+      return standardCheck && Number(inputData.monthlyPayment) >= 500;
+    }
+    return standardCheck;
+  })();
 
   const handleNext = () => {
     if (!isStepValid) return;
@@ -135,19 +147,39 @@ export default function UserInputMonthly({ monthlyPayment, setMonthlyPayment, on
                 className="absolute flex w-full flex-col gap-2"
               >
                 {currentPageData.type === "dropdown" ? (
-                  // --- FIX: Added className props to restore original styling ---
-                  <DropDownComponent
-                    label={currentPageData.label}
-                    labelClassName="text-bg-dark font-medium"
-                    name={currentPageData.field}
-                    value={formData[currentPageData.field]}
-                    onChange={handleChange}
-                    options={currentPageData.options}
-                    placeholder={currentPageData.placeholder}
-                    buttonClassName="text-bg-dark focus:border-primary-pink w-full rounded-xl border-2 border-gray-200 bg-white p-4 font-bold shadow-sm transition-all focus:ring-4 focus:ring-pink-200 focus:outline-none"
-                    optionsContainerClassName="p-2 border border-gray-200"
-                    optionClassName="rounded-lg p-3 hover:bg-gray-100"
-                  />
+                  // --- change to inputData
+                  <>
+                    <DropDownComponent
+                      label={currentPageData.label}
+                      labelClassName="text-bg-dark font-medium"
+                      name={currentPageData.field}
+                      value={inputData[currentPageData.field]}
+                      onChange={handleChange}
+                      options={currentPageData.options}
+                      placeholder={currentPageData.placeholder}
+                      buttonClassName="text-bg-dark focus:border-primary-pink w-full rounded-xl border-2 border-gray-200 bg-white p-4 font-bold shadow-sm transition-all focus:ring-4 focus:ring-pink-200 focus:outline-none"
+                      optionsContainerClassName="p-2 border border-gray-200"
+                      optionClassName="rounded-lg p-3 hover:bg-gray-100"
+                    />
+                    {currentPageData.field === "occupation" && inputData.occupation === "อื่นๆ" && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="mt-2"
+                      >
+                        <input
+                          name="customOccupation"
+                          type="text"
+                          placeholder="กรุณาระบุอาชีพของคุณ"
+                          value={inputData.customOccupation || ""}
+                          onChange={handleChange}
+                          className="text-bg-dark focus:border-primary-pink w-full rounded-xl border-2 border-gray-200 p-4 font-bold shadow-sm transition-all focus:ring-4 focus:ring-pink-200 focus:outline-none"
+                          autoFocus
+                        />
+                      </motion.div>
+                    )}
+                  </>
                 ) : (
                   <>
                     <label htmlFor={currentPageData.field} className="text-bg-dark font-medium">
@@ -158,7 +190,7 @@ export default function UserInputMonthly({ monthlyPayment, setMonthlyPayment, on
                       name={currentPageData.field}
                       type={currentPageData.type}
                       placeholder={currentPageData.placeholder}
-                      value={formData[currentPageData.field]}
+                      value={inputData[currentPageData.field]}
                       onChange={handleChange}
                       className="text-bg-dark focus:border-primary-pink w-full rounded-xl border-2 border-gray-200 p-4 font-bold shadow-sm transition-all focus:ring-4 focus:ring-pink-200 focus:outline-none"
                     />

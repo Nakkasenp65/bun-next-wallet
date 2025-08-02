@@ -1,52 +1,107 @@
+"use client";
+
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowUpRightFromSquare, faWallet, faPlusCircle, faBullseye } from "@fortawesome/free-solid-svg-icons";
-export default function ActionGrid({ setShowTransfer, setShowWithdraw, setShowDeposit, setShowGoal }) {
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+
+// For a more modern, cohesive look, using icons from the popular 'react-icons' library
+import { FaPaperPlane, FaWallet, FaPiggyBank, FaBullseye, FaStar } from "react-icons/fa6";
+
+export default function ActionGrid({
+  setShowTransfer,
+  setShowWithdraw,
+  setShowDeposit,
+  setShowGoal,
+}) {
+  const router = useRouter();
+
+  // A more scalable data structure that can handle both functions and links
   const actionItems = [
     {
       label: "โอนเงิน",
-      icon: faArrowUpRightFromSquare,
+      icon: FaPaperPlane,
       key: "transfer",
+      action: () => setShowTransfer(true),
     },
-    { label: "ถอนเงิน", icon: faWallet, key: "withdraw" },
-    { label: "ออมเงิน", icon: faPlusCircle, key: "deposit" },
-    { label: "เป้าหมาย", icon: faBullseye, key: "goal" },
+    {
+      label: "ถอนเงิน",
+      icon: FaWallet,
+      key: "withdraw",
+      action: () => setShowWithdraw(true),
+    },
+    {
+      label: "ออมเงิน",
+      icon: FaPiggyBank,
+      key: "deposit",
+      action: () => setShowDeposit(true),
+    },
+    {
+      label: "เป้าหมาย",
+      icon: FaBullseye,
+      key: "goal",
+      action: () => setShowGoal(true),
+    },
+    {
+      label: "ภารกิจ",
+      icon: FaStar,
+      key: "mission",
+      action: () => router.push("/mission"), // Handles navigation directly
+    },
   ];
 
-  const handleClick = (key) => {
-    switch (key) {
-      case "transfer":
-        setShowTransfer((prev) => !prev);
-        break;
-      case "withdraw":
-        setShowWithdraw((prev) => !prev);
-        break;
-      case "deposit":
-        setShowDeposit((prev) => !prev);
-        break;
-      case "goal":
-        setShowGoal((prev) => !prev);
-        break;
-      default:
-        break;
-    }
+  // Animation variants for the container to orchestrate children animations
+  const gridVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05, // Each child will animate 0.05s after the previous one
+      },
+    },
+  };
+
+  // Animation variants for each grid item
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 150,
+      },
+    },
   };
 
   return (
-    <div id="actions-grid" className="grid grid-cols-4 gap-4">
+    <motion.div
+      id="actions-grid"
+      className="grid grid-cols-4 gap-2" // Changed to grid-cols-5 for perfect alignment
+      variants={gridVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {actionItems.map((item) => (
-        <div
-          onClick={() => handleClick(item.key)}
-          href={item.url ? item.url : "/"}
+        <motion.div
           key={item.key}
-          className="group text-secondary-text hover:text-light-text flex cursor-pointer flex-col items-center gap-2 transition-all hover:-translate-y-1"
+          className="group flex cursor-pointer flex-col items-center gap-2"
+          onClick={item.action}
+          variants={itemVariants}
+          whileHover={{ scale: 1.05 }} // Subtle scale on hover for the whole group
         >
-          <div className="group-hover:bg-vibrant-purple/50 flex h-[55px] w-[55px] items-center justify-center rounded-xl bg-black/50 text-xl shadow-sm transition-all">
-            <FontAwesomeIcon icon={item.icon} />
-          </div>
-          <span className="text-xs font-bold">{item.label}</span>
-        </div>
+          <motion.div
+            className="flex h-14 w-14 items-center justify-center rounded-xl bg-black/50 text-xl text-white/90 shadow-md transition-colors group-hover:bg-white/20"
+            whileTap={{ scale: 0.9 }} // Bouncier, more satisfying tap effect
+            transition={{ type: "spring", stiffness: 1500, damping: 17 }}
+          >
+            {/* The Icon component is rendered dynamically */}
+            <item.icon />
+          </motion.div>
+          <span className="text-xs font-bold text-white/80 transition-colors group-hover:text-white">
+            {item.label}
+          </span>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }

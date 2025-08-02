@@ -2,11 +2,7 @@
 
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faChevronLeft,
-  faChevronRight,
-  faDownload,
-} from "@fortawesome/free-solid-svg-icons";
+import { faChevronLeft, faChevronRight, faDownload } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { useTransactions } from "@/hooks/useTransactions"; // 1. Import hook ใหม่
 import CtaButton from "@/components/Ui/CtaButton";
@@ -30,20 +26,13 @@ const thaiMonths = [
 ];
 
 export default function HistoryPage() {
+  const { liffProfile, isLoggedIn } = useLiff();
   const router = useRouter();
-
   const [currentDate, setCurrentDate] = useState(new Date());
-
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
 
-  console.log("year: ", currentYear, " month: ", currentMonth);
-
-  const {
-    data: userData,
-    isLoading: userLoading,
-    error: userError,
-  } = useUser("U5d2998909721fdea596f8e9e91e7bf85");
+  const { data: userData, isLoading: userLoading, error: userError } = useUser(liffProfile?.userId);
   console.log(userData);
   const {
     data: transactions,
@@ -70,16 +59,16 @@ export default function HistoryPage() {
   };
 
   const isCurrentMonth =
-    currentYear === new Date().getFullYear() &&
-    currentMonth === new Date().getMonth();
+    currentYear === new Date().getFullYear() && currentMonth === new Date().getMonth();
+
+  if (userLoading || !isLoggedIn || userError) {
+    return <Loading />;
+  }
 
   return (
-    <div
-      id="history-overlay"
-      className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
-    >
+    <div className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm">
       {/* Page Header */}
-      <header className="flex flex-shrink-0 items-center border-b border-white/20 px-5 pt-10 pb-4">
+      <header className="flex flex-shrink-0 items-center px-5 pt-10 pb-4">
         <button
           onClick={() => router.push("/")}
           className="text-secondary-text text-2xl transition-colors hover:text-white"
@@ -97,10 +86,7 @@ export default function HistoryPage() {
         <div className="p-6">
           {/* Period Selector */}
           <div className="flex items-center justify-between rounded-lg bg-gray-100 p-3">
-            <button
-              onClick={handlePrevMonth}
-              className="text-gray-500 hover:text-black"
-            >
+            <button onClick={handlePrevMonth} className="text-gray-500 hover:text-black">
               <FontAwesomeIcon icon={faChevronLeft} />
             </button>
             <span className="text-bg-dark font-bold">
@@ -120,31 +106,29 @@ export default function HistoryPage() {
           </div>
 
           {/* Transaction List */}
-          <ul id="full-history-list" className="mt-4">
+          <ul id="full-history-list">
             {isLoading ? (
               <div className="flex justify-center p-8">
                 <Loading />
               </div>
             ) : error ? (
-              <p className="text-center text-red-500">
-                เกิดข้อผิดพลาดในการโหลดข้อมูล
-              </p>
+              <p className="text-center text-red-500">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
             ) : transactions && transactions.length > 0 ? (
               transactions.map((transaction) => (
                 <Transaction key={transaction.id} transaction={transaction} />
               ))
             ) : (
-              <p className="p-8 text-center text-gray-500">
-                ไม่พบรายการในเดือนนี้
-              </p>
+              <p className="p-8 text-center text-gray-500">ไม่พบรายการในเดือนนี้</p>
             )}
           </ul>
         </div>
       </div>
 
       {/* Page Footer */}
-      <footer className="flex-shrink-0 bg-white p-6 pt-4 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-        <CtaButton>ขอรายการเดินบัญชี</CtaButton>
+      <footer className="flex justify-center bg-white p-6 pt-4">
+        <CtaButton className={"z-10 w-48 rounded-xl p-4 text-lg font-bold"}>
+          ขอรายการเดินบัญชี
+        </CtaButton>
       </footer>
     </div>
   );
