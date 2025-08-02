@@ -28,5 +28,6 @@ export function useSuccessTransactions(year, month, walletId) {
   return useQuery({
     queryKey: ["successTransactions", year, month, walletId],
     queryFn: () => fetchSuccessTransactions(year, month, walletId),
+    enabled: !!walletId,
   });
 }

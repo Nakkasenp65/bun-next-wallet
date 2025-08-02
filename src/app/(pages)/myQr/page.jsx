@@ -6,15 +6,11 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser"; // 1. Import useUser hook
 import CtaButton from "@/components/Ui/CtaButton";
-import Loading from "@/components/Loading";
+import Loading from "@/components/StatusComponents/Loading";
 
 export default function MyQr() {
   const router = useRouter();
-  const {
-    data: userData,
-    isLoading,
-    error,
-  } = useUser("U5d2998909721fdea596f8e9e91e7bf85");
+  const { data: userData, isLoading, error } = useUser("U5d2998909721fdea596f8e9e91e7bf85");
 
   const handleClose = () => {
     router.push("/");
@@ -78,9 +74,7 @@ export default function MyQr() {
           style={{ backgroundImage: `url(${qrCodeUrl})` }}
         ></div>
 
-        <p className="text-sm text-gray-600">
-          แสดง QR นี้ให้เพื่อนเพื่อรับเงิน
-        </p>
+        <p className="text-sm text-gray-600">แสดง QR นี้ให้เพื่อนเพื่อรับเงิน</p>
 
         {/* Close Button */}
         <div className="mt-auto w-full pt-6">

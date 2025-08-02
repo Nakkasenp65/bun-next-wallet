@@ -28,10 +28,9 @@ export function useCreateGoal() {
     // `onSuccess` จะได้รับ (data, variables, context)
     // data from { data } = await axios.post
     // variables from goalData ที่เราส่งเข้ามา
-    onSuccess: async (data, variables) => {
-      const { liffId } = variables;
-      queryClient.setQueryData(["user", liffId], data);
-      await queryClient.invalidateQueries(["user", liffId]);
+    onSuccess: async (data) => {
+      await queryClient.setQueryData(["user", data.userId], data);
+      await queryClient.setQueryData(["userStatus", data.userId], { firstTime: false, isNewUser: false });
       toast.success("สร้างเป้าหมายการออมเงินสำเร็จ!");
       router.push("/");
     },

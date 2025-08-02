@@ -6,10 +6,11 @@ import { faChevronLeft, faChevronRight, faDownload } from "@fortawesome/free-sol
 import { useRouter } from "next/navigation";
 import { useTransactions } from "@/hooks/useTransactions"; // 1. Import hook ใหม่
 import CtaButton from "@/components/Ui/CtaButton";
-import Loading from "@/components/Loading";
+import Loading from "@/components/StatusComponents/Loading";
 import Transaction from "@/components/TransactionComponents/Transaction";
 import { useUser } from "@/hooks/useUser";
 import { useLiff } from "@/components/provider/LiffProvider";
+import TransactionSkeleton from "@/components/Ui/TransactionSkeleton";
 
 const thaiMonths = [
   "มกราคม",
@@ -34,10 +35,9 @@ export default function HistoryPage() {
   const currentMonth = currentDate.getMonth();
 
   const { data: userData, isLoading: userLoading, error: userError } = useUser(liffProfile?.userId);
-  console.log(userData);
   const {
     data: transactions,
-    isLoading,
+    isLoading: transactionLoading,
     error,
   } = useTransactions(currentYear, currentMonth, userData?.wallet.id, {
     enabled: !!userData,
@@ -62,13 +62,13 @@ export default function HistoryPage() {
   const isCurrentMonth =
     currentYear === new Date().getFullYear() && currentMonth === new Date().getMonth();
 
-  if (userLoading || !isLoggedIn || userError) {
-    return <Loading />;
+  if (userLoading) {
+    return <Loading message="กำลังโหลดข้อมูลผู้ใช้..." />;
   }
 
   return (
     <div className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm">
-      {/* Page Header */}
+      {/* Page Header (remains visible) */}
       <header className="flex flex-shrink-0 items-center px-5 pt-10 pb-4">
         <button
           onClick={() => router.push("/")}
@@ -79,13 +79,13 @@ export default function HistoryPage() {
         <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
           ประวัติธุรกรรม
         </h2>
-        <div className="w-6"></div> {/* Spacer */}
+        <div className="w-6"></div>
       </header>
 
-      {/* Page Content */}
+      {/* Page Content (remains visible) */}
       <div className="flex flex-grow flex-col overflow-y-auto rounded-t-[30px] bg-white">
         <div className="p-6">
-          {/* Period Selector */}
+          {/* Period Selector (remains visible and interactive) */}
           <div className="flex items-center justify-between rounded-lg bg-gray-100 p-3">
             <button onClick={handlePrevMonth} className="text-gray-500 hover:text-black">
               <FontAwesomeIcon icon={faChevronLeft} />
@@ -106,14 +106,18 @@ export default function HistoryPage() {
             </button>
           </div>
 
-          {/* Transaction List */}
-          <ul id="full-history-list">
-            {isLoading ? (
-              <div className="flex justify-center p-8">
-                <Loading />
-              </div>
+          {/* --- 2. UPDATED Transaction List with inline loading --- */}
+          <ul id="full-history-list" className="mt-4">
+            {transactionLoading ? (
+              // If transactions are loading, show the skeleton placeholders
+              <>
+                <TransactionSkeleton />
+                <TransactionSkeleton />
+                <TransactionSkeleton />
+                <TransactionSkeleton />
+              </>
             ) : error ? (
-              <p className="text-center text-red-500">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
+              <p className="p-8 text-center text-red-500">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
             ) : transactions && transactions.length > 0 ? (
               transactions.map((transaction) => (
                 <Transaction key={transaction.id} transaction={transaction} />
@@ -125,7 +129,7 @@ export default function HistoryPage() {
         </div>
       </div>
 
-      {/* Page Footer */}
+      {/* Page Footer (remains visible) */}
       <footer className="flex justify-center bg-white p-6 pt-4">
         <CtaButton className={"z-10 w-48 rounded-xl p-4 text-lg font-bold"}>
           ขอรายการเดินบัญชี

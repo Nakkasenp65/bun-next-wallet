@@ -13,7 +13,7 @@ import Image from "next/image";
 
 import CtaButton from "../Ui/CtaButton";
 import FramerDiv from "../framerComponents/FramerDiv";
-import Loading from "@/components/Loading";
+import Loading from "@/components/StatusComponents/Loading";
 import TransferContent from "../Payment/TransferContent";
 import QrContent from "../Payment/QrContent";
 import OtherMethodsContent from "../Payment/OtherMethodsContent";

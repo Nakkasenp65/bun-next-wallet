@@ -6,8 +6,8 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import QueryProvider from "@/components/provider/QueryProvider";
 import { LiffProvider, useLiff } from "@/components/provider/LiffProvider";
 import { Suspense } from "react";
-import ErrorBoundary from "@/components/Ui/ErrorBoundary";
-import Loading from "@/components/Loading";
+import ErrorBoundary from "@/components/StatusComponents/ErrorBoundary";
+import Loading from "@/components/StatusComponents/Loading";
 import ErrorComponent from "@/components/Ui/ErrorComponent";
 import TokenSynchronizer from "@/components/provider/TokenSynchronizer";
 

@@ -2,7 +2,7 @@ import React from "react";
 import { GrTransaction } from "react-icons/gr";
 import Transaction from "./Transaction";
 import { useSuccessTransactions, useTransactions } from "@/hooks/useTransactions";
-import Loading from "../Loading";
+import Loading from "../StatusComponents/Loading";
 import Link from "next/link";
 import { RiExternalLinkFill } from "react-icons/ri";
 import FramerLink from "../Ui/FramerLink";

@@ -9,7 +9,7 @@ import { useLiff } from "@/components/provider/LiffProvider";
 import toast from "react-hot-toast";
 import { useCreateGoal } from "@/hooks/useUser";
 import UserInputMonthly from "@/components/pages/UserInputMonthly";
-import Loading from "@/components/Loading";
+import Loading from "@/components/StatusComponents/Loading";
 import ProductTabs from "@/components/welcomeComponents/ProductTabs";
 import GoalSetter from "@/components/Ui/GoalSetter";
 

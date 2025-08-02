@@ -1,7 +1,7 @@
 import React from "react";
 import Transaction from "./Transaction";
 import { useTransactions } from "@/hooks/useTransactions";
-import Loading from "../Loading";
+import Loading from "../StatusComponents/Loading";
 
 // Example data matching the original script
 

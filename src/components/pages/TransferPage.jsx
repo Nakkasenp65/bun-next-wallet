@@ -7,7 +7,7 @@ import { FaHashtag } from "react-icons/fa6";
 import CtaButton from "../Ui/CtaButton";
 import FramerDiv from "../framerComponents/FramerDiv";
 import BankSelectionModal from "../Ui/BankSelectionModal";
-import Loading from "../Loading";
+import Loading from "../StatusComponents/Loading";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import axios from "axios";
