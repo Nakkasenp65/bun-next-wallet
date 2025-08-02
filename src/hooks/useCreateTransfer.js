@@ -4,10 +4,7 @@ import instanceAxios from "axios";
 import toast from "react-hot-toast";
 
 const createSavingTransaction = async ({ walletId, username, formData }) => {
-  const imageData = await instanceAxios.post(
-    "https://google-drive-uploader-seven-nu.vercel.app/api/upload",
-    formData,
-  );
+  const imageData = await instanceAxios.post("https://google-drive-uploader-seven-nu.vercel.app/api/upload", formData);
   console.log("image Sent: ", imageData);
 
   const savingTransaction = {

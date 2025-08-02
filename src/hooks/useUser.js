@@ -1,15 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import axios from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-
-const BACKEND_API = process.env.NEXT_PUBLIC_API_URL;
 
 export function useUser(liffId) {
   return useQuery({
     queryKey: ["user", liffId],
     queryFn: async () => {
-      const response = await axios.get(`${BACKEND_API}/user/${liffId}`);
+      const response = await axios.get(`/user/${liffId}`);
       return response.data;
     },
     enabled: !!liffId,
@@ -22,7 +20,7 @@ export function useCreateGoal() {
 
   return useMutation({
     mutationFn: async (goalData) => {
-      const { data } = await axios.post(`${BACKEND_API}/user`, goalData);
+      const { data } = await axios.post(`/user`, goalData);
       return data;
     },
     // `onSuccess` จะได้รับ (data, variables, context)
