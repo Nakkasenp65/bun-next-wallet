@@ -19,13 +19,13 @@ import GoalSetter from "@/components/Ui/GoalSetter";
 // 3. ไม่เป็นสมาชิกให้ redirect ไปสมัครที่ https://liff.line.me/2006703040-RYAyYAyA
 
 export default function Page() {
-  // const { liffProfile } = useLiff();
-  const liffProfile = {
-    userId: "U5d2998909721fdea596f8e9e91e7bf85",
-    displayName: "Long👁️‍🗨️",
-    pictureUrl:
-      "https://profile.line-scdn.net/0hPsTqIBJhD1x5CB7EtsVxYglYDDZaeVZOVjxHahgOUGhMPU9ZVDxIORwJAj5BOhxZAWxBakoIV21bTUB3DWgHYz9BU24mUxsKPhhEezdwJwJNQTdDFRZGXRB2BRAsbhxKUDFHXDVTUDIMbD5jU2oBcTpMFWpFQCxrN19jCnw6Yd8WCngJVG9EPUQAVmrA",
-  };
+  const { liffProfile } = useLiff();
+  // const liffProfile = {
+  //   userId: "U5d2998909721fdea596f8e9e91e7bf85",
+  //   displayName: "Long👁️‍🗨️",
+  //   pictureUrl:
+  //     "https://profile.line-scdn.net/0hPsTqIBJhD1x5CB7EtsVxYglYDDZaeVZOVjxHahgOUGhMPU9ZVDxIORwJAj5BOhxZAWxBakoIV21bTUB3DWgHYz9BU24mUxsKPhhEezdwJwJNQTdDFRZGXRB2BRAsbhxKUDFHXDVTUDIMbD5jU2oBcTpMFWpFQCxrN19jCnw6Yd8WCngJVG9EPUQAVmrA",
+  // };
   const router = useRouter();
   const [goal, setGoal] = useState({});
   const [uiStep, setUiStep] = useState("input");
@@ -56,8 +56,7 @@ export default function Page() {
     const { userId: liffId, displayName, pictureUrl } = liffProfile;
     const { mobileId, planId } = goal;
 
-    const finalOccupation =
-      inputData.occupation === "อื่นๆ" ? inputData.customOccupation : inputData.occupation;
+    const finalOccupation = inputData.occupation === "อื่นๆ" ? inputData.customOccupation : inputData.occupation;
 
     const dataToPost = {
       liffId,
@@ -95,9 +94,7 @@ export default function Page() {
     const potentialPrice = inputData.monthlyPayment * 6;
     toast.loading("กำลังประมวลผล โปรดรอสักครู่");
     setUiStep("calculate");
-    const phones = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/product?maxPrice=${potentialPrice}`,
-    );
+    const phones = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/product?maxPrice=${potentialPrice}`);
     if (!phones) {
       toast.error("เกิดความผิดพลาดในการประมวลผล");
       setUiStep("input");
@@ -132,9 +129,7 @@ export default function Page() {
       {uiStep === "main" && suggestedPhone && (
         <div className="flex flex-col gap-4">
           <header className="from-primary-pink to-primary-orange flex flex-col items-center justify-center gap-2 rounded-b-4xl bg-gradient-to-br p-6 pt-14 text-white drop-shadow-lg">
-            <h1 className="text-2xl font-bold text-white drop-shadow-md drop-shadow-black/30">
-              ตั้งค่าเป้าหมายการออม
-            </h1>
+            <h1 className="text-2xl font-bold text-white drop-shadow-md drop-shadow-black/30">ตั้งค่าเป้าหมายการออม</h1>
             <p className="text-xs">เลือกสิ่งที่คุณอยากได้ แล้วมาเริ่มวางแผนการออมกัน!</p>
           </header>
 
