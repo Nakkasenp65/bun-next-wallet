@@ -8,7 +8,7 @@ import { useTransactions } from "@/hooks/useTransactions"; // 1. Import hook ใ
 import CtaButton from "@/components/Ui/CtaButton";
 import Loading from "@/components/StatusComponents/Loading";
 import Transaction from "@/components/TransactionComponents/Transaction";
-import { useUser } from "@/hooks/useUser";
+import { useUser } from "@/hooks/userHook";
 import { useLiff } from "@/components/provider/LiffProvider";
 import TransactionSkeleton from "@/components/Ui/TransactionSkeleton";
 
@@ -59,8 +59,7 @@ export default function HistoryPage() {
     });
   };
 
-  const isCurrentMonth =
-    currentYear === new Date().getFullYear() && currentMonth === new Date().getMonth();
+  const isCurrentMonth = currentYear === new Date().getFullYear() && currentMonth === new Date().getMonth();
 
   if (userLoading) {
     return <Loading message="กำลังโหลดข้อมูลผู้ใช้..." />;
@@ -119,9 +118,7 @@ export default function HistoryPage() {
             ) : error ? (
               <p className="p-8 text-center text-red-500">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
             ) : transactions && transactions.length > 0 ? (
-              transactions.map((transaction) => (
-                <Transaction key={transaction.id} transaction={transaction} />
-              ))
+              transactions.map((transaction) => <Transaction key={transaction.id} transaction={transaction} />)
             ) : (
               <p className="p-8 text-center text-gray-500">ไม่พบรายการในเดือนนี้</p>
             )}
@@ -131,9 +128,7 @@ export default function HistoryPage() {
 
       {/* Page Footer (remains visible) */}
       <footer className="flex justify-center bg-white p-6 pt-4">
-        <CtaButton className={"z-10 w-48 rounded-xl p-4 text-lg font-bold"}>
-          ขอรายการเดินบัญชี
-        </CtaButton>
+        <CtaButton className={"z-10 w-48 rounded-xl p-4 text-lg font-bold"}>ขอรายการเดินบัญชี</CtaButton>
       </footer>
     </div>
   );

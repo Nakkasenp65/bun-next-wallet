@@ -1,23 +1,38 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, userQueryOptions } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-export function useUser(liffId) {
+async function fetchUserStatus(userId) {
+  console.log("hooks/userHook.js userId : ", userId);
+  const { data } = await axios.get(`/user/status/${userId}`);
+  return data;
+}
+
+async function fetchUser(userId) {
+  const { data } = await axios.get(`/user/${userId}`);
+  return data;
+}
+
+export function useUserStatus(userId) {
   return useQuery({
-    queryKey: ["user", liffId],
-    queryFn: async () => {
-      const response = await axios.get(`/user/${liffId}`);
-      return response.data;
-    },
-    enabled: !!liffId,
+    queryKey: ["userStatus", userId],
+    queryFn: () => fetchUserStatus(userId),
+    enabled: !!userId,
+  });
+}
+
+export function useUser(userId) {
+  return useQuery({
+    queryKey: ["user", userId],
+    queryFn: () => fetchUser(userId),
+    enabled: !!userId,
   });
 }
 
 export function useCreateGoal() {
   const queryClient = useQueryClient();
   const router = useRouter();
-
   return useMutation({
     mutationFn: async (goalData) => {
       const { data } = await axios.post(`/user`, goalData);
@@ -28,7 +43,7 @@ export function useCreateGoal() {
     // variables from goalData ที่เราส่งเข้ามา
     onSuccess: async (data) => {
       await queryClient.setQueryData(["user", data.userId], data);
-      await queryClient.setQueryData(["userStatus", data.userId], { firstTime: false, isNewUser: false });
+      await queryClient.setQueryData(["userStatus", data.userId], { isNewUser: false });
       toast.success("สร้างเป้าหมายการออมเงินสำเร็จ!");
       router.push("/");
     },

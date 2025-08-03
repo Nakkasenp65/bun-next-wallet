@@ -4,7 +4,7 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
-import { useUser } from "@/hooks/useUser"; // 1. Import useUser hook
+import { useUser } from "@/hooks/userHook"; // 1. Import useUser hook
 import CtaButton from "@/components/Ui/CtaButton";
 import Loading from "@/components/StatusComponents/Loading";
 
@@ -44,16 +44,10 @@ export default function MyQr() {
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCodeData)}`;
 
   return (
-    <div
-      id="my-qr-overlay"
-      className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
-    >
+    <div id="my-qr-overlay" className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm">
       {/* Page Header */}
       <header className="flex flex-shrink-0 items-center border-b border-white/20 px-5 pt-10 pb-4">
-        <button
-          onClick={handleClose}
-          className="text-secondary-text text-2xl transition-colors hover:text-white"
-        >
+        <button onClick={handleClose} className="text-secondary-text text-2xl transition-colors hover:text-white">
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
         <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">

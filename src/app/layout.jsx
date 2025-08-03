@@ -4,6 +4,7 @@ import { RiErrorWarningLine } from "react-icons/ri";
 import { FaRegCircleCheck } from "react-icons/fa6";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import QueryProvider from "@/components/provider/QueryProvider";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { LiffProvider, useLiff } from "@/components/provider/LiffProvider";
 import { Suspense } from "react";
 import ErrorBoundary from "@/components/StatusComponents/ErrorBoundary";
@@ -55,11 +56,8 @@ export default function RootLayout({ children }) {
           <LiffProvider>
             <TokenSynchronizer />
             {children}
-            <Toaster
-              position="top-center"
-              containerClassName="mx-auto z-[9999] w-4/5"
-              toastOptions={toastOptions}
-            />
+            <ReactQueryDevtools />
+            <Toaster position="top-center" containerClassName="mx-auto z-[9999] w-4/5" toastOptions={toastOptions} />
           </LiffProvider>
         </QueryProvider>
       </body>

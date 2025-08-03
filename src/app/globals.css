@@ -3,15 +3,13 @@
 
 @font-face {
   font-family: "LINESeedSansTH";
-  src: url("https://cdn.jsdelivr.net/gh/ok1developer/NO1Money/LINESeedSansTH_W_Rg.woff")
-    format("woff");
+  src: url("https://cdn.jsdelivr.net/gh/ok1developer/NO1Money/LINESeedSansTH_W_Rg.woff") format("woff");
   font-weight: 400;
 }
 
 @font-face {
   font-family: "LINESeedSansTH";
-  src: url("https://cdn.jsdelivr.net/gh/ok1developer/NO1Money/LINESeedSansTH_W_Bd.woff")
-    format("woff");
+  src: url("https://cdn.jsdelivr.net/gh/ok1developer/NO1Money/LINESeedSansTH_W_Bd.woff") format("woff");
   font-weight: 700;
 }
 
@@ -56,7 +54,7 @@
 
 @keyframes floater {
   0% {
-    transform: translateY(-1%);
+    transform: translateY(0%);
     transition: ease 1s;
   }
   50% {
@@ -64,7 +62,7 @@
     transition: ease 1s;
   }
   100% {
-    transform: translateY(-1%);
+    transform: translateY(0%);
     transition: ease 1s;
   }
 }
@@ -176,7 +174,7 @@ body {
   scrollbar-width: none;
 }
 
-.gradient-background {
+.gradient-bg {
   background: linear-gradient(240deg, #7e4fff, #150046, #150047);
   background-size: 150% 150%;
   animation: gradient-animation 24s ease infinite;
@@ -279,7 +277,7 @@ body::-webkit-scrollbar {
   --animate-shine: shining 3s infinite;
   --animate-pulseUp: pulseUp 2s infinite;
   --animate-shining: shining 3s infinite linear;
-  --animate-floating: floater 10s infinite;
+  --animate-floating: floater 8s infinite;
 
   --font-family-main: "LINESeedSansTH", sans-serif;
 

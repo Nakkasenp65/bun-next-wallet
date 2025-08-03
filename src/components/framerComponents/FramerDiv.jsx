@@ -1,8 +1,9 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import { memo } from "react";
 
-export default function FramerDiv({ isOpen, children, className }) {
+const FramerDiv = memo(({ isOpen, children, className }) => {
   const variants = {
     hidden: {
       y: "100%",
@@ -27,16 +28,12 @@ export default function FramerDiv({ isOpen, children, className }) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          className={className}
-          variants={variants}
-          initial="hidden"
-          animate="visible"
-          exit="hidden"
-        >
+        <motion.div className={className} variants={variants} initial="hidden" animate="visible" exit="hidden">
           {children}
         </motion.div>
       )}
     </AnimatePresence>
   );
-}
+});
+
+export default FramerDiv;

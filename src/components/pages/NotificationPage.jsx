@@ -5,7 +5,7 @@ import { IoIosArrowBack } from "react-icons/io";
 import FramerDiv from "../framerComponents/FramerDiv";
 import NotificationTab from "../NotificationComponents/NotificationTab";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useUser } from "@/hooks/useUser";
+import { useUser } from "@/hooks/userHook";
 import Loading from "../StatusComponents/Loading";
 import ErrorComponent from "../Ui/ErrorComponent";
 import axios from "axios";

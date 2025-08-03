@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
-const fetchTransactions = async (year, month, walletId) => {
+async function fetchTransactions(year, month, walletId) {
   const response = await axios.get(`/transaction/${walletId}?year=${year}&month=${month}`);
   return response.data;
-};
+}
 
-const fetchSuccessTransactions = async (year, month, walletId) => {
+async function fetchSuccessTransactions(year, month, walletId) {
   const response = await axios.get(`/transaction/success/${walletId}?year=${year}&month=${month}`);
   return response.data;
-};
+}
 
 export function useTransactions(year, month, walletId) {
   return useQuery({

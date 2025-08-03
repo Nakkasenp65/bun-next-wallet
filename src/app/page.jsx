@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@/hooks/useUser";
+import { useUser } from "@/hooks/userHook";
 
 import Loading from "@/components/StatusComponents/Loading";
 import WalletHeader from "../components/Ui/WalletHeader";
@@ -17,7 +17,7 @@ import DepositPage from "@/components/pages/DepositPage";
 import GoalPage from "@/components/pages/GoalPage";
 import NotificationPage from "@/components/pages/NotificationPage";
 import ErrorComponent from "@/components/Ui/ErrorComponent";
-import { useUserStatus } from "@/hooks/useUserStatus";
+import { useUserStatus } from "@/hooks/userHook";
 import { useLiff } from "@/components/provider/LiffProvider";
 import ContactPage from "@/components/pages/ContactPage";
 import { useGetMissions } from "@/hooks/useMission";
@@ -26,6 +26,8 @@ import MainTransactionList from "@/components/TransactionComponents/MainTransact
 export default function HomePage() {
   const router = useRouter();
   const { liffProfile, isLoggedIn } = useLiff();
+  console.log("app/page.js CHECK LINE: ", liffProfile?.userId);
+
   const { data: userData, isLoading: isUserDataLoading, error: isUserDataError } = useUser(liffProfile?.userId);
   const { data: userStatus, isLoading: isStatusLoading, error: statusError } = useUserStatus(liffProfile?.userId);
   const { data: missionData, isLoading: missionLoading, error: missionError } = useGetMissions();
@@ -41,11 +43,8 @@ export default function HomePage() {
   console.log("userStatus: ", userStatus);
 
   useEffect(() => {
-    if (userStatus?.isNewUser) {
-      router.push("/welcome");
-    }
-    // else setIsLoggedIn(true);
-  }, [userStatus, isStatusLoading, liffProfile]);
+    if (userStatus?.isNewUser) router.push("/welcome");
+  }, [userStatus, liffProfile]);
 
   if (!liffProfile || !isLoggedIn || isStatusLoading || isUserDataLoading || missionLoading) {
     return (
@@ -58,6 +57,9 @@ export default function HomePage() {
   if (isUserDataError || statusError) {
     return <ErrorComponent />;
   }
+
+  console.log("app/page.js CHECK USER STATUS: ", userStatus);
+  console.log("app/page.js CHECK USER DATA: ", userData);
 
   if (userData)
     return (

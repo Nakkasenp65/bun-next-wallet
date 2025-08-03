@@ -1,17 +1,16 @@
 "use client";
 
 import CtaButton from "@/components/Ui/CtaButton";
-import React, { use, useEffect, useState } from "react";
-import SetupContent from "@/components/Ui/SetupContent";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import axios from "@/lib/axios";
 import { useLiff } from "@/components/provider/LiffProvider";
 import toast from "react-hot-toast";
-import { useCreateGoal } from "@/hooks/useUser";
+import { useCreateGoal } from "@/hooks/userHook";
 import UserInputMonthly from "@/components/pages/UserInputMonthly";
 import Loading from "@/components/StatusComponents/Loading";
-import ProductTabs from "@/components/welcomeComponents/ProductTabs";
 import GoalSetter from "@/components/Ui/GoalSetter";
+import MiniLoading from "@/components/StatusComponents/MiniLoading";
 
 // GET https://checkuserdb.vercel.app/api/check-user/:liffID เช็คว่าเป็นสมาชิกหรือยัง
 // 1. Check ว่าเป็นสมาชิกกับ database เดิมไหม
@@ -20,12 +19,7 @@ import GoalSetter from "@/components/Ui/GoalSetter";
 
 export default function Page() {
   const { liffProfile } = useLiff();
-  // const liffProfile = {
-  //   userId: "U5d2998909721fdea596f8e9e91e7bf85",
-  //   displayName: "Long👁️‍🗨️",
-  //   pictureUrl:
-  //     "https://profile.line-scdn.net/0hPsTqIBJhD1x5CB7EtsVxYglYDDZaeVZOVjxHahgOUGhMPU9ZVDxIORwJAj5BOhxZAWxBakoIV21bTUB3DWgHYz9BU24mUxsKPhhEezdwJwJNQTdDFRZGXRB2BRAsbhxKUDFHXDVTUDIMbD5jU2oBcTpMFWpFQCxrN19jCnw6Yd8WCngJVG9EPUQAVmrA",
-  // };
+
   const router = useRouter();
   const [goal, setGoal] = useState({});
   const [uiStep, setUiStep] = useState("input");
@@ -69,7 +63,6 @@ export default function Page() {
       monthlyPayment: inputData.monthlyPayment,
     };
 
-    // const {occupation, age-range} = inputData
     // createGoalMutate = call mutation function -> useCreateGoal inside useUser.js
     createGoalMutate(dataToPost);
   };
@@ -94,12 +87,11 @@ export default function Page() {
     const potentialPrice = inputData.monthlyPayment * 6;
     toast.loading("กำลังประมวลผล โปรดรอสักครู่");
     setUiStep("calculate");
-    const phones = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/product?maxPrice=${potentialPrice}`);
-    if (!phones) {
+    const { data } = await axios.get(`/product?maxPrice=${potentialPrice}`);
+    if (!data) {
       toast.error("เกิดความผิดพลาดในการประมวลผล");
       setUiStep("input");
     }
-    const { data } = phones;
     setSuggestedPhone(data);
   };
 
@@ -115,7 +107,7 @@ export default function Page() {
   console.log("LINE 99 INPUTDATA:", inputData);
 
   return (
-    <main id="setup-page" className="flex min-h-dvh flex-col overflow-x-hidden bg-white">
+    <main id="setup-page" className="gradient-bg flex min-h-dvh flex-col justify-center overflow-x-hidden">
       {uiStep === "input" && (
         <UserInputMonthly
           isOpen={uiStep === "input" ? true : false}
@@ -125,18 +117,14 @@ export default function Page() {
         />
       )}
 
-      {uiStep === "calculate" && <Loading message={"กำลังประมวลผล..."} />}
+      {uiStep === "calculate" && <MiniLoading message="กำลังประมวลผล..." />}
       {uiStep === "main" && suggestedPhone && (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col bg-white">
           <header className="from-primary-pink to-primary-orange flex flex-col items-center justify-center gap-2 rounded-b-4xl bg-gradient-to-br p-6 pt-14 text-white drop-shadow-lg">
             <h1 className="text-2xl font-bold text-white drop-shadow-md drop-shadow-black/30">ตั้งค่าเป้าหมายการออม</h1>
             <p className="text-xs">เลือกสิ่งที่คุณอยากได้ แล้วมาเริ่มวางแผนการออมกัน!</p>
           </header>
-
-          {/* <SetupContent goal={goal} setGoal={setGoal} /> */}
-          {/* <ProductTabs products={suggestedPhone} /> */}
           <GoalSetter products={suggestedPhone} onGoalChange={handleGoalUpdate} onBack={goBack} />
-
           <footer className="flex w-full items-center justify-center bg-white p-6 pb-12 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
             <CtaButton
               onClick={handleSetGoal}

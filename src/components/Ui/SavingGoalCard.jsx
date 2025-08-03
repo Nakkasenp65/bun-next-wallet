@@ -71,11 +71,9 @@ export default function SavingsGoalCard({ brand, name, target, balance = 20000, 
           />
         </div>
         {/* GOAL */}
-        <div className="flex items-center justify-between text-[10px] text-white/90">
-          <span className="rounded-full bg-black/50 px-2 py-1.5">
-            ดาวน์: {formatCurrency(target)}
-          </span>
-          <span className="rounded-full bg-black/50 px-2 py-1.5">
+        <div className="flex items-center justify-between text-[9px] text-white/90">
+          <span className="rounded-full bg-black/50 px-1 py-1">ดาวน์: {formatCurrency(target)}</span>
+          <span className="rounded-full bg-black/50 px-1 py-1">
             {isAchieved ? "สำเร็จแล้ว!" : `อีก: ${formatCurrency(remainingAmount)}`}
           </span>
         </div>
