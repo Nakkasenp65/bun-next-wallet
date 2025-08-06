@@ -14,10 +14,6 @@ export default function TransferContent({ amount }) {
     toast.success("คัดลอกไปยังคลิปบอร์ดแล้ว!");
   };
 
-  // The amount to display, defaulting to 0.00 if none is entered yet
-  const displayAmount =
-    parseFloat(amount) > 0 ? parseFloat(amount).toFixed(2) : "0.00";
-
   return (
     <div className="py-4">
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">

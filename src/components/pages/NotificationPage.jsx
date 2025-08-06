@@ -4,80 +4,25 @@ import React, { useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import FramerDiv from "../framerComponents/FramerDiv";
 import NotificationTab from "../NotificationComponents/NotificationTab";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@/hooks/userHook";
 import Loading from "../StatusComponents/Loading";
 import ErrorComponent from "../Ui/ErrorComponent";
-import axios from "axios";
-
-const BACKEND_API = process.env.NEXT_PUBLIC_API_URL;
-
-const fetchNotifications = async (userId) => {
-  const { data } = await axios.get(`${BACKEND_API}/notification/${userId}`);
-  return data.data;
-};
-
-const markAsReadMutationFn = async ({ notificationId, userMongoId }) => {
-  if (!notificationId || !userMongoId) {
-    throw new Error("Notification ID and User ID are required.");
-  }
-  const url = `${BACKEND_API}/notification/${notificationId}/${userMongoId}/read`;
-  const { data } = await axios.patch(url);
-  return data.data;
-};
-
-const clearNotificationsMutationFn = async (type) => {
-  const { data } = await axios.delete(`${BACKEND_API}/notification/clear?type=${type}`);
-  return data.data;
-};
+import { useNotification } from "@/hooks/useNotification";
+import { clearNotificationsMutation } from "@/hooks/useNotification";
 
 export default function NotificationPage({ userId, showNotifications, setShowNotifications }) {
   const [activeTab, setActiveTab] = useState("transactions");
-  const queryClient = useQueryClient();
   const { data: userData, isLoading: isUserLoading, error: userError } = useUser(userId);
-
-  // --- Data Fetching ---
   const {
-    data: notifications,
-    isLoading: areNotificationsLoading,
-    error: notificationsError,
-  } = useQuery({
-    queryKey: ["notifications", userData?.id],
-    queryFn: () => fetchNotifications(userData.id),
-    enabled: !!userData, // Fetch only when userData is available
-  });
-
-  // --- Mutations ---
-  const markAsReadMutation = useMutation({
-    mutationFn: markAsReadMutationFn,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["notifications", userData?.id],
-      });
-    },
-    onError: (error) => {
-      toast.error(error.message || "Failed to mark as read.");
-    },
-  });
-
-  const clearNotificationsMutation = useMutation({
-    mutationFn: clearNotificationsMutationFn,
-    onSuccess: (data) => {
-      toast.success(`${data.count} notifications cleared!`);
-      queryClient.invalidateQueries({
-        queryKey: ["notifications", userData?.id],
-      });
-    },
-    onError: () => {
-      toast.error("Failed to clear notifications.");
-    },
-  });
-
+    data: notificationData,
+    isLoading: notificationLoading,
+    error: notificationError,
+  } = useNotification(userData);
   // --- Event Handlers ---
   const handleNotificationClick = (notification) => {
     if (!notification.isRead && userData?.id) {
       markAsReadMutation.mutate({
-        notificationId: notification.id,
+        notificationId: notificationData.id,
         userMongoId: userData.id, // <-- Use the internal MongoDB ID here
       });
     }
@@ -90,21 +35,21 @@ export default function NotificationPage({ userId, showNotifications, setShowNot
   };
 
   const filteredNotifications = React.useMemo(() => {
-    if (!notifications) return []; // Return empty array if notifications haven't loaded
+    if (!notificationData) return []; // Return empty array if notifications haven't loaded
 
     if (activeTab === "transactions") {
       // The "Transactions" tab should show SENT and RECEIVE types.
-      return notifications.filter((n) => n.type === "SENT" || n.type === "RECEIVE");
+      return notificationData.filter((n) => n.type === "SENT" || n.type === "RECEIVE");
     }
     if (activeTab === "promos") {
       // The "Promos" tab should show SYSTEM and REWARD types.
-      return notifications.filter((n) => n.type === "SYSTEM" || n.type === "REWARD");
+      return notificationData.filter((n) => n.type === "SYSTEM" || n.type === "REWARD");
     }
     return []; // Fallback
-  }, [notifications, activeTab]);
+  }, [notificationData, activeTab]);
 
-  const isLoading = isUserLoading || areNotificationsLoading;
-  const error = userError || notificationsError;
+  const isLoading = isUserLoading || notificationLoading;
+  const error = userError || notificationError;
 
   if (isLoading)
     return (

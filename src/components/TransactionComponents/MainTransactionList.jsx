@@ -1,23 +1,16 @@
 import React from "react";
 import { GrTransaction } from "react-icons/gr";
 import Transaction from "./Transaction";
-import { useSuccessTransactions, useTransactions } from "@/hooks/useTransactions";
 import Loading from "../StatusComponents/Loading";
-import Link from "next/link";
 import { RiExternalLinkFill } from "react-icons/ri";
 import FramerLink from "../Ui/FramerLink";
 
 // Example data matching the original script
 
-export default function MainTransactionList({ walletId }) {
+export default function MainTransactionList({ transactions }) {
   const date = new Date();
-  const {
-    data: transactions,
-    isLoading: transactionLoading,
-    error: transactionError,
-  } = useSuccessTransactions(date.getFullYear(), date.getMonth(), walletId);
 
-  if (transactionLoading || transactionError) {
+  if (!transactions) {
     return (
       <div className="flex h-56 items-center justify-center">
         <Loading textColor="text-black" />
@@ -37,18 +30,13 @@ export default function MainTransactionList({ walletId }) {
             รายการล่าสุด
           </h2>
 
-          <FramerLink
-            link={"/history"}
-            icon={<RiExternalLinkFill size={24} />}
-            backgroundColor={"bg-amber-500"}
-          >
+          <FramerLink link={"/history"} icon={<RiExternalLinkFill size={24} />} backgroundColor={"bg-amber-500"}>
             ดูทั้งหมด
           </FramerLink>
         </header>
         <ul id="transaction-list-container">
           {transactions.map((transaction) => {
-            if (transaction.status !== "PENDING")
-              return <Transaction key={transaction.id} transaction={transaction} />;
+            if (transaction.status !== "PENDING") return <Transaction key={transaction.id} transaction={transaction} />;
           })}
         </ul>
       </div>

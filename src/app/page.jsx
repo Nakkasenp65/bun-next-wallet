@@ -20,33 +20,63 @@ import ErrorComponent from "@/components/Ui/ErrorComponent";
 import { useUserStatus } from "@/hooks/userHook";
 import { useLiff } from "@/components/provider/LiffProvider";
 import ContactPage from "@/components/pages/ContactPage";
-import { useGetMissions } from "@/hooks/useMission";
+import { useGetAvailableMissions, useGetMyMissions } from "@/hooks/useMission";
 import MainTransactionList from "@/components/TransactionComponents/MainTransactionList";
+import MyMissions from "@/components/Ui/MyMissions";
+import { useSuccessTransactions } from "@/hooks/useTransactions";
 
 export default function HomePage() {
   const router = useRouter();
+  const date = new Date();
   const { liffProfile, isLoggedIn } = useLiff();
-  console.log("app/page.js CHECK LINE: ", liffProfile?.userId);
+  const {
+    data: userStatus,
+    isLoading: isStatusLoading,
+    error: statusError,
+  } = useUserStatus(liffProfile?.userId);
+  const {
+    data: userData,
+    isLoading: isUserDataLoading,
+    error: isUserDataError,
+  } = useUser(liffProfile?.userId);
 
-  const { data: userData, isLoading: isUserDataLoading, error: isUserDataError } = useUser(liffProfile?.userId);
-  const { data: userStatus, isLoading: isStatusLoading, error: statusError } = useUserStatus(liffProfile?.userId);
-  const { data: missionData, isLoading: missionLoading, error: missionError } = useGetMissions();
-
+  const {
+    data: availableMission,
+    isLoading: missionLoading,
+    error: missionError,
+  } = useGetAvailableMissions(userData?.id);
+  const {
+    data: myMission,
+    isLoading: myMissionLoading,
+    error: myMissionError,
+  } = useGetMyMissions(userData?.id);
+  const {
+    data: transactions,
+    isLoading: transactionLoading,
+    error: transactionError,
+  } = useSuccessTransactions(
+    date.getFullYear(),
+    date.getMonth(),
+    userData?.wallet.id,
+  );
   const [showTransfer, setShowTransfer] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showDeposit, setShowDeposit] = useState(false);
   const [showGoal, setShowGoal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showContact, setShowContact] = useState(false);
-
-  console.log("userdata: ", userData);
-  console.log("userStatus: ", userStatus);
-
   useEffect(() => {
+    console.log(userStatus);
     if (userStatus?.isNewUser) router.push("/welcome");
   }, [userStatus, liffProfile]);
 
-  if (!liffProfile || !isLoggedIn || isStatusLoading || isUserDataLoading || missionLoading) {
+  if (
+    !liffProfile ||
+    !isLoggedIn ||
+    isStatusLoading ||
+    isUserDataLoading ||
+    missionLoading
+  ) {
     return (
       <div className="gradient-background flex h-dvh w-full items-center justify-center">
         <Loading />
@@ -54,29 +84,42 @@ export default function HomePage() {
     );
   }
 
-  if (isUserDataError || statusError) {
-    return <ErrorComponent />;
-  }
-
-  console.log("app/page.js CHECK USER STATUS: ", userStatus);
-  console.log("app/page.js CHECK USER DATA: ", userData);
-
+  if ((isUserDataError, statusError, missionError)) return <ErrorComponent />;
   if (userData)
     return (
       <>
         <NotificationPage
-          userId={userData.userId}
+          userId={userData?.userId}
           showNotifications={showNotifications}
           setShowNotifications={setShowNotifications}
         />
-        <TransferPage userData={userData} showTransfer={showTransfer} setShowTransfer={setShowTransfer} />
-        <WithdrawPage userData={userData} showWithdraw={showWithdraw} setShowWithdraw={setShowWithdraw} />
-        <DepositPage userData={userData} showDeposit={showDeposit} setShowDeposit={setShowDeposit} />
-        <GoalPage userData={userData} showGoal={showGoal} setShowGoal={setShowGoal} />
-        <ContactPage showContact={showContact} setShowContact={setShowContact} />
+        <TransferPage
+          userData={userData}
+          showTransfer={showTransfer}
+          setShowTransfer={setShowTransfer}
+        />
+        <WithdrawPage
+          userData={userData}
+          showWithdraw={showWithdraw}
+          setShowWithdraw={setShowWithdraw}
+        />
+        <DepositPage
+          userData={userData}
+          showDeposit={showDeposit}
+          setShowDeposit={setShowDeposit}
+        />
+        <GoalPage
+          userData={userData}
+          showGoal={showGoal}
+          setShowGoal={setShowGoal}
+        />
+        <ContactPage
+          showContact={showContact}
+          setShowContact={setShowContact}
+        />
 
         <div className="gradient-background font-main relative flex h-dvh w-full flex-col overflow-hidden lg:mx-auto lg:max-w-[450px] lg:shadow-lg">
-          <main className="flex-grow overflow-y-auto">
+          <main className="relative flex-grow overflow-y-auto">
             {/* Profile Part */}
             <section className="flex flex-col gap-8 px-6 py-4 pb-8">
               <WalletHeader
@@ -101,13 +144,17 @@ export default function HomePage() {
             </section>
 
             {/* Transaction Part */}
-            <section className="relative flex flex-col items-center gap-6 rounded-t-3xl bg-white px-6 pt-10 pb-28 shadow-lg">
+            <section className="relative flex min-h-[400px] flex-col items-center gap-6 rounded-t-3xl bg-white px-6 pt-10 pb-28 shadow-lg">
               <div className="absolute top-3 flex h-2 w-full items-center justify-center">
                 <span className="h-1.5 w-10 rounded-full bg-gray-300" />
               </div>
 
-              <SavingsMission missions={missionData} />
-              <MainTransactionList walletId={userData.wallet.id} />
+              <MyMissions missions={myMission} userId={userData?.id} />
+              <SavingsMission
+                missions={availableMission}
+                userId={userData?.id}
+              />
+              <MainTransactionList transactions={transactions} />
             </section>
           </main>
 

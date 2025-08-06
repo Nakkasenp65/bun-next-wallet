@@ -3,10 +3,14 @@
 import React, { useState, useRef, use } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
-import { FaEllipsisH, FaExclamationTriangle, FaUniversity, FaUpload } from "react-icons/fa";
+import {
+  FaEllipsisH,
+  FaExclamationTriangle,
+  FaUniversity,
+  FaUpload,
+} from "react-icons/fa";
 import { FaQrcode } from "react-icons/fa6";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import jsQR from "jsqr";
 import toast from "react-hot-toast";
 import clsx from "clsx";
 import Image from "next/image";
@@ -21,7 +25,6 @@ import { useCreateSavingTransaction } from "@/hooks/useCreateTransfer";
 
 export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
   const [activeTab, setActiveTab] = useState("transfer");
-  const [amount, setAmount] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
@@ -29,7 +32,6 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
   const closePage = () => {
     setSelectedFile(null);
     setPreviewUrl(null);
-    setAmount("");
     setActiveTab("transfer");
     setShowDeposit(false);
   };
@@ -59,35 +61,96 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
     </button>
   );
 
-  const handleFileChange = (event) => {
+  const handleFileChange = async (event) => {
+    // รีเซ็ต state ก่อนทุกครั้งเพื่อให้แน่ใจว่าเริ่มต้นจากค่าว่าง
+    setSelectedFile(null);
+    setPreviewUrl(null);
+
     const file = event.target.files[0];
-    if (file && file.type.startsWith("image/")) {
-      setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
-    } else {
-      setSelectedFile(null);
-      setPreviewUrl(null);
-      toast.error("กรุณาเลือกรูป PNG หรือ JPG");
+
+    // --- 1. ตรวจสอบว่ามีไฟล์และเป็นไฟล์รูปภาพหรือไม่ ---
+    if (!file || !file.type.startsWith("image/")) {
+      if (file) {
+        // ถ้ามีไฟล์แต่ไม่ใช่รูปภาพ
+        toast.error("กรุณาเลือกไฟล์รูปภาพนามสกุล PNG หรือ JPG");
+      }
+      // รีเซ็ตค่าใน input element (สำคัญมาก)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = null;
+      }
+      return; // จบการทำงาน
     }
+
+    const hasQRCode = await scanImageForQRCode(file);
+
+    if (!hasQRCode) {
+      toast.error("ไม่พบ QR Code ในรูปภาพสลิป กรุณาตรวจสอบและแนบใหม่อีกครั้ง");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = null;
+      }
+      return;
+    }
+
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
   };
 
-  const handleSubmit = () => {
-    // Send file to googleDrive and receive url -> save to backend database
-    const numericAmount = parseFloat(amount);
+  const scanImageForQRCode = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const image = new window.Image();
+        image.onload = () => {
+          // Create a canvas element to draw the image onto
+          const canvas = document.createElement("canvas");
+          const context = canvas.getContext("2d");
+          canvas.width = image.width;
+          canvas.height = image.height;
+          context.drawImage(image, 0, 0, image.width, image.height);
 
+          // Get the image data from the canvas
+          const imageData = context.getImageData(
+            0,
+            0,
+            canvas.width,
+            canvas.height,
+          );
+
+          const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert",
+          });
+
+          // If 'code' is not null, a QR code was found
+          if (code) {
+            console.log("QR Code found:", code.data);
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        };
+        image.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleSubmit = async () => {
     if (!selectedFile) {
       return toast.error("กรุณาแนบสลิปการโอนเงิน");
     }
 
-    const formData = new FormData();
-    formData.append("myFile", selectedFile);
-    formData.append("userId", userData.wallet.id);
+    try {
+      const formData = new FormData();
+      formData.append("slipImage", selectedFile);
+      formData.append("name", "ฝากเงินออม");
+      formData.append("type", "INCOME");
+      formData.append("status", "PENDING");
+      formData.append("from", userData.username);
+      formData.append("to", "Aom-Down App");
+      formData.append("walletId", userData.wallet.id);
 
-    createTransactionMutation.mutate({
-      walletId: userData.wallet.id,
-      username: userData.username,
-      formData: formData,
-    });
+      createTransactionMutation.mutate(formData);
+    } catch (error) {}
   };
 
   return (
@@ -131,15 +194,24 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
               </div>
 
               <div className="flex items-center justify-center gap-2">
-                <FaUniversity color="#f36" size={24} className="animate-bounce" />
-                <h1 className="text-xl font-bold text-[#f36]">เลือกช่องทางการชำระเงิน</h1>
+                <FaUniversity
+                  color="#f36"
+                  size={24}
+                  className="animate-bounce"
+                />
+                <h1 className="text-xl font-bold text-[#f36]">
+                  เลือกช่องทางการชำระเงิน
+                </h1>
               </div>
 
               <div className="flex items-start gap-3 rounded-lg bg-yellow-50 p-3 text-yellow-800">
                 <FaExclamationTriangle className="mt-1 flex-shrink-0 text-yellow-500" />
                 <p className="text-[12px]">
-                  <span className="font-bold">ข้อแนะนำ:</span> โปรดหลีกเลี่ยงการชำระเงินช่วงเวลา{" "}
-                  <span className="font-bold text-red-600">00:00 - 01:00น.</span>{" "}
+                  <span className="font-bold">ข้อแนะนำ:</span>{" "}
+                  โปรดหลีกเลี่ยงการชำระเงินช่วงเวลา{" "}
+                  <span className="font-bold text-red-600">
+                    00:00 - 01:00น.
+                  </span>{" "}
                   เพื่อป้องกันข้อผิดพลาดช่วงเวลาธนาคารปิดปรับปรุงระบบ
                 </p>
               </div>
@@ -157,10 +229,11 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
                   ))}
                 </div>
                 <div className="bg-white p-1">
-                  {activeTab === "transfer" && <TransferContent amount={amount} />}
-                  {activeTab === "promptpay" && <QrContent amount={amount} />}
+                  {activeTab === "transfer" && <TransferContent />}
+                  {activeTab === "promptpay" && <QrContent />}
                   {activeTab === "other" && <OtherMethodsContent />}
-                  {(activeTab === "spaylater" || activeTab === "creditcard") && (
+                  {(activeTab === "spaylater" ||
+                    activeTab === "creditcard") && (
                     <div className="p-16 text-center text-gray-400">
                       <p>ช่องทางนี้ยังไม่เปิดให้บริการ</p>
                     </div>
@@ -187,7 +260,9 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
                   ) : (
                     <>
                       <FaUpload className="text-3xl text-gray-400" />
-                      <p className="mt-2 font-medium text-gray-700">คลิกเพื่อแนบสลิป</p>
+                      <p className="mt-2 font-medium text-gray-700">
+                        คลิกเพื่อแนบสลิป
+                      </p>
                       <p className="text-xs text-gray-500">รองรับ: JPG, PNG</p>
                     </>
                   )}
@@ -209,7 +284,9 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
               disabled={!selectedFile || createTransactionMutation.isPending}
               className="z-10 w-48 rounded-xl p-4 text-base font-bold"
             >
-              {createTransactionMutation.isPending ? "กำลังส่ง..." : "ยืนยันการชำระเงิน"}
+              {createTransactionMutation.isPending
+                ? "กำลังส่ง..."
+                : "ยืนยันการชำระเงิน"}
             </CtaButton>
           </div>
         </div>

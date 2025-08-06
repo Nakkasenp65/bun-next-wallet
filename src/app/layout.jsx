@@ -5,14 +5,10 @@ import { FaRegCircleCheck } from "react-icons/fa6";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import QueryProvider from "@/components/provider/QueryProvider";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { LiffProvider, useLiff } from "@/components/provider/LiffProvider";
-import { Suspense } from "react";
-import ErrorBoundary from "@/components/StatusComponents/ErrorBoundary";
-import Loading from "@/components/StatusComponents/Loading";
-import ErrorComponent from "@/components/Ui/ErrorComponent";
+import { LiffProvider } from "@/components/provider/LiffProvider";
 import TokenSynchronizer from "@/components/provider/TokenSynchronizer";
 
-const toastIconClass = "mr-4 h-8 w-auto animate-pulse";
+const toastIconClass = "h-12 w-auto animate-pulse";
 const toastWaiting = "animate-spin text-primary-pink";
 
 export const toastOptions = {
@@ -22,9 +18,8 @@ export const toastOptions = {
     fontWeight: "bold",
     borderRadius: "12px",
     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-    padding: "8px 32px",
-    marginTop: "24px",
-    fontSize: "18px",
+    padding: "8px 24px",
+    fontSize: "14px",
   },
   success: {
     icon: <FaRegCircleCheck className={toastIconClass} />,
@@ -40,7 +35,7 @@ export const toastOptions = {
     icon: <AiOutlineLoading3Quarters className={toastWaiting} />,
   },
   position: "top-center",
-  duration: 4000,
+  duration: 5000,
 };
 
 export const metadata = {
@@ -57,7 +52,7 @@ export default function RootLayout({ children }) {
             <TokenSynchronizer />
             {children}
             <ReactQueryDevtools />
-            <Toaster position="top-center" containerClassName="mx-auto z-[9999] w-4/5" toastOptions={toastOptions} />
+            <Toaster position="top-center" containerClassName="mx-auto z-[9999] w-5/6" toastOptions={toastOptions} />
           </LiffProvider>
         </QueryProvider>
       </body>

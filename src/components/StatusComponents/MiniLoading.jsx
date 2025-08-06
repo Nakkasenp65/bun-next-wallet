@@ -6,6 +6,7 @@ export default function MiniLoading({ message = "กำลังโหลด..."
     <div className="flex flex-col items-center justify-center gap-4">
       <Image
         className="h-auto w-40 drop-shadow-xl drop-shadow-black/50"
+        alt="pig loading icon"
         src="/videos/pigIcon.gif"
         width="150"
         height="150"

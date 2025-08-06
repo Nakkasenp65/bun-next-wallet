@@ -4,7 +4,13 @@ import Image from "next/image";
 
 const formatCurrency = (num) => `฿${num.toLocaleString("en-US")}`;
 
-export default function SavingsGoalCard({ brand, name, target, balance = 20000, imageUrl }) {
+export default function SavingsGoalCard({
+  brand,
+  name,
+  target,
+  balance = 20000,
+  imageUrl,
+}) {
   const progress = progressDisplay();
   const remainingAmount = Math.max(0, target - balance);
   const isAchieved = balance >= target;
@@ -22,7 +28,7 @@ export default function SavingsGoalCard({ brand, name, target, balance = 20000, 
       className="text-light-text shadow-neon-purple inset-shadow-lg relative flex flex-col gap-4 overflow-hidden rounded-3xl p-6 inset-shadow-black/36 [background:linear-gradient(45deg,_#230640_0%,_#402E99_100%)]"
     >
       <Image
-        className="animate-floating drop-shadow-primary-pink absolute -right-18 -bottom-4 h-auto w-[240px] -rotate-6 drop-shadow-2xl sm:-bottom-12 sm:w-[300px] sm:-rotate-10"
+        className="animate-floating drop-shadow-primary-pink absolute -right-28 -bottom-16 h-auto w-[240px] -rotate-6 drop-shadow-2xl sm:-bottom-12 sm:w-[300px] sm:-rotate-10"
         src={imageUrl}
         alt="mobile phone image"
         width={300}
@@ -72,9 +78,13 @@ export default function SavingsGoalCard({ brand, name, target, balance = 20000, 
         </div>
         {/* GOAL */}
         <div className="flex items-center justify-between text-[9px] text-white/90">
-          <span className="rounded-full bg-black/50 px-1 py-1">ดาวน์: {formatCurrency(target)}</span>
           <span className="rounded-full bg-black/50 px-1 py-1">
-            {isAchieved ? "สำเร็จแล้ว!" : `อีก: ${formatCurrency(remainingAmount)}`}
+            ดาวน์: {formatCurrency(target)}
+          </span>
+          <span className="rounded-full bg-black/50 px-1 py-1">
+            {isAchieved
+              ? "สำเร็จแล้ว!"
+              : `อีก: ${formatCurrency(remainingAmount)}`}
           </span>
         </div>
       </div>

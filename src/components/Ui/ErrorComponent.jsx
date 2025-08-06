@@ -19,7 +19,7 @@ export default function ErrorComponent({
 
   return (
     // Main container with the same theme as your app's dark background
-    <div className="gradient-background flex h-dvh w-full flex-col items-center justify-center p-6 text-center">
+    <div className="gradient-bg flex h-dvh w-full flex-col items-center justify-center p-6 text-center">
       {/* Icon: Using a vibrant, attention-grabbing color from your theme */}
       <div className="mb-6">
         <FontAwesomeIcon

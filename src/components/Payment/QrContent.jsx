@@ -2,12 +2,9 @@
 import Image from "next/image";
 import React from "react";
 import { IoIosWarning } from "react-icons/io";
-import { FaDownload, FaFolderOpen, FaMobileAlt, FaImage } from "react-icons/fa";
 
 export default function QrContent({ amount }) {
-  const displayAmount =
-    parseFloat(amount) > 0 ? parseFloat(amount).toFixed(2) : "0.00";
-  const qrCodeUrl = `https://no-1-genqrcodepromptpay.vercel.app/api/?amount=${displayAmount}`;
+  const qrCodeUrl = `https://no-1-genqrcodepromptpay.vercel.app/api/?amount=0`;
   return (
     <div className="p-4 text-center">
       <div className="mx-auto flex w-full items-center justify-center gap-2 rounded-t-xl bg-[#0e3d67] px-4 py-3 text-white">

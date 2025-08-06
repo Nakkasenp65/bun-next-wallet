@@ -10,7 +10,7 @@ export default function ({ backgroundColor, link, children, icon }) {
     >
       <Link
         href={link}
-        className={`${backgroundColor} flex items-center gap-1 rounded-lg px-2 py-2 text-xs font-semibold text-white`}
+        className={`${backgroundColor} flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-semibold text-white`}
       >
         {children}
         {icon}

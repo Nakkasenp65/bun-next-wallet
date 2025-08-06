@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 // For a more modern, cohesive look, using icons from the popular 'react-icons' library
-import { FaPaperPlane, FaWallet, FaPiggyBank, FaBullseye, FaStar } from "react-icons/fa6";
+import {
+  FaPaperPlane,
+  FaWallet,
+  FaPiggyBank,
+  FaBullseye,
+  FaStar,
+} from "react-icons/fa6";
 
 export default function ActionGrid({
   setShowTransfer,
@@ -18,6 +24,12 @@ export default function ActionGrid({
   // A more scalable data structure that can handle both functions and links
   const actionItems = [
     {
+      label: "ออมเงิน",
+      icon: FaPiggyBank,
+      key: "deposit",
+      action: () => setShowDeposit(true),
+    },
+    {
       label: "โอนเงิน",
       icon: FaPaperPlane,
       key: "transfer",
@@ -29,12 +41,7 @@ export default function ActionGrid({
       key: "withdraw",
       action: () => setShowWithdraw(true),
     },
-    {
-      label: "ออมเงิน",
-      icon: FaPiggyBank,
-      key: "deposit",
-      action: () => setShowDeposit(true),
-    },
+
     {
       label: "เป้าหมาย",
       icon: FaBullseye,
@@ -84,18 +91,18 @@ export default function ActionGrid({
       {actionItems.map((item) => (
         <motion.div
           key={item.key}
-          className="group flex cursor-pointer flex-col items-center gap-2"
+          className={`group flex cursor-pointer flex-col items-center gap-2`}
           onClick={item.action}
           variants={itemVariants}
           whileHover={{ scale: 1.05 }} // Subtle scale on hover for the whole group
         >
           <motion.div
-            className="flex h-14 w-14 items-center justify-center rounded-xl bg-black/50 text-xl text-white/90 shadow-md transition-colors group-hover:bg-white/20"
+            className={`flex h-14 w-14 items-center justify-center rounded-xl bg-white/80 text-xl text-white/90 shadow-md transition-colors group-hover:bg-white/20 backdrop:blur-2xl`}
             whileTap={{ scale: 0.9 }} // Bouncier, more satisfying tap effect
             transition={{ type: "spring", stiffness: 1500, damping: 17 }}
           >
             {/* The Icon component is rendered dynamically */}
-            <item.icon />
+            <item.icon size={24} color="purple" />
           </motion.div>
           <span className="text-xs font-bold text-white/80 transition-colors group-hover:text-white">
             {item.label}

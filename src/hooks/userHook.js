@@ -1,10 +1,14 @@
-import { useMutation, useQuery, useQueryClient, userQueryOptions } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  userQueryOptions,
+} from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 async function fetchUserStatus(userId) {
-  console.log("hooks/userHook.js userId : ", userId);
   const { data } = await axios.get(`/user/status/${userId}`);
   return data;
 }
@@ -43,13 +47,16 @@ export function useCreateGoal() {
     // variables from goalData ที่เราส่งเข้ามา
     onSuccess: async (data) => {
       await queryClient.setQueryData(["user", data.userId], data);
-      await queryClient.setQueryData(["userStatus", data.userId], { isNewUser: false });
+      await queryClient.setQueryData(["userStatus", data.userId], {
+        isNewUser: false,
+      });
       toast.success("สร้างเป้าหมายการออมเงินสำเร็จ!");
       router.push("/");
     },
     onError: (error) => {
       console.error("Error creating goal:", error);
-      const errorMessage = error.response?.data?.message || "สร้างเป้าหมายการออมเงินไม่สำเร็จ";
+      const errorMessage =
+        error.response?.data?.message || "สร้างเป้าหมายการออมเงินไม่สำเร็จ";
       toast.error(errorMessage);
     },
   });
