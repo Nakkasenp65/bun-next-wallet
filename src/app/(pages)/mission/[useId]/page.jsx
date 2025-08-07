@@ -1,5 +1,4 @@
-import NotificationPage from "@/components/pages/NotificationPage";
-import { clouddebugger } from "googleapis/build/src/apis/clouddebugger";
+"use client";
 import { useParams } from "next/navigation";
 
 export default function Page() {
