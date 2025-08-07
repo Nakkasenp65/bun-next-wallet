@@ -1,13 +1,10 @@
 import React from "react";
-import { GrMoney } from "react-icons/gr";
 import { MdOutlineSavings } from "react-icons/md";
-import { AiOutlineGift } from "react-icons/ai";
 import { RiExternalLinkFill } from "react-icons/ri";
 import FramerLink from "./FramerLink";
 import MyMissionCard from "../MissionComponents/MyMissionCard";
 
-export default function MyMissions({ missions }) {
-  console.log(missions[0]);
+export default function MyMissions({ missions, userId }) {
   // Handler for the "Start Now" button
   const handleEnrollClick = (missionId) => {
     enroll(missionId);
@@ -27,15 +24,12 @@ export default function MyMissions({ missions }) {
     <div className="flex w-full flex-col gap-4">
       {/* Section Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          <MdOutlineSavings
-            className="text-primary-pink h-auto w-8"
-            size={16}
-          />
-          <h2 className="text-bg-dark text-base font-bold">ภารกิจของฉัน</h2>
+        <div className="flex items-center gap-2">
+          <div className="bg-primary-pink h-6 w-1 rounded-full" size={16} />
+          <h2 className="text-bg-dark text-lg font-bold">ภารกิจของฉัน</h2>
         </div>
         <FramerLink
-          link={"/mission"}
+          link={`/mission/${userId}`}
           icon={<RiExternalLinkFill size={16} />}
           backgroundColor={"bg-primary-pink"}
         >

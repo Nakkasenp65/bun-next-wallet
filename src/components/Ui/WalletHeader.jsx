@@ -14,9 +14,15 @@ const getGreeting = () => {
   return "สวัสดีตอนเย็น,";
 };
 
-export default function WalletHeader({ userName, setShowNotifications, profileUrl, notifications }) {
+export default function WalletHeader({
+  userName,
+  setShowNotifications,
+  profileUrl,
+  notifications,
+}) {
   const greeting = getGreeting();
-  const unreadNotifications = notifications?.filter((notification) => !notification.isRead).length || 0;
+  const unreadNotifications =
+    notifications?.filter((notification) => !notification.isRead).length || 0;
   // const unreadNotifications = 9;
 
   return (
@@ -28,23 +34,32 @@ export default function WalletHeader({ userName, setShowNotifications, profileUr
           width={50}
           height={50}
           alt="profile image"
-          className="border-primary-pink shadow-neon-pink-sm h-8 w-8 rounded-full border-2 object-cover"
+          className="border-primary-pink shadow-neon-pink-sm h-10 w-auto rounded-full border-2 object-cover"
         />
         <div className="flex flex-col">
           <div className="text-secondary-text text-xs">สวัสดี</div>
-          <div className="text-[10px]">{userName}</div>
+          <div className="text-sm">{userName}</div>
         </div>
       </div>
 
       {/* App Logo (Centered) */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <Image src="/okNumberOne.png" alt="1 Wallet Logo" className="h-9 w-9 shadow-sm" width={100} height={100} />
+        <Image
+          src="/okNumberOne.png"
+          alt="1 Wallet Logo"
+          className="h-9 w-9 shadow-sm"
+          width={100}
+          height={100}
+        />
       </div>
 
       {/* Header Actions */}
       <div className="flex items-center gap-1">
         {/* Lock Icon: Notification */}
-        <div id="lock-btn" className="text-secondary-text hover:text-primary-pink cursor-pointer text-2xl transition">
+        <div
+          id="lock-btn"
+          className="text-secondary-text hover:text-primary-pink cursor-pointer text-2xl transition"
+        >
           <MdLock className="h-auto w-6" />
         </div>
         {/* Bell Icon: Notification */}

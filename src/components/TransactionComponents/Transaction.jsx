@@ -1,8 +1,11 @@
 "use client";
 import React, { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IoIosArrowForward } from "react-icons/io";
-import { MdAttachMoney, MdOutlineMoneyOffCsred } from "react-icons/md";
+import { MdArrowUpward, MdArrowDownward } from "react-icons/md";
+import { AnimatePresence, motion } from "framer-motion";
+import StatusBadge from "./StatusBadge";
+import { FaBan, FaReceipt } from "react-icons/fa6";
+import { FaInfoCircle } from "react-icons/fa";
 
 const incomeIcon = "text-green-500 w-6 h-auto ";
 const outcomeIcon = "text-red-500 w-6 h-auto ";
@@ -26,75 +29,155 @@ const formatRelativeTime = (dateString) => {
 
 export default function Transaction({ transaction }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const isReceived = transaction.type === "INCOME";
-  const amountColor = isReceived ? "text-success-green" : "text-danger-red";
-  const icon = isReceived ? (
-    <MdAttachMoney className={incomeIcon} />
-  ) : (
-    <MdOutlineMoneyOffCsred className={outcomeIcon} />
-  );
+
+  // --- 1. กำหนดค่าต่างๆ ตามประเภทและสถานะ ---
+  const isIncome =
+    transaction.type === "INCOME" || transaction.type === "REWARD";
+  const isPending = transaction.status === "PENDING";
+  const isRejected = transaction.status === "REJECTED"; // <-- 2. เพิ่มตัวแปร isRejected
+
+  const amount = isPending ? transaction.verifiedAmount : transaction.amount;
+  const amountDisplay = amount ?? transaction.verifiedAmount;
+
+  const iconConfig = {
+    INCOME: {
+      icon: <MdArrowUpward />,
+      bg: "bg-green-100",
+      text: "text-green-600",
+    },
+    REWARD: {
+      icon: <MdArrowUpward />,
+      bg: "bg-green-100",
+      text: "text-green-600",
+    },
+    OUTCOME: {
+      icon: <MdArrowDownward />,
+      bg: "bg-red-100",
+      text: "text-red-600",
+    },
+  };
+
+  // --- 3. สร้าง displayConfig เพื่อจัดการสถานะ REJECTED ---
+  // เริ่มต้นด้วย config ปกติตามประเภท
+  let displayConfig = iconConfig[transaction.type] || iconConfig.OUTCOME;
+
+  // ถ้าสถานะเป็น REJECTED, ให้ override ค่า icon และสี
+  if (isRejected) {
+    displayConfig = {
+      icon: <FaBan />, // ใช้ไอคอนกากบาท/แบน
+      bg: "bg-gray-200", // ทำให้สีพื้นหลังดูจืดลง
+      text: "text-gray-500", // ทำให้สีไอคอนดูจืดลง
+    };
+  }
+
+  // --- 4. อัปเดตฟังก์ชันสำหรับแสดงผลจำนวนเงิน ---
+  const renderAmount = () => {
+    "";
+    // ตรวจสอบสถานะ REJECTED ก่อนเป็นอันดับแรก
+    if (isRejected) {
+      return <span className="text-sm font-bold text-red-500">ถูกปฏิเสธ</span>;
+    }
+    if (isPending) {
+      return (
+        <span className="text-sm font-medium text-gray-500">รอตรวจสอบ</span>
+      );
+    }
+    if (amountDisplay === null || amountDisplay === undefined) {
+      return <span className="text-sm font-medium text-gray-400">-</span>;
+    }
+    return (
+      <span className={`font-bold ${displayConfig.text}`}>
+        {isIncome ? "+" : "-"} ฿
+        {amountDisplay.toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+      </span>
+    );
+  };
 
   return (
-    <li className="border-divider list-none border-b last:border-b-0">
-      {/* Transaction */}
-      <div className="flex items-center py-4" onClick={() => setIsExpanded((prev) => !prev)}>
-        {/* Details */}
-        <div className="flex flex-shrink items-center gap-2">
-          {/* Arrow Icon */}
+    <li className="list-none border-b border-gray-100 last:border-b-0">
+      {/* ส่วนหลักที่คลิกได้ */}
+      <div
+        className="flex cursor-pointer items-center gap-4 p-4 transition-colors hover:bg-gray-50"
+        onClick={() => setIsExpanded((prev) => !prev)}
+      >
+        {/* --- 5. ใช้ displayConfig ที่นี่ --- */}
+        <div
+          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${displayConfig.bg} ${displayConfig.text}`}
+        >
+          {displayConfig.icon}
+        </div>
+        <div className="flex-grow">
+          <p className="font-semibold text-gray-800">{transaction.name}</p>
+          <p className="text-xs text-gray-500">
+            {formatRelativeTime(transaction.createdAt)}
+          </p>
+        </div>
+        <div className="flex flex-col items-end">
+          {renderAmount()}
           <IoIosArrowForward
             className={`text-gray-400 transition-transform ${isExpanded ? "rotate-90" : ""}`}
           />
-          {/* Payment icon */}
-          <div
-            className={`flex items-center justify-center rounded-full bg-gray-100 p-2 drop-shadow-md drop-shadow-black/15 ${amountColor}`}
+        </div>
+      </div>
+
+      {/* ส่วนรายละเอียดที่ขยายได้ (ใช้ AnimatePresence) */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden px-4 pb-4"
           >
-            {icon}
-          </div>
-          {/* title and time */}
-          <div className="flex w-24 flex-col">
-            <div className="w-32 text-sm font-semibold text-gray-800">{transaction.name}</div>
-            <div className="text-xs text-gray-500">{formatRelativeTime(transaction.createdAt)}</div>
-          </div>
-        </div>
+            <div className="space-y-3 rounded-lg bg-gray-100 p-4 text-sm">
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-600">สถานะ</span>
+                <StatusBadge status={transaction.status} />
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-600">จาก</span>
+                <span className="text-right font-mono text-gray-800">
+                  {transaction.from}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-600">ไปยัง</span>
+                <span className="text-right font-mono text-gray-800">
+                  {transaction.to}
+                </span>
+              </div>
 
-        {/* Amount */}
-        <div className="w-full grow text-right font-bold">
-          {transaction.amount != null ? (
-            <span className={amountColor}>฿{transaction.amount.toLocaleString()}</span>
-          ) : (
-            <span className="text-gray-500">กำลังตรวจสอบ</span>
-          )}
-        </div>
-      </div>
+              {transaction.description && (
+                <div className="flex items-start gap-2 rounded-md bg-blue-50 p-2 text-blue-800">
+                  <FaInfoCircle className="mt-0.5 flex-shrink-0" />
+                  <p className="text-xs">{transaction.description}</p>
+                </div>
+              )}
 
-      {/* Expanded Details */}
-      <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isExpanded ? "max-h-96 pb-4 opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <ul className="grid grid-cols-1 gap-1 rounded-lg bg-gray-100 p-3 text-sm">
-          <li className="flex items-center justify-between">
-            <span className="font-bold text-gray-600">จาก</span>
-            <span className="text-gray-800">{transaction.from}</span>
-          </li>
-          <li className="flex items-center justify-between">
-            <span className="font-bold text-gray-600">ไปยัง</span>
-            <span className="text-gray-800">{transaction.to}</span>
-          </li>
-          <li className="flex items-center justify-between">
-            <span className="font-bold text-gray-600">สถานะ</span>
-            <span
-              className={`rounded-lg p-1 px-2 text-[12px] font-bold text-white ${transaction.status === "SUCCESS" ? "bg-green-500" : "bg-amber-500"}`}
-            >
-              {transaction.status}
-            </span>
-          </li>
-          <li className="mt-2 flex flex-col">
-            <span className="text-[12px] text-gray-500">เลขที่รายการ: {transaction.id}</span>
-          </li>
-        </ul>
-      </div>
+              {transaction.slipImageUrl && (
+                <a
+                  href={transaction.slipImageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-white py-2 font-semibold text-blue-600 shadow-sm transition-all hover:bg-blue-50 hover:shadow-md"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <FaReceipt />
+                  <span>ดูสลิปการโอนเงิน</span>
+                </a>
+              )}
+
+              <div className="border-t border-gray-200 pt-2 text-center text-xs text-gray-400">
+                ID: {transaction.id}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </li>
   );
 }

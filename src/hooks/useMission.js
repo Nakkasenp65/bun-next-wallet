@@ -7,7 +7,7 @@ const fetchAvailableMissions = async (userId) => {
 };
 
 const fetchMyMissions = async (userId) => {
-  const { data } = await axios.get(`/mission/my-missions/${userId}`);
+  const { data } = await axios.get(`/user-mission/${userId}`);
   return data;
 };
 

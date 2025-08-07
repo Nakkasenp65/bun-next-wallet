@@ -25,12 +25,9 @@ export default function SavingsMission({ missions, userId }) {
       <div className="flex w-full flex-col gap-4">
         {/* Section Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <MdOutlineSavings
-              className="text-primary-pink h-auto w-8"
-              size={16}
-            />
-            <h2 className="text-bg-dark text-base font-bold">ภารกิจพิเศษ</h2>
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-1 rounded-full bg-purple-500" />
+            <h2 className="text-bg-dark text-lg font-bold">ภารกิจพิเศษ</h2>
           </div>
           <FramerLink
             link={"/mission"}
@@ -42,7 +39,7 @@ export default function SavingsMission({ missions, userId }) {
         </div>
 
         {/* Horizontal Scroll Container */}
-        <div className="flex gap-4 overflow-x-auto p-2">
+        <div className="flex gap-4 overflow-x-auto">
           {missions.map((mission) => {
             return (
               <div

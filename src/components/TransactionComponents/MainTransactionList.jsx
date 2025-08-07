@@ -22,21 +22,25 @@ export default function MainTransactionList({ transactions }) {
     return (
       <div className="flex w-full flex-col gap-2">
         <header className="flex justify-between">
-          <h2 className="text-bg-dark flex items-center gap-2 text-base font-semibold">
-            <GrTransaction
-              size={32}
-              className="rounded-md bg-gray-100 p-1 text-amber-400 drop-shadow-sm drop-shadow-black/25"
-            />
+          <h2 className="text-bg-dark flex items-center gap-2 text-lg font-bold">
+            <div className="h-6 w-1 rounded-full bg-yellow-500" />
             รายการล่าสุด
           </h2>
 
-          <FramerLink link={"/history"} icon={<RiExternalLinkFill size={24} />} backgroundColor={"bg-amber-500"}>
+          <FramerLink
+            link={"/history"}
+            icon={<RiExternalLinkFill size={16} />}
+            backgroundColor={"bg-amber-500"}
+          >
             ดูทั้งหมด
           </FramerLink>
         </header>
         <ul id="transaction-list-container">
           {transactions.map((transaction) => {
-            if (transaction.status !== "PENDING") return <Transaction key={transaction.id} transaction={transaction} />;
+            if (transaction.status !== "PENDING")
+              return (
+                <Transaction key={transaction.id} transaction={transaction} />
+              );
           })}
         </ul>
       </div>

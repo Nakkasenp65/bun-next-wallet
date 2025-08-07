@@ -66,7 +66,6 @@ export default function HomePage() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showContact, setShowContact] = useState(false);
   useEffect(() => {
-    console.log(userStatus);
     if (userStatus?.isNewUser) router.push("/welcome");
   }, [userStatus, liffProfile]);
 
@@ -121,7 +120,7 @@ export default function HomePage() {
         <div className="gradient-background font-main relative flex h-dvh w-full flex-col overflow-hidden lg:mx-auto lg:max-w-[450px] lg:shadow-lg">
           <main className="relative flex-grow overflow-y-auto">
             {/* Profile Part */}
-            <section className="flex flex-col gap-8 px-6 py-4 pb-8">
+            <section className="flex flex-col gap-10 px-6 py-4 pb-8">
               <WalletHeader
                 userName={userData.username}
                 profileUrl={userData.userProfilePicUrl}
@@ -144,7 +143,7 @@ export default function HomePage() {
             </section>
 
             {/* Transaction Part */}
-            <section className="relative flex min-h-[400px] flex-col items-center gap-6 rounded-t-3xl bg-white px-6 pt-10 pb-28 shadow-lg">
+            <section className="relative flex min-h-[400px] flex-col items-center gap-8 rounded-t-3xl bg-white px-6 pt-10 pb-28 shadow-lg">
               <div className="absolute top-3 flex h-2 w-full items-center justify-center">
                 <span className="h-1.5 w-10 rounded-full bg-gray-300" />
               </div>
