@@ -80,7 +80,7 @@ export default function UserInputMonthly({
       label: "จำนวนยอดจ่ายรายเดือน",
       placeholder: "ขั้นต่ำ 500 บาท",
       type: "number",
-      inputMode: "numberic",
+      inputMode: "numeric",
     },
   ];
 
