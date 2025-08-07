@@ -2,7 +2,11 @@
 
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight, faDownload } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faChevronRight,
+  faDownload,
+} from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { useTransactions } from "@/hooks/useTransactions"; // 1. Import hook ใหม่
 import CtaButton from "@/components/Ui/CtaButton";
@@ -34,7 +38,11 @@ export default function HistoryPage() {
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
 
-  const { data: userData, isLoading: userLoading, error: userError } = useUser(liffProfile?.userId);
+  const {
+    data: userData,
+    isLoading: userLoading,
+    error: userError,
+  } = useUser(liffProfile?.userId);
   const {
     data: transactions,
     isLoading: transactionLoading,
@@ -59,10 +67,16 @@ export default function HistoryPage() {
     });
   };
 
-  const isCurrentMonth = currentYear === new Date().getFullYear() && currentMonth === new Date().getMonth();
+  const isCurrentMonth =
+    currentYear === new Date().getFullYear() &&
+    currentMonth === new Date().getMonth();
 
-  if (userLoading) {
-    return <Loading message="กำลังโหลดข้อมูลผู้ใช้..." />;
+  if (userLoading || transactionLoading) {
+    return (
+      <div className="flex h-dvh w-full items-center justify-center">
+        <Loading message="กำลังโหลดข้อมูลผู้ใช้" />
+      </div>
+    );
   }
 
   return (
@@ -86,7 +100,10 @@ export default function HistoryPage() {
         <div className="p-6">
           {/* Period Selector (remains visible and interactive) */}
           <div className="flex items-center justify-between rounded-lg bg-gray-100 p-3">
-            <button onClick={handlePrevMonth} className="text-gray-500 hover:text-black">
+            <button
+              onClick={handlePrevMonth}
+              className="text-gray-500 hover:text-black"
+            >
               <FontAwesomeIcon icon={faChevronLeft} />
             </button>
             <span className="text-bg-dark font-bold">
@@ -116,11 +133,17 @@ export default function HistoryPage() {
                 <TransactionSkeleton />
               </>
             ) : error ? (
-              <p className="p-8 text-center text-red-500">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
+              <p className="p-8 text-center text-red-500">
+                เกิดข้อผิดพลาดในการโหลดข้อมูล
+              </p>
             ) : transactions && transactions.length > 0 ? (
-              transactions.map((transaction) => <Transaction key={transaction.id} transaction={transaction} />)
+              transactions.map((transaction) => (
+                <Transaction key={transaction.id} transaction={transaction} />
+              ))
             ) : (
-              <p className="p-8 text-center text-gray-500">ไม่พบรายการในเดือนนี้</p>
+              <p className="p-8 text-center text-gray-500">
+                ไม่พบรายการในเดือนนี้
+              </p>
             )}
           </ul>
         </div>
@@ -128,7 +151,9 @@ export default function HistoryPage() {
 
       {/* Page Footer (remains visible) */}
       <footer className="flex justify-center bg-white p-6 pt-4">
-        <CtaButton className={"z-10 w-48 rounded-xl p-4 text-lg font-bold"}>ขอรายการเดินบัญชี</CtaButton>
+        <CtaButton className={"z-10 w-48 rounded-xl p-4 text-lg font-bold"}>
+          ขอรายการเดินบัญชี
+        </CtaButton>
       </footer>
     </div>
   );

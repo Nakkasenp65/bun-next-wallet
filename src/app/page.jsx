@@ -69,13 +69,7 @@ export default function HomePage() {
     if (userStatus?.isNewUser) router.push("/welcome");
   }, [userStatus, liffProfile]);
 
-  if (
-    !liffProfile ||
-    !isLoggedIn ||
-    isStatusLoading ||
-    isUserDataLoading ||
-    missionLoading
-  ) {
+  if (!liffProfile || !isLoggedIn || isStatusLoading || isUserDataLoading) {
     return (
       <div className="gradient-background flex h-dvh w-full items-center justify-center">
         <Loading />

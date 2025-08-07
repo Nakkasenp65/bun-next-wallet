@@ -31,10 +31,15 @@ export default function Page() {
   });
   const [monthlyPayment, setMonthlyPayment] = useState("");
   const [suggestedPhone, setSuggestedPhone] = useState(null);
-  const { mutate: createGoalMutate, isPending: createGoalPending } = useCreateGoal();
+  const { mutate: createGoalMutate, isPending: createGoalPending } =
+    useCreateGoal();
 
   const handleGoalUpdate = (newGoal) => {
-    setGoal((prev) => ({ ...prev, mobileId: newGoal.mobileId, planId: newGoal.planId }));
+    setGoal((prev) => ({
+      ...prev,
+      mobileId: newGoal.mobileId,
+      planId: newGoal.planId,
+    }));
   };
 
   const goBack = () => {
@@ -50,7 +55,10 @@ export default function Page() {
     const { userId: liffId, displayName, pictureUrl } = liffProfile;
     const { mobileId, planId } = goal;
 
-    const finalOccupation = inputData.occupation === "อื่นๆ" ? inputData.customOccupation : inputData.occupation;
+    const finalOccupation =
+      inputData.occupation === "อื่นๆ"
+        ? inputData.customOccupation
+        : inputData.occupation;
 
     const dataToPost = {
       liffId,
@@ -70,15 +78,19 @@ export default function Page() {
   const handleUserRedirect = async (userId) => {
     // ตรวจสอบว่าเป็น user บน NUMBER 1 MOBI ไหม
     try {
-      // const response = await axios.get(`https://checkuserdb.vercel.app/api/check-user/${userId} `);
+      const response = await axios.get(
+        `https://checkuserdb.vercel.app/api/check-user/${userId} `,
+      );
       // ตอบมา = เป็น ไม่ตอบหรือ 404 คือไม่เป็นสมาชิก หรือ server offline
-      // if (response) toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
+      if (response) toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
     } catch (error) {
       console.log("new user: ", error.status === 404);
       console.log("new user: ", error.status === 500);
 
-      // if (error.status === 404) router.replace("https://liff.line.me/2006703040-RYAyYAyA");
-      // else if (error.status === 500) toast.error("ขออภัย ขณะเกิดข้อผิดพลาดระหว่างการดำเนินการ!");
+      if (error.status === 404)
+        router.replace("https://liff.line.me/2006703040-RYAyYAyA");
+      else if (error.status === 500)
+        toast.error("ขออภัย ขณะเกิดข้อผิดพลาดระหว่างการดำเนินการ!");
     }
   };
 
@@ -107,7 +119,10 @@ export default function Page() {
   console.log("LINE 99 INPUTDATA:", inputData);
 
   return (
-    <main id="setup-page" className="gradient-bg flex min-h-dvh flex-col justify-center overflow-x-hidden">
+    <main
+      id="setup-page"
+      className="gradient-bg flex min-h-dvh flex-col justify-center overflow-x-hidden"
+    >
       {uiStep === "input" && (
         <UserInputMonthly
           isOpen={uiStep === "input" ? true : false}
@@ -121,10 +136,18 @@ export default function Page() {
       {uiStep === "main" && suggestedPhone && (
         <div className="flex flex-col bg-white">
           <header className="from-primary-pink to-primary-orange flex flex-col items-center justify-center gap-2 rounded-b-4xl bg-gradient-to-br p-6 pt-14 text-white drop-shadow-lg">
-            <h1 className="text-2xl font-bold text-white drop-shadow-md drop-shadow-black/30">ตั้งค่าเป้าหมายการออม</h1>
-            <p className="text-xs">เลือกสิ่งที่คุณอยากได้ แล้วมาเริ่มวางแผนการออมกัน!</p>
+            <h1 className="text-2xl font-bold text-white drop-shadow-md drop-shadow-black/30">
+              ตั้งค่าเป้าหมายการออม
+            </h1>
+            <p className="text-xs">
+              เลือกสิ่งที่คุณอยากได้ แล้วมาเริ่มวางแผนการออมกัน!
+            </p>
           </header>
-          <GoalSetter products={suggestedPhone} onGoalChange={handleGoalUpdate} onBack={goBack} />
+          <GoalSetter
+            products={suggestedPhone}
+            onGoalChange={handleGoalUpdate}
+            onBack={goBack}
+          />
           <footer className="flex w-full items-center justify-center bg-white p-6 pb-12 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
             <CtaButton
               onClick={handleSetGoal}

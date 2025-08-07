@@ -28,7 +28,10 @@ export const useGetMyMissions = (userId) => {
 };
 
 const enrollInMission = async ({ missionId, userId }) => {
-  const { data } = await axios.post(`/mission/enroll`, { missionId, userId });
+  const { data } = await axios.post(`/user-mission/enroll`, {
+    missionId,
+    userId,
+  });
   return data;
 };
 

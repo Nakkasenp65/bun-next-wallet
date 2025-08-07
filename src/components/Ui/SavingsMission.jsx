@@ -68,7 +68,7 @@ export default function SavingsMission({ missions, userId }) {
                     <span>ได้รับ ฿{mission.rewardAmount}</span>
                   </div>
                   <button
-                    onClick={() => handleEnrollClick(mission.id)}
+                    onClick={() => handleEnrollClick(mission.id, userId)}
                     disabled={isPending}
                     className="text-primary-pink rounded-xl bg-white px-4 py-2 text-sm font-bold shadow-md transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
                   >

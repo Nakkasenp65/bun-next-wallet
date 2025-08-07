@@ -1,16 +1,49 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faHashtag, faUser } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faHashtag,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
+import { IoIosArrowForward } from "react-icons/io";
 import CtaButton from "../Ui/CtaButton";
 import FramerDiv from "../framerComponents/FramerDiv";
+import BankSelectionModal from "../Ui/BankSelectionModal";
+import Loading from "../StatusComponents/Loading";
+import { useWithdrawTransaction } from "@/hooks/useTransactions"; // 1. Import hook ใหม่
+import toast from "react-hot-toast";
 
-export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw }) {
+export default function WithdrawPage({
+  userData,
+  showWithdraw,
+  setShowWithdraw,
+}) {
+  console.log("Withdraw:", userData);
+  const [showBankModal, setShowBankModal] = useState(false);
   const [formData, setFormData] = useState({
+    userId: userData.id,
     amount: "",
+    bank: "",
     accountNumber: "",
-    recipient: "",
+    accountName: "", // เปลี่ยนจาก recipient เป็น accountName เพื่อให้ตรงกับ service
+  });
+
+  // 2. สร้างฟังก์ชันสำหรับปิดหน้าและรีเซ็ตค่าทั้งหมด
+  const closePage = () => {
+    setShowWithdraw(false);
+    setFormData({
+      amount: "",
+      bank: "",
+      accountNumber: "",
+      accountName: "",
+    });
+  };
+
+  // 3. เรียกใช้งาน useMutation hook
+  const { mutate: withdraw, isPending } = useWithdrawTransaction({
+    onSuccessCallback: closePage,
   });
 
   const handleInputChange = (e) => {
@@ -21,20 +54,66 @@ export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw }
     }));
   };
 
+  const handleBankSelect = (bank) => {
+    setFormData((prev) => ({
+      ...prev,
+      bank: bank.name, // เก็บเฉพาะชื่อธนาคาร
+    }));
+    setShowBankModal(false);
+  };
+
+  // 4. สร้างฟังก์ชัน handleSubmit
+  const handleSubmit = () => {
+    // --- Client-side validation ---
+    const numericAmount = parseFloat(formData.amount);
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      return toast.error("กรุณาระบุจำนวนเงินที่ถูกต้อง");
+    }
+    if (!formData.bank) {
+      return toast.error("กรุณาเลือกธนาคาร");
+    }
+    if (!formData.accountNumber.trim()) {
+      return toast.error("กรุณากรอกเลขบัญชี");
+    }
+    if (!formData.accountName.trim()) {
+      return toast.error("กรุณากรอกชื่อบัญชีผู้รับ");
+    }
+
+    // ส่งข้อมูลไปให้ mutation
+    withdraw({
+      userId: userData.id,
+      amount: numericAmount,
+      bank: formData.bank,
+      accountNumber: formData.accountNumber,
+      accountName: formData.accountName,
+    });
+  };
+
+  // useEffect ถูกปรับปรุงให้ใช้ closePage เพื่อความสะอาด
+  useEffect(() => {
+    if (!showWithdraw) {
+      closePage();
+    }
+  }, [showWithdraw]);
+
   return (
-    <FramerDiv
-      isOpen={showWithdraw}
-      id="withdraw-overlay"
-      className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
-    >
-      <div
+    <>
+      {/* 5. เพิ่ม Loading Overlay */}
+      {isPending && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <Loading />
+        </div>
+      )}
+
+      <FramerDiv
+        isOpen={showWithdraw}
         id="withdraw-overlay"
-        className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
+        className="text-bg-dark bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
       >
         {/* Header */}
         <header className="flex flex-shrink-0 items-center px-5 pt-10 pb-4">
           <button
-            onClick={() => setShowWithdraw((prev) => !prev)}
+            onClick={closePage}
             className="text-secondary-text text-2xl transition-colors hover:text-white"
           >
             <FontAwesomeIcon icon={faChevronLeft} />
@@ -42,7 +121,7 @@ export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw }
           <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
             ถอนเงิน
           </h2>
-          <div className="w-6"></div> {/* Spacer */}
+          <div className="w-6"></div>
         </header>
 
         {/* Page Content */}
@@ -60,22 +139,25 @@ export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw }
 
           {/* Input Group: Amount */}
           <div>
-            <label htmlFor="withdraw-amount" className="mb-2 block text-sm font-bold text-gray-500">
+            <label
+              htmlFor="withdraw-amount"
+              className="mb-2 block text-sm font-bold text-gray-500"
+            >
               จำนวนเงิน
             </label>
             <input
-              type="text"
+              type="number"
               id="withdraw-amount"
               name="amount"
               value={formData.amount}
               onChange={handleInputChange}
               inputMode="decimal"
               placeholder="฿0.00"
-              className="focus:border-primary-pink focus:ring-primary-pink/30 w-full rounded-xl border border-gray-300 p-4 text-2xl font-bold outline-none focus:ring-2"
+              className="text-bg-dark focus:border-primary-pink focus:ring-primary-pink/30 w-full rounded-xl border border-gray-300 p-4 text-lg font-bold outline-none focus:ring-2"
             />
           </div>
 
-          {/* Input Group: Bank (Placeholder) */}
+          {/* --- 6. เพิ่ม UI สำหรับเลือกธนาคาร (สำคัญ) --- */}
           <div>
             <label
               htmlFor="withdraw-bank-selector"
@@ -85,11 +167,23 @@ export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw }
             </label>
             <div
               id="withdraw-bank-selector"
-              className="hover:border-vibrant-purple flex w-full cursor-pointer items-center justify-between rounded-xl border border-gray-300 p-4"
+              onClick={() => setShowBankModal(true)}
+              className="hover:border-primary-pink flex w-full cursor-pointer items-center justify-between rounded-xl border border-gray-300 p-4"
             >
-              <span className="text-gray-400">เลือกธนาคาร</span>
-              <FontAwesomeIcon icon={faChevronLeft} className="rotate-180 text-gray-400" />
+              <span
+                className={
+                  formData.bank ? "text-bg-dark font-semibold" : "text-gray-400"
+                }
+              >
+                {formData.bank || "เลือกธนาคาร"}
+              </span>
+              <IoIosArrowForward className="text-xl text-gray-400" />
             </div>
+            <BankSelectionModal
+              isOpen={showBankModal}
+              onClose={() => setShowBankModal(false)}
+              onBankSelect={handleBankSelect}
+            />
           </div>
 
           {/* Input Group: Account Number */}
@@ -133,8 +227,8 @@ export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw }
               <input
                 type="text"
                 id="withdraw-recipient"
-                name="recipient"
-                value={formData.recipient}
+                name="accountName"
+                value={formData.accountName}
                 onChange={handleInputChange}
                 placeholder="ชื่อ-นามสกุลเจ้าของบัญชี"
                 className="focus:border-primary-pink focus:ring-primary-pink/30 w-full rounded-xl border border-gray-300 p-4 pl-12 outline-none focus:ring-2"
@@ -148,12 +242,18 @@ export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw }
             <span className="text-bg-dark font-bold">฿15.00</span>
           </div>
 
-          {/* CTA Button */}
-          <div className="mt-auto">
-            <CtaButton id="confirm-withdraw-btn">ต่อไป</CtaButton>
+          {/* --- 7. เชื่อมปุ่ม CTA กับ handleSubmit --- */}
+          <div className="mt-auto flex items-center justify-center">
+            <CtaButton
+              onClick={handleSubmit}
+              disabled={isPending}
+              className={"z-10 w-48 rounded-xl p-4 text-base font-bold"}
+            >
+              {isPending ? "กำลังดำเนินการ..." : "ต่อไป"}
+            </CtaButton>
           </div>
         </div>
-      </div>
-    </FramerDiv>
+      </FramerDiv>
+    </>
   );
 }

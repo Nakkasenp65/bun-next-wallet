@@ -1,12 +1,33 @@
 "use client";
 import Image from "next/image";
-import { useState, useMemo, useEffect } from "react";
 import DropDownComponent from "@/components/Ui/DropDownComponent";
 import FramerButton from "../framerComponents/FramerButton";
+import { useState, useMemo, useEffect } from "react";
+import { FaApple } from "react-icons/fa6";
+import { SiSamsung, SiOppo, SiVivo, SiXiaomi } from "react-icons/si";
+import { HiOutlineViewfinderCircle } from "react-icons/hi2";
+import GridSelectorComponent from "./GridSelectorComponent";
+import Poco from "../logos/Poco";
+import Realme from "../logos/Realme";
+
+const brandLogos = {
+  Apple: <FaApple />,
+  Samsung: <SiSamsung />,
+  Oppo: <SiOppo />,
+  Vivo: <SiVivo />,
+  Xiaomi: <SiXiaomi />,
+  Poco: <Poco />,
+  Realme: <Realme />,
+  Default: <HiOutlineViewfinderCircle />, // ไอคอนสำรอง
+};
 
 // This component now accepts an `onGoalChange` prop function
 // to communicate its state back to the parent component.
-export default function GoalSetter({ products, onGoalChange = () => {}, onBack }) {
+export default function GoalSetter({
+  products,
+  onGoalChange = () => {},
+  onBack,
+}) {
   // Data Grouping Logic - No changes needed
   const groupedData = useMemo(() => {
     if (!products || products.length === 0) return {};
@@ -26,11 +47,20 @@ export default function GoalSetter({ products, onGoalChange = () => {}, onBack }
   const [selectedCapacity, setSelectedCapacity] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState("daily"); // Default plan
-  console.log("SELCTED PRODUCT: ", selectedProduct);
-  // console.log("SELCTED PLAN: ", selectedPlan);
 
   // Dynamic Options for Dropdowns - No changes needed
   const brands = useMemo(() => Object.keys(groupedData), [groupedData]);
+
+  const brandOptions = useMemo(
+    () =>
+      brands.map((brandName) => ({
+        id: brandName,
+        name: brandName,
+        icon: brandLogos[brandName] || brandLogos.Default, // เปลี่ยนจาก imageUrl เป็น icon
+      })),
+    [brands],
+  );
+
   const models = useMemo(
     () => (selectedBrand ? Object.keys(groupedData[selectedBrand]) : []),
     [selectedBrand, groupedData],
@@ -38,7 +68,9 @@ export default function GoalSetter({ products, onGoalChange = () => {}, onBack }
   // --- THIS IS THE CORRECTED LINE ---
   const capacities = useMemo(
     () =>
-      selectedBrand && selectedModel ? Object.keys(groupedData[selectedBrand][selectedModel]) : [],
+      selectedBrand && selectedModel
+        ? Object.keys(groupedData[selectedBrand][selectedModel])
+        : [],
     [selectedBrand, selectedModel, groupedData],
   );
   const availableProductsInVariant = useMemo(
@@ -68,7 +100,9 @@ export default function GoalSetter({ products, onGoalChange = () => {}, onBack }
 
   const handleModelChange = (newModel, currentBrand) => {
     setSelectedModel(newModel);
-    const newCapacities = newModel ? Object.keys(groupedData[currentBrand][newModel]) : [];
+    const newCapacities = newModel
+      ? Object.keys(groupedData[currentBrand][newModel])
+      : [];
     handleCapacityChange(newCapacities[0] || "", currentBrand, newModel);
   };
 
@@ -85,7 +119,9 @@ export default function GoalSetter({ products, onGoalChange = () => {}, onBack }
   };
 
   const handleColorChange = (newColor) => {
-    const product = availableProductsInVariant.find((p) => p.color === newColor);
+    const product = availableProductsInVariant.find(
+      (p) => p.color === newColor,
+    );
     if (product) setSelectedProduct(product);
   };
 
@@ -125,7 +161,9 @@ export default function GoalSetter({ products, onGoalChange = () => {}, onBack }
     ];
 
     return plansConfig.map((plan) => {
-      const calculatedAmount = Math.ceil(selectedProduct.downPaymentAmount / plan.divisor);
+      const calculatedAmount = Math.ceil(
+        selectedProduct.downPaymentAmount / plan.divisor,
+      );
       return {
         ...plan,
         displayValue: calculatedAmount.toLocaleString("en-US"),
@@ -151,7 +189,9 @@ export default function GoalSetter({ products, onGoalChange = () => {}, onBack }
   if (!selectedProduct) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <p className="animate-pulse text-center text-slate-500">กำลังโหลดข้อมูลสินค้า...</p>
+        <p className="animate-pulse text-center text-slate-500">
+          กำลังโหลดข้อมูลสินค้า...
+        </p>
       </div>
     );
   }
@@ -164,17 +204,22 @@ export default function GoalSetter({ products, onGoalChange = () => {}, onBack }
       >
         ย้อนกลับ
       </FramerButton>
-      <div className="rounded-xl bg-white p-4 shadow-inner shadow-slate-200">
-        <DropDownComponent
+      <div className="rounded-xl bg-white">
+        <h1 className="text-bg-dark mb-2 font-bold">
+          เลือกแบรนด์ที่ต้องการดาวน์
+        </h1>
+        <GridSelectorComponent
+          labelClassName="text-bg-dark mb-2 block font-bold"
           name="brand"
           value={selectedBrand}
-          onChange={(e) => handleBrandChange(e.target.value)}
-          options={brands}
-          buttonClassName="w-full rounded-xl border-2 border-pink-400 bg-white p-3 text-center text-lg font-bold text-pink-500 focus:ring-4 focus:ring-pink-200 focus:outline-none"
-          optionsContainerClassName="p-2"
-          optionClassName="rounded-lg text-center font-semibold"
+          onChange={(value) => handleBrandChange(value)}
+          options={brandOptions}
+          containerClassName="grid-cols-4 gap-3 md:grid-cols-4"
+          itemClassName="hover:bg-pink-50/50 shadow-sm"
+          activeItemClassName="border-pink-500 bg-pink-50"
         />
         <div className="my-5 flex h-48 items-center justify-center">
+          {/* Product Image */}
           {selectedProduct.imageUrl ? (
             <Image
               src={selectedProduct.imageUrl}
@@ -190,22 +235,27 @@ export default function GoalSetter({ products, onGoalChange = () => {}, onBack }
             </div>
           )}
         </div>
-        <div className="space-y-4 rounded-xl bg-slate-100/70 p-4">
+        <div className="space-y-4 rounded-xl">
+          <h1 className="text-bg-dark font-black">เลือกรุ่นที่ต้องการดาวน์</h1>
+          {/* Choose Model Iphone */}
           <DropDownComponent
             name="model"
             value={selectedModel}
             onChange={(e) => handleModelChange(e.target.value, selectedBrand)}
             options={models}
-            buttonClassName="w-full text-md font-bold text-slate-800"
+            buttonClassName="w-full text-md font-bold border-pink-400 text-pink-400  border p-2 rounded-lg"
             optionsContainerClassName="p-2"
             optionClassName="rounded-lg font-semibold"
           />
+          {/* Choose capacity GB */}
           <DropDownComponent
             name="capacity"
             value={selectedCapacity}
-            onChange={(e) => handleCapacityChange(e.target.value, selectedBrand, selectedModel)}
+            onChange={(e) =>
+              handleCapacityChange(e.target.value, selectedBrand, selectedModel)
+            }
             options={capacities}
-            buttonClassName="w-full -mt-4 text-slate-500 font-medium"
+            buttonClassName="w-full text-md font-bold border-pink-400 text-pink-400  border p-2 rounded-lg"
             optionsContainerClassName="p-2"
             optionClassName="rounded-lg font-semibold"
           />
@@ -234,7 +284,9 @@ export default function GoalSetter({ products, onGoalChange = () => {}, onBack }
         </div>
       </div>
       <div className="mt-6">
-        <h3 className="mb-3 text-lg font-bold text-slate-800">เลือกเป้าหมายการออมของคุณ</h3>
+        <h3 className="mb-3 text-lg font-bold text-slate-800">
+          เลือกเป้าหมายการออมของคุณ
+        </h3>
         <div className="grid w-full grid-cols-2 gap-3 overflow-x-auto px-2 pb-4">
           {savingPlans.map((plan) => (
             <button

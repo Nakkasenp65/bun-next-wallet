@@ -27,14 +27,30 @@ export default function SavingsGoalCard({
       id="savings-goal-card"
       className="text-light-text shadow-neon-purple inset-shadow-lg relative flex flex-col gap-4 overflow-hidden rounded-3xl p-6 inset-shadow-black/36 [background:linear-gradient(45deg,_#230640_0%,_#402E99_100%)]"
     >
-      <Image
-        className="animate-floating drop-shadow-primary-pink absolute -right-28 -bottom-16 h-auto w-[240px] -rotate-6 drop-shadow-2xl sm:-bottom-12 sm:w-[300px] sm:-rotate-10"
-        src={imageUrl}
-        alt="mobile phone image"
-        width={300}
-        height={300}
-        priority
-      />
+      {imageUrl ? (
+        <Image
+          className="animate-floating drop-shadow-primary-pink absolute -right-28 -bottom-16 h-auto w-[240px] -rotate-6 drop-shadow-2xl sm:-bottom-12 sm:w-[300px] sm:-rotate-10"
+          src={imageUrl}
+          alt="mobile phone image"
+          width={300}
+          height={300}
+          priority
+        />
+      ) : (
+        <Image
+          className="animate-floating drop-shadow-primary-pink/50 absolute right-1 h-auto w-30 drop-shadow-2xl sm:-bottom-12 sm:-rotate-10"
+          alt="pig loading icon"
+          src="/videos/moneyLoading.gif"
+          width="300"
+          height="300"
+          controls
+          autoPlay
+          muted
+          loop
+          playsInline
+        />
+      )}
+
       <div className="flex justify-between">
         {/* Profile Picture */}
         {/* <Image

@@ -6,7 +6,12 @@ import { motion, AnimatePresence } from "framer-motion";
 // Animation for the dropdown menu
 const dropdownVariants = {
   initial: { opacity: 0, y: -5, scale: 0.98 },
-  open: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 25 } },
+  open: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring", stiffness: 1000, damping: 25 },
+  },
   exit: { opacity: 0, y: -5, scale: 0.98, transition: { duration: 0.1 } },
 };
 
@@ -64,7 +69,7 @@ export default function DropDownComponent({
                 className="h-6 w-6 fill-current text-pink-500"
                 viewBox="0 0 20 20"
                 animate={{ rotate: isOpen ? 180 : 0 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.1 }}
               >
                 <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
               </motion.svg>

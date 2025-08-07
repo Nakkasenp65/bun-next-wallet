@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, use } from "react";
+import React, { useState, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -21,7 +21,7 @@ import Loading from "@/components/StatusComponents/Loading";
 import TransferContent from "../Payment/TransferContent";
 import QrContent from "../Payment/QrContent";
 import OtherMethodsContent from "../Payment/OtherMethodsContent";
-import { useCreateSavingTransaction } from "@/hooks/useCreateTransfer";
+import { useCreateSavingTransaction } from "@/hooks/useTransactions";
 
 export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
   const [activeTab, setActiveTab] = useState("transfer");
@@ -122,7 +122,6 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
 
           // If 'code' is not null, a QR code was found
           if (code) {
-            console.log("QR Code found:", code.data);
             resolve(true);
           } else {
             resolve(false);
