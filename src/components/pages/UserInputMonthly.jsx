@@ -19,7 +19,11 @@ const variants = {
   }),
 };
 
-export default function UserInputMonthly({ inputData, setInputData, onCalculate }) {
+export default function UserInputMonthly({
+  inputData,
+  setInputData,
+  onCalculate,
+}) {
   const [page, setPage] = useState(0);
   const [direction, setDirection] = useState(1);
   const [waitFetch, setWaitFetch] = useState(false);
@@ -76,13 +80,17 @@ export default function UserInputMonthly({ inputData, setInputData, onCalculate 
       label: "จำนวนยอดจ่ายรายเดือน",
       placeholder: "ขั้นต่ำ 500 บาท",
       type: "number",
+      inputMode: "numberic",
     },
   ];
 
   const currentPageData = pages[page];
   const isStepValid = (() => {
     const standardCheck = inputData[currentPageData.field]?.trim() !== "";
-    if (currentPageData.field === "occupation" && inputData.occupation === "อื่นๆ") {
+    if (
+      currentPageData.field === "occupation" &&
+      inputData.occupation === "อื่นๆ"
+    ) {
       return inputData.customOccupation?.trim() !== "";
     }
     if (currentPageData.field === "monthlyPayment") {
@@ -161,28 +169,32 @@ export default function UserInputMonthly({ inputData, setInputData, onCalculate 
                       optionsContainerClassName="p-2 border border-gray-200"
                       optionClassName="rounded-lg p-3 hover:bg-gray-100"
                     />
-                    {currentPageData.field === "occupation" && inputData.occupation === "อื่นๆ" && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="mt-2"
-                      >
-                        <input
-                          name="customOccupation"
-                          type="text"
-                          placeholder="กรุณาระบุอาชีพของคุณ"
-                          value={inputData.customOccupation || ""}
-                          onChange={handleChange}
-                          className="text-bg-dark focus:border-primary-pink w-full rounded-xl border-2 border-gray-200 p-4 font-bold shadow-sm transition-all focus:ring-4 focus:ring-pink-200 focus:outline-none"
-                          autoFocus
-                        />
-                      </motion.div>
-                    )}
+                    {currentPageData.field === "occupation" &&
+                      inputData.occupation === "อื่นๆ" && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 }}
+                          className="mt-2"
+                        >
+                          <input
+                            name="customOccupation"
+                            type="text"
+                            placeholder="กรุณาระบุอาชีพของคุณ"
+                            value={inputData.customOccupation || ""}
+                            onChange={handleChange}
+                            className="text-bg-dark focus:border-primary-pink w-full rounded-xl border-2 border-gray-200 p-4 font-bold shadow-sm transition-all focus:ring-4 focus:ring-pink-200 focus:outline-none"
+                            autoFocus
+                          />
+                        </motion.div>
+                      )}
                   </>
                 ) : (
                   <>
-                    <label htmlFor={currentPageData.field} className="text-bg-dark font-medium">
+                    <label
+                      htmlFor={currentPageData.field}
+                      className="text-bg-dark font-medium"
+                    >
                       {currentPageData.label}
                     </label>
                     <input
@@ -192,6 +204,7 @@ export default function UserInputMonthly({ inputData, setInputData, onCalculate 
                       placeholder={currentPageData.placeholder}
                       value={inputData[currentPageData.field]}
                       onChange={handleChange}
+                      inputMode={currentPageData.inputMode}
                       className="text-bg-dark focus:border-primary-pink w-full rounded-xl border-2 border-gray-200 p-4 font-bold shadow-sm transition-all focus:ring-4 focus:ring-pink-200 focus:outline-none"
                     />
                   </>
