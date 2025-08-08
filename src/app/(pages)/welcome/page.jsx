@@ -150,7 +150,7 @@ export default function Page() {
     }
     setSuggestedPhone(data);
   };
-
+  console.log("line profile: ", liffProfile);
   useEffect(() => {
     // ให้เช็ค user
     if (!isRegistered) handleUserRedirect(liffProfile?.userId);
