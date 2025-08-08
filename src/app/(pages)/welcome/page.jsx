@@ -70,6 +70,31 @@ export default function Page() {
         : inputData.occupation;
     // ข้อมูลจาก server หลัก
     const { fullname, phone, pin, chat_url } = mainServerUserProfile;
+    let notHavingData = {
+      fullname: "test",
+      phone: "test",
+      pin: "test",
+      chat_url: "test",
+    };
+    if (!fullname || !phone || !pin || !chat_url) {
+      const dataToPost = {
+        line_user_id,
+        line_display_name,
+        line_profile_url,
+        mobileId,
+        planId,
+        fullname: notHavingData.fullname,
+        phone: notHavingData.phone,
+        pin: notHavingData.chat_url,
+        chat_url: notHavingData.chat_url,
+        occupation: finalOccupation,
+        ageRange: inputData.age,
+        monthlyPayment: inputData.monthlyPayment,
+      };
+      console.log("TEST PRODUCTION: NO MOBI INFO");
+      createGoalMutate(dataToPost);
+      return;
+    }
 
     const dataToPost = {
       line_user_id,
@@ -104,7 +129,8 @@ export default function Page() {
       }
     } catch (error) {
       if (error.status === 404)
-        router.replace("https://liff.line.me/2006703040-RYAyYAyA");
+        // router.replace("https://liff.line.me/2006703040-RYAyYAyA");
+        toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
       else if (error.status === 500)
         toast.error("ขออภัย ขณะเกิดข้อผิดพลาดระหว่างการดำเนินการ!");
     }
