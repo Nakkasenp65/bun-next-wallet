@@ -128,10 +128,11 @@ export default function Page() {
         setIsRegistered(true); // สมัครสมาชิกกับ server หลักแล้ว
       }
     } catch (error) {
-      if (error.status === 404)
+      if (error.status === 404) {
         // router.replace("https://liff.line.me/2006703040-RYAyYAyA");
         toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
-      else if (error.status === 500)
+        setIsRegistered(true);
+      } else if (error.status === 500)
         toast.error("ขออภัย ขณะเกิดข้อผิดพลาดระหว่างการดำเนินการ!");
     }
   };
