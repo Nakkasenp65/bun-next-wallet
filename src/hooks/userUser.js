@@ -5,32 +5,62 @@ import {
   userQueryOptions,
 } from "@tanstack/react-query";
 import axios from "@/lib/axios";
+import externalLinkAxios from "axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 async function fetchUserStatus(userId) {
+  console.log("fetch user status");
   const { data } = await axios.get(`/user/status/${userId}`);
   return data;
 }
 
 async function fetchUser(userId) {
+  console.log("fetch aomdown user");
   const { data } = await axios.get(`/user/${userId}`);
   return data;
 }
 
-export function useUserStatus(userId) {
+async function fetchUserFromMainServer(lineUserId) {
+  const mainUserApiUrl = process.env.NEXT_PUBLIC_MAIN_USER_API;
+
+  console.log("fetch main server user");
+  let mainUser = {};
+  try {
+    if (!mainUserApiUrl) throw new Error("mainUserApiUrl is not defined");
+    const { data } = await externalLinkAxios.get(
+      `${process.env.NEXT_PUBLIC_MAIN_USER_API}${lineUserId}`,
+    );
+    mainUser = data;
+    console.log(mainUser);
+    return mainUser;
+  } catch (error) {
+    console.log("Error fetchUserfromMainServer", error);
+    return null;
+  }
+}
+
+export function useUserStatus(lineUserId) {
   return useQuery({
-    queryKey: ["userStatus", userId],
-    queryFn: () => fetchUserStatus(userId),
-    enabled: !!userId,
+    queryKey: ["userStatus", lineUserId],
+    queryFn: () => fetchUserStatus(lineUserId),
+    enabled: !!lineUserId,
   });
 }
 
-export function useUser(userId) {
+export function useUser(lineUserId) {
   return useQuery({
-    queryKey: ["user", userId],
-    queryFn: () => fetchUser(userId),
-    enabled: !!userId,
+    queryKey: ["user", lineUserId],
+    queryFn: () => fetchUser(lineUserId),
+    enabled: !!lineUserId,
+  });
+}
+
+export function useMainServerUser(lineUserId) {
+  return useQuery({
+    queryKey: ["mainServerUser", lineUserId],
+    queryFn: () => fetchUserFromMainServer(lineUserId),
+    enabled: !!lineUserId,
   });
 }
 

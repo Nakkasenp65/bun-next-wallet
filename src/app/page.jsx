@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@/hooks/userHook";
+import { useUser } from "@/hooks/userUser";
 
 import Loading from "@/components/StatusComponents/Loading";
 import WalletHeader from "../components/Ui/WalletHeader";
@@ -17,7 +17,7 @@ import DepositPage from "@/components/pages/DepositPage";
 import GoalPage from "@/components/pages/GoalPage";
 import NotificationPage from "@/components/pages/NotificationPage";
 import ErrorComponent from "@/components/Ui/ErrorComponent";
-import { useUserStatus } from "@/hooks/userHook";
+import { useUserStatus } from "@/hooks/userUser";
 import { useLiff } from "@/components/provider/LiffProvider";
 import ContactPage from "@/components/pages/ContactPage";
 import { useGetAvailableMissions, useGetMyMissions } from "@/hooks/useMission";
@@ -116,8 +116,8 @@ export default function HomePage() {
             {/* Profile Part */}
             <section className="flex flex-col gap-10 px-6 py-4 pb-8">
               <WalletHeader
-                userName={userData.username}
-                profileUrl={userData.userProfilePicUrl}
+                userName={userData.line_display_name}
+                profileUrl={userData.line_profile_url}
                 setShowNotifications={setShowNotifications}
                 notifications={userData.notifications}
               />

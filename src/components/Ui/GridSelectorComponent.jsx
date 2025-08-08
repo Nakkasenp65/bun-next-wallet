@@ -28,14 +28,12 @@ export default function GridSelectorComponent({
           >
             {/* เปลี่ยนจาก Image มาเป็น div ที่แสดงผลไอคอน */}
             <div
-              className={`flex h-12 w-12 items-center justify-center text-4xl transition-colors duration-200 ${
-                value === option.id ? "text-pink-500" : "text-gray-600"
-              }`}
+              className={`flex h-12 w-12 items-center justify-center text-4xl text-gray-600 transition-colors duration-200`}
             >
               {option.icon}
             </div>
             <span
-              className={`mt-2 text-[10px] font-medium ${
+              className={`text-[10px] font-medium ${
                 value === option.id ? "text-pink-600" : "text-gray-700"
               }`}
             >

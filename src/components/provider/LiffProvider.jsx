@@ -22,10 +22,10 @@ export function LiffProvider({ children }) {
     const initialize = async () => {
       if (server === "dev") {
         setLiffProfile({
-          userId: "U5d2998909721fdea596f8e9e91e7bf85",
-          displayName: "Long👁️‍🗨️",
+          userId: "U669f6092308023f227aa435c803b2e74",
+          displayName: "Zzz59🧚🏻♀️🌈",
           pictureUrl:
-            "https://profile.line-scdn.net/0hPsTqIBJhD1x5CB7EtsVxYglYDDZaeVZOVjxHahgOUGhMPU9ZVDxIORwJAj5BOhxZAWxBakoIV21bTUB3DWgHYz9BU24mUxsKPhhEezdwJwJNQTdDFRZGXRB2BRAsbhxKUDFHXDVTUDIMbD5jU2oBcTpMFWpFQCxrN19jCnw6Yd8WCngJVG9EPUQAVmrA",
+            "https://lh3.googleusercontent.com/d/1eXgDln7TvPQGiMpzaUdo7l2hKmsh8Kvc",
         });
         setIsLoggedIn(true);
         setLineAccessToken("dev");
@@ -61,7 +61,9 @@ export function LiffProvider({ children }) {
   }
 
   return (
-    <LiffContext.Provider value={{ liffProfile, isLoggedIn, isLoading, lineAccessToken }}>
+    <LiffContext.Provider
+      value={{ liffProfile, isLoggedIn, isLoading, lineAccessToken }}
+    >
       {children}
     </LiffContext.Provider>
   );

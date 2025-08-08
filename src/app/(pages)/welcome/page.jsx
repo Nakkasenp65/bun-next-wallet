@@ -6,9 +6,8 @@ import { useRouter } from "next/navigation";
 import axios from "@/lib/axios";
 import { useLiff } from "@/components/provider/LiffProvider";
 import toast from "react-hot-toast";
-import { useCreateGoal } from "@/hooks/userHook";
+import { useCreateGoal, useMainServerUser } from "@/hooks/userUser";
 import UserInputMonthly from "@/components/pages/UserInputMonthly";
-import Loading from "@/components/StatusComponents/Loading";
 import GoalSetter from "@/components/Ui/GoalSetter";
 import MiniLoading from "@/components/StatusComponents/MiniLoading";
 
@@ -19,7 +18,9 @@ import MiniLoading from "@/components/StatusComponents/MiniLoading";
 
 export default function Page() {
   const { liffProfile } = useLiff();
-
+  const { data: mainServerUserProfile } = useMainServerUser(
+    liffProfile?.userId,
+  );
   const router = useRouter();
   const [goal, setGoal] = useState({});
   const [uiStep, setUiStep] = useState("input");
@@ -29,10 +30,11 @@ export default function Page() {
     monthlyPayment: "",
     customOccupation: "",
   });
-  const [monthlyPayment, setMonthlyPayment] = useState("");
   const [suggestedPhone, setSuggestedPhone] = useState(null);
   const { mutate: createGoalMutate, isPending: createGoalPending } =
     useCreateGoal();
+  // ใช้เป็นค่าตรวจสอบ user จาก server หลัก
+  const [isRegistered, setIsRegistered] = useState(false);
 
   const handleGoalUpdate = (newGoal) => {
     setGoal((prev) => ({
@@ -48,24 +50,37 @@ export default function Page() {
     }, 200);
   };
 
+  // สร้าง user ใหม่จากข้อมูล goal และ ข้อมูลบางส่วนจาก server หลัก
   const handleSetGoal = () => {
     if (!goal.mobileId || !goal.planId) {
       toast.error("กรุณาเลือกเป้าหมายการออมให้ครบถ้วน");
     }
-    const { userId: liffId, displayName, pictureUrl } = liffProfile;
+    // ข้อมูลจากไลน์
+    const {
+      userId: line_user_id,
+      displayName: line_display_name,
+      pictureUrl: line_profile_url,
+    } = liffProfile;
+    // ข้อมูลจากหน้าเลือกโทรศัพท์
     const { mobileId, planId } = goal;
-
+    // ข้อมูลจากหน้า userInputMonthLy (กรอกยอดเงินรายเดือน)
     const finalOccupation =
       inputData.occupation === "อื่นๆ"
         ? inputData.customOccupation
         : inputData.occupation;
+    // ข้อมูลจาก server หลัก
+    const { fullname, phone, pin, chat_url } = mainServerUserProfile;
 
     const dataToPost = {
-      liffId,
-      displayName,
-      pictureUrl,
+      line_user_id,
+      line_display_name,
+      line_profile_url,
       mobileId,
       planId,
+      fullname,
+      phone,
+      pin,
+      chat_url,
       occupation: finalOccupation,
       ageRange: inputData.age,
       monthlyPayment: inputData.monthlyPayment,
@@ -75,18 +90,19 @@ export default function Page() {
     createGoalMutate(dataToPost);
   };
 
-  const handleUserRedirect = async (userId) => {
+  // ตรวจสอบการเป็นสมาชิกกับ server หลักว่าเป็นสมาชิกไหมและ redirect ไปสมัครสมาชิก
+  const handleUserRedirect = async (lineUserId) => {
     // ตรวจสอบว่าเป็น user บน NUMBER 1 MOBI ไหม
     try {
       const response = await axios.get(
-        `https://checkuserdb.vercel.app/api/check-user/${userId} `,
+        `https://checkuserdb.vercel.app/api/check-user/${lineUserId} `,
       );
-      // ตอบมา = เป็น ไม่ตอบหรือ 404 คือไม่เป็นสมาชิก หรือ server offline
-      if (response) toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
+      // 404 คือไม่เป็นสมาชิก
+      if (response) {
+        toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
+        setIsRegistered(true); // สมัครสมาชิกกับ server หลักแล้ว
+      }
     } catch (error) {
-      console.log("new user: ", error.status === 404);
-      console.log("new user: ", error.status === 500);
-
       if (error.status === 404)
         router.replace("https://liff.line.me/2006703040-RYAyYAyA");
       else if (error.status === 500)
@@ -94,8 +110,9 @@ export default function Page() {
     }
   };
 
+  // คำนวณเงินดาวน์ของผู้ใช้ในเวลา 6 เดือน
   const handleCalculateClick = async () => {
-    // use in UserInputMonthly.jsx get product list based on user downPayment capability
+    // คำนวณเงินดาวน์จากค่างวด
     const potentialPrice = inputData.monthlyPayment * 6;
     toast.loading("กำลังประมวลผล โปรดรอสักครู่");
     setUiStep("calculate");
@@ -108,15 +125,17 @@ export default function Page() {
   };
 
   useEffect(() => {
-    // ถ้า LiffProfile มีการเปลี่ยนแปลง(line ตอบกลับมา login liffInit()) ให้เช็ค user
-    handleUserRedirect(liffProfile?.userId);
-  }, [liffProfile]);
+    // ให้เช็ค user
+    if (!isRegistered) handleUserRedirect(liffProfile?.userId);
+  }, [isRegistered]);
 
   useEffect(() => {
-    if (uiStep === "calculate") setTimeout(() => setUiStep("main"), 4000);
-  }, [uiStep]);
+    if (uiStep === "calculate") {
+      if (suggestedPhone) setUiStep("main");
+    }
+  }, [uiStep, suggestedPhone]);
 
-  console.log("LINE 99 INPUTDATA:", inputData);
+  console.log(inputData);
 
   return (
     <main

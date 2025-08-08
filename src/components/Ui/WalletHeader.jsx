@@ -47,9 +47,9 @@ export default function WalletHeader({
         <Image
           src="/okNumberOne.png"
           alt="1 Wallet Logo"
-          className="h-9 w-9 shadow-sm"
-          width={100}
-          height={100}
+          className="h-12 w-12 shadow-sm"
+          width={200}
+          height={200}
         />
       </div>
 

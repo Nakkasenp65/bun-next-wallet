@@ -4,15 +4,23 @@ import React, { useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import FramerDiv from "../framerComponents/FramerDiv";
 import NotificationTab from "../NotificationComponents/NotificationTab";
-import { useUser } from "@/hooks/userHook";
+import { useUser } from "@/hooks/userUser";
 import Loading from "../StatusComponents/Loading";
 import ErrorComponent from "../Ui/ErrorComponent";
 import { useNotification } from "@/hooks/useNotification";
 import { clearNotificationsMutation } from "@/hooks/useNotification";
 
-export default function NotificationPage({ userId, showNotifications, setShowNotifications }) {
+export default function NotificationPage({
+  userId,
+  showNotifications,
+  setShowNotifications,
+}) {
   const [activeTab, setActiveTab] = useState("transactions");
-  const { data: userData, isLoading: isUserLoading, error: userError } = useUser(userId);
+  const {
+    data: userData,
+    isLoading: isUserLoading,
+    error: userError,
+  } = useUser(userId);
   const {
     data: notificationData,
     isLoading: notificationLoading,
@@ -29,7 +37,11 @@ export default function NotificationPage({ userId, showNotifications, setShowNot
   };
 
   const handleClear = () => {
-    if (window.confirm(`Are you sure you want to clear all ${activeTab} notifications?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to clear all ${activeTab} notifications?`,
+      )
+    ) {
       clearNotificationsMutation.mutate(activeTab);
     }
   };
@@ -39,11 +51,15 @@ export default function NotificationPage({ userId, showNotifications, setShowNot
 
     if (activeTab === "transactions") {
       // The "Transactions" tab should show SENT and RECEIVE types.
-      return notificationData.filter((n) => n.type === "SENT" || n.type === "RECEIVE");
+      return notificationData.filter(
+        (n) => n.type === "SENT" || n.type === "RECEIVE",
+      );
     }
     if (activeTab === "promos") {
       // The "Promos" tab should show SYSTEM and REWARD types.
-      return notificationData.filter((n) => n.type === "SYSTEM" || n.type === "REWARD");
+      return notificationData.filter(
+        (n) => n.type === "SYSTEM" || n.type === "REWARD",
+      );
     }
     return []; // Fallback
   }, [notificationData, activeTab]);
