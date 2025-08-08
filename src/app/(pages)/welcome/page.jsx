@@ -69,32 +69,15 @@ export default function Page() {
         ? inputData.customOccupation
         : inputData.occupation;
     // ข้อมูลจาก server หลัก
-    const { fullname, phone, pin, chat_url } = mainServerUserProfile;
+
+    // const { fullname, phone, pin, chat_url } = mainServerUserProfile;
+    // Testint purpose ไม่เช็ค mobi เพราะไม่มีสมาชิก
     let notHavingData = {
       fullname: "test",
       phone: "test",
       pin: "test",
       chat_url: "test",
     };
-    if (!fullname || !phone || !pin || !chat_url) {
-      const dataToPost = {
-        line_user_id,
-        line_display_name,
-        line_profile_url,
-        mobileId,
-        planId,
-        fullname: notHavingData.fullname,
-        phone: notHavingData.phone,
-        pin: notHavingData.chat_url,
-        chat_url: notHavingData.chat_url,
-        occupation: finalOccupation,
-        ageRange: inputData.age,
-        monthlyPayment: inputData.monthlyPayment,
-      };
-      console.log("TEST PRODUCTION: NO MOBI INFO");
-      createGoalMutate(dataToPost);
-      return;
-    }
 
     const dataToPost = {
       line_user_id,
@@ -102,17 +85,35 @@ export default function Page() {
       line_profile_url,
       mobileId,
       planId,
-      fullname,
-      phone,
-      pin,
-      chat_url,
+      fullname: notHavingData.fullname,
+      phone: notHavingData.phone,
+      pin: notHavingData.chat_url,
+      chat_url: notHavingData.chat_url,
       occupation: finalOccupation,
       ageRange: inputData.age,
       monthlyPayment: inputData.monthlyPayment,
     };
+    console.log("TEST PRODUCTION: NO MOBI INFO");
+    createGoalMutate(dataToPost);
+    return;
+
+    // const dataToPost = {
+    //   line_user_id,
+    //   line_display_name,
+    //   line_profile_url,
+    //   mobileId,
+    //   planId,
+    //   fullname,
+    //   phone,
+    //   pin,
+    //   chat_url,
+    //   occupation: finalOccupation,
+    //   ageRange: inputData.age,
+    //   monthlyPayment: inputData.monthlyPayment,
+    // };
 
     // createGoalMutate = call mutation function -> useCreateGoal inside useUser.js
-    createGoalMutate(dataToPost);
+    // createGoalMutate(dataToPost);
   };
 
   // ตรวจสอบการเป็นสมาชิกกับ server หลักว่าเป็นสมาชิกไหมและ redirect ไปสมัครสมาชิก
@@ -162,7 +163,9 @@ export default function Page() {
     }
   }, [uiStep, suggestedPhone]);
 
-  console.log(inputData);
+  if (createGoalPending) {
+    return <MiniLoading />;
+  }
 
   return (
     <main

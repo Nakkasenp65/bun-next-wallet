@@ -19,14 +19,21 @@ export function LiffProvider({ children }) {
   const [lineAccessToken, setLineAccessToken] = useState("");
 
   useEffect(() => {
+    const longProfile = {
+      userId: "U006fb519ba07650932c6981af95d0620",
+      displayName: "Long👁️‍🗨️",
+      pictureUrl:
+        "https://profile.line-scdn.net/0hPsTql5LvD1x5CB7EtsVxYglYDDZaeVZOVjxHahgOUGhMPU9ZVDxIORwJAj5BOhxZAWxBakoIV21bTUB3DWgHYz9BU24mUxsKPhhEezdwJwJNQTdDFRZGXRB2BRAsbhxKUDFHXDVTUDIMbD5jU2oBcTpMFWpFQCxrN19jCnw6Yd8WCngJVG9GOE4BU2_M",
+    };
+    const testProfile = {
+      userId: "U669f6092308023f227aa435c803b2e74",
+      displayName: "Zzz59🧚🏻♀️🌈",
+      pictureUrl:
+        "https://lh3.googleusercontent.com/d/1eXgDln7TvPQGiMpzaUdo7l2hKmsh8Kvc",
+    };
     const initialize = async () => {
       if (server === "dev") {
-        setLiffProfile({
-          userId: "U669f6092308023f227aa435c803b2e74",
-          displayName: "Zzz59🧚🏻♀️🌈",
-          pictureUrl:
-            "https://lh3.googleusercontent.com/d/1eXgDln7TvPQGiMpzaUdo7l2hKmsh8Kvc",
-        });
+        setLiffProfile(longProfile);
         setIsLoggedIn(true);
         setLineAccessToken("dev");
         setIsLoading(false);

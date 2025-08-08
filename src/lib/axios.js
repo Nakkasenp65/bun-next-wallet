@@ -1,13 +1,14 @@
 import axios from "axios";
 import { getAuthToken } from "./tokenManager";
 
-const apiUrl =
-  process.env.NEXT_PUBLIC_SERVER_OPTION === "dev"
-    ? process.env.NEXT_PUBLIC_DEV_API_URL
-    : process.env.NEXT_PUBLIC_API_URL;
+const serverOption = NEXT_PUBLIC_SERVER_OPTION;
+const productionApiUrl = NEXT_PUBLIC_API_URL;
+const devApiUrl = NEXT_PUBLIC_DEV_API_URL;
+
+const apiUrl = serverOption === "dev" ? devApiUrl : productionApiUrl;
 
 const axiosInstance = axios.create({
-  baseURL: apiUrl,
+  baseURL: productionApiUrl,
   headers: {
     "Content-Type": "application/json",
   },

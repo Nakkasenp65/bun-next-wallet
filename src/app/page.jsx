@@ -59,6 +59,8 @@ export default function HomePage() {
     date.getMonth(),
     userData?.wallet.id,
   );
+
+  console.log(userData);
   const [showTransfer, setShowTransfer] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showDeposit, setShowDeposit] = useState(false);
