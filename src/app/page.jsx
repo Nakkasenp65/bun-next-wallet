@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@/hooks/userUser";
+import { useUser } from "@/hooks/useUser";
 
 import Loading from "@/components/StatusComponents/Loading";
 import WalletHeader from "../components/Ui/WalletHeader";
@@ -17,7 +17,7 @@ import DepositPage from "@/components/pages/DepositPage";
 import GoalPage from "@/components/pages/GoalPage";
 import NotificationPage from "@/components/pages/NotificationPage";
 import ErrorComponent from "@/components/Ui/ErrorComponent";
-import { useUserStatus } from "@/hooks/userUser";
+import { useUserStatus } from "@/hooks/useUser";
 import { useLiff } from "@/components/provider/LiffProvider";
 import ContactPage from "@/components/pages/ContactPage";
 import { useGetAvailableMissions, useGetMyMissions } from "@/hooks/useMission";
@@ -122,6 +122,7 @@ export default function HomePage() {
                 profileUrl={userData.line_profile_url}
                 setShowNotifications={setShowNotifications}
                 notifications={userData.notifications}
+                userLineId={userData.line_user_id}
               />
               <SavingsGoalCard
                 brand={userData.goal.product.brand}
@@ -154,7 +155,10 @@ export default function HomePage() {
           </main>
 
           {/* Bottom Navbar */}
-          <BottomNav setShowContact={setShowContact} />
+          <BottomNav
+            userId={userData.line_user_id}
+            setShowContact={setShowContact}
+          />
         </div>
       </>
     );

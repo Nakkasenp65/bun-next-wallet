@@ -39,7 +39,6 @@ export default function MyMissions({ missions, userId }) {
 
       {/* Horizontal Scroll Container */}
       <div className="noscrollbar -m-2 flex gap-4 overflow-x-auto p-2">
-        {/* 2. วนลูปและเรียกใช้ MyMissionCard */}
         {missions.map((userMission) => (
           <MyMissionCard key={userMission.id} userMission={userMission} />
         ))}

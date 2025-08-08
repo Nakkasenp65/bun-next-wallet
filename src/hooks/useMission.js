@@ -23,7 +23,7 @@ export const useGetMyMissions = (userId) => {
   return useQuery({
     queryKey: ["myMissions", userId],
     queryFn: () => fetchMyMissions(userId),
-    enabled: !!userId, // ทำงานเมื่อมี userId เท่านั้น
+    enabled: !!userId,
   });
 };
 
@@ -32,7 +32,8 @@ const enrollInMission = async ({ missionId, userId }) => {
     missionId,
     userId,
   });
-  return data;
+  setTimeout(() => {}, 300);
+  return (data, userId);
 };
 
 export function useEnrollMission() {
@@ -40,10 +41,9 @@ export function useEnrollMission() {
 
   return useMutation({
     mutationFn: enrollInMission,
-    onSuccess: (newUserMission) => {
+    onSuccess: (newUserMission, userId) => {
       toast.success("เข้าร่วมภารกิจสำเร็จ!");
       queryClient.setQueryData(["availableMissions"], (oldData) => {
-        // ถ้าไม่มีข้อมูลเก่าใน cache ก็ไม่ต้องทำอะไร
         if (!oldData) {
           return oldData;
         }
@@ -56,7 +56,7 @@ export function useEnrollMission() {
 
       // --- 2. อัปเดต Cache ของ 'userMissions' (ภารกิจของฉัน) ---
       // สมมติว่าคุณมี query key ชื่อ "userMissions" สำหรับหน้ารวมภารกิจของฉัน
-      queryClient.setQueryData(["userMissions"], (oldData) => {
+      queryClient.setQueryData(["myMissions", userId], (oldData) => {
         // newUserMission คือ object ที่ได้จาก backend ซึ่งตรงตาม format อยู่แล้ว
         // ถ้าไม่มีข้อมูลเก่า (เช่น user ยังไม่เคยเปิดหน้านี้)
         // ให้สร้าง array ใหม่ที่มีแค่ mission นี้

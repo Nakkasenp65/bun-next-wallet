@@ -1,107 +1,81 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
-import { IoMdPerson } from "react-icons/io";
-import { FaHashtag } from "react-icons/fa6";
-
+import { FaPhoneAlt } from "react-icons/fa";
+import Image from "next/image";
 import CtaButton from "../Ui/CtaButton";
 import FramerDiv from "../framerComponents/FramerDiv";
-import BankSelectionModal from "../Ui/BankSelectionModal";
 import Loading from "../StatusComponents/Loading";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
-import axios from "axios";
+import PinInput from "../Ui/PinInput"; // Import the new component
+import {
+  useSearchRecipient,
+  useCreateInternalTransfer,
+} from "@/hooks/useTransactions"; // Import new hooks
+import { AnimatePresence, motion } from "framer-motion";
 
-export default function TransferPage({ userData, setShowTransfer, showTransfer }) {
-  const [showBankModal, setShowBankModal] = useState(false);
-  const [selectedBank, setSelectedBank] = useState(null);
-  const [formData, setFormData] = useState({
-    // amount: "",
-    recipient: "",
-    account: "",
-  });
+export default function TransferPage({
+  userData,
+  setShowTransfer,
+  showTransfer,
+}) {
+  const [uiStep, setUiStep] = useState("inputPhoneNumber"); // 'inputPhoneNumber', 'confirmRecipient', 'confirmPin'
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [recipient, setRecipient] = useState(null);
+  const [amount, setAmount] = useState("");
 
-  const createTransferTransaction = async (transactionData) => {
-    const { walletId, ...payload } = transactionData;
-    const { data } = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/transaction/${walletId}`,
-      payload,
-    );
-    return data;
+  const closePage = () => {
+    setShowTransfer(false);
+    // Reset all states when closing
+    setTimeout(() => {
+      setUiStep("inputPhoneNumber");
+      setPhoneNumber("");
+      setRecipient(null);
+      setAmount("");
+    }, 300); // Delay reset to allow for exit animation
   };
 
-  useEffect(() => {
-    setFormData({
-      // amount: "",
-      recipient: "",
-      account: "",
+  const searchRecipientMutation = useSearchRecipient();
+  const transferMutation = useCreateInternalTransfer({
+    onSuccessCallback: closePage,
+  });
+
+  const handleSearch = () => {
+    if (phoneNumber.length < 9)
+      return toast.error("กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง");
+    searchRecipientMutation.mutate(phoneNumber, {
+      onSuccess: (data) => {
+        setRecipient(data);
+        setUiStep("confirmRecipient");
+      },
     });
-    setSelectedBank(null);
-    setShowBankModal(false);
-  }, [showTransfer]);
-
-  const queryClient = useQueryClient();
-  const transferMutation = useMutation({
-    mutationFn: createTransferTransaction,
-    onSuccess: () => {
-      toast.success("สร้างรายการโอนเงินสำเร็จ!");
-      queryClient.invalidateQueries({ queryKey: ["user"] });
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      setShowTransfer(false);
-      setFormData(null);
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || "สร้างรายการโอนเงินล้มเหลว");
-    },
-  });
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
   };
 
-  const handleBankSelect = (bank) => {
-    setSelectedBank(bank);
-    setShowBankModal(false); // Close the modal after selection
-  };
-
-  const handleConfirmTransfer = () => {
-    const numericAmount = parseFloat(formData.amount);
+  const handleAmountConfirm = () => {
+    const numericAmount = parseFloat(amount);
     if (isNaN(numericAmount) || numericAmount <= 0)
-      return toast.error("Please enter a valid amount.");
-    if (!selectedBank) return toast.error("Please select a bank.");
-    if (!formData.recipient || !formData.account)
-      return toast.error("Please fill in all recipient details.");
-
-    const transactionData = {
-      walletId: userData.wallet.id,
-      name: `โอนเงิน`,
-      amount: numericAmount,
-      type: "OUTCOME",
-      from: userData.username,
-      to: formData.recipient,
-      bank: selectedBank.name, // Add the bank name
-      description: `Transfer to ${formData.selectedBank} - (${selectedBank.account})`,
-    };
-
-    transferMutation.mutate(transactionData);
+      return toast.error("กรุณาระบุจำนวนเงินที่ถูกต้อง");
+    if (numericAmount > userData.wallet.balance)
+      return toast.error("ยอดเงินของคุณไม่เพียงพอ");
+    setUiStep("confirmPin");
   };
 
-  const accountInputPlaceholder =
-    selectedBank?.id === "promptpay" ? "กรอกเบอร์โทรศัพท์" : "กรอกเลขบัญชี";
+  const handlePinComplete = (pin) => {
+    transferMutation.mutate({
+      recipientUserId: recipient.id,
+      amount: parseFloat(amount),
+      pin: pin,
+    });
+  };
+
+  const pageVariants = {
+    initial: { opacity: 0, x: 300 },
+    in: { opacity: 1, x: 0 },
+    out: { opacity: 0, x: -300 },
+  };
 
   return (
     <>
-      <BankSelectionModal
-        isOpen={showBankModal}
-        onClose={() => setShowBankModal(false)}
-        onBankSelect={handleBankSelect}
-      />
-
-      {transferMutation.isPending && (
+      {(searchRecipientMutation.isPending || transferMutation.isPending) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <Loading />
         </div>
@@ -112,117 +86,155 @@ export default function TransferPage({ userData, setShowTransfer, showTransfer }
         id="transfer-overlay"
         className="bg-bg-dark/80 fixed inset-0 z-20 flex flex-col backdrop-blur-xl"
       >
-        {/* Page Header */}
         <header className="flex items-center px-5 pt-10 pb-4">
-          <div onClick={() => setShowTransfer(false)} className="text-secondary-text text-2xl">
+          <button onClick={closePage} className="text-secondary-text text-2xl">
             <IoIosArrowBack className="text-3xl" />
-          </div>
+          </button>
           <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
             โอนเงิน
           </h2>
-          <div className="w-6" /> {/* Spacer to keep title perfectly centered */}
+          <div className="w-6" />
         </header>
 
-        {/* Page Content */}
-        <div className="flex flex-col gap-6 rounded-t-4xl bg-white p-6">
-          {/* Account Balance */}
-          <div className="rounded-lg bg-gray-100 p-3 text-center text-sm text-gray-600">
-            ยอดเงินที่ใช้ได้
-            <span className="text-bg-dark ml-2 font-bold">
-              ฿
-              {userData?.wallet.balance.toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </span>
-          </div>
+        <div className="relative flex-grow overflow-hidden rounded-t-4xl bg-white p-6">
+          <AnimatePresence mode="wait">
+            {/* Step 1: Input Phone Number */}
+            {uiStep === "inputPhoneNumber" && (
+              <motion.div
+                key="step1"
+                variants={pageVariants}
+                initial="initial"
+                animate="in"
+                exit="out"
+                className="flex h-full flex-col gap-6"
+              >
+                <div className="rounded-lg bg-gray-100 p-3 text-center text-sm text-gray-600">
+                  ยอดเงินที่ใช้ได้
+                  <span className="text-bg-dark ml-2 font-bold">
+                    ฿
+                    {userData?.wallet.balance.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-500">
+                    เบอร์โทรศัพท์ผู้รับ
+                  </label>
+                  <div className="relative mt-2">
+                    <FaPhoneAlt className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      placeholder="กรอกเบอร์โทรศัพท์"
+                      className="w-full rounded-xl border border-gray-300 p-4 pl-12 outline-none focus:ring-2 focus:ring-pink-400"
+                    />
+                  </div>
+                </div>
+                <div className="mt-auto flex justify-center">
+                  <CtaButton onClick={handleSearch}>ค้นหาผู้รับ</CtaButton>
+                </div>
+              </motion.div>
+            )}
 
-          {/* Input Group: Amount */}
-          <div className="flex flex-col gap-2">
-            <label htmlFor="transfer-amount" className="block text-sm font-bold text-gray-500">
-              จำนวนเงิน
-            </label>
-            <input
-              type="number"
-              name="amount"
-              value={formData.amount}
-              onChange={handleInputChange}
-              inputMode="decimal"
-              placeholder="฿0.00"
-              className="text-bg-dark focus:border-primary-pink focus:ring-primary-pink/30 w-full rounded-xl border border-gray-300 p-4 font-bold focus:ring-2 focus:outline-none"
-            />
-          </div>
+            {/* Step 2: Confirm Recipient & Input Amount */}
+            {uiStep === "confirmRecipient" && recipient && (
+              <motion.div
+                key="step2"
+                variants={pageVariants}
+                initial="initial"
+                animate="in"
+                exit="out"
+                className="flex h-full flex-col gap-6"
+              >
+                <div>
+                  <p className="text-sm font-bold text-gray-500">โอนไปยัง</p>
+                  <div className="mt-2 flex items-center gap-3 rounded-xl border border-gray-200 p-3">
+                    <Image
+                      src={recipient.line_profile_url}
+                      width={40}
+                      height={40}
+                      alt={recipient.line_display_name}
+                      className="rounded-full"
+                    />
+                    <div>
+                      <p className="font-bold text-gray-800">
+                        {recipient.line_display_name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        เบอร์โทร: {recipient.phone}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-500">
+                    จำนวนเงิน
+                  </label>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    inputMode="decimal"
+                    placeholder="฿0.00"
+                    className="mt-2 w-full rounded-xl border border-gray-300 p-4 text-lg font-bold outline-none focus:ring-2 focus:ring-pink-400"
+                  />
+                </div>
+                <div className="mt-auto flex justify-center gap-4">
+                  <button
+                    onClick={() => setUiStep("inputPhoneNumber")}
+                    className="rounded-xl px-6 py-3 font-bold text-gray-500"
+                  >
+                    ย้อนกลับ
+                  </button>
+                  <CtaButton onClick={handleAmountConfirm}>ต่อไป</CtaButton>
+                </div>
+              </motion.div>
+            )}
 
-          {/* Input Group: Recipient Name */}
-          <div className="flex flex-col gap-2">
-            <label htmlFor="transfer-recipient" className="text-sm font-bold text-gray-500">
-              ผู้รับโอน
-            </label>
-            <div className="relative">
-              <IoMdPerson className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                name="recipient"
-                value={formData.recipient}
-                onChange={handleInputChange}
-                placeholder="ชื่อ-นามสกุล"
-                className="focus:border-primary-pink focus:ring-primary-pink/30 text-bg-dark w-full rounded-xl border border-gray-300 p-4 pl-12 focus:ring-2 focus:outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Input Group: Bank (Placeholder for now) */}
-          <div className="flex flex-col gap-2">
-            <label htmlFor="transfer-bank-selector" className="text-sm font-bold text-gray-500">
-              ธนาคารผู้รับ
-            </label>
-            <div
-              id="transfer-bank-selector"
-              onClick={() => setShowBankModal(true)} // 6. Open the modal on click
-              className="hover:border-vibrant-purple flex w-full cursor-pointer items-center justify-between rounded-xl border border-gray-300 p-3"
-            >
-              {/* 7. Display the selected bank name or the placeholder */}
-              <span className={selectedBank ? "text-bg-dark font-semibold" : "text-gray-400"}>
-                {selectedBank ? selectedBank.name : "เลือกธนาคาร / พร้อมเพย์"}
-              </span>
-              <IoIosArrowBack className="rotate-180 text-3xl text-gray-400" />
-            </div>
-          </div>
-
-          {/* Input Group: Account Number */}
-          <div className="flex flex-col gap-2">
-            <label htmlFor="transfer-account" className="text-sm font-bold text-gray-500">
-              เลขบัญชี / เบอร์โทรศัพท์
-            </label>
-            <div className="relative">
-              <FaHashtag className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                id="transfer-account"
-                name="account"
-                value={formData.account}
-                onChange={handleInputChange}
-                placeholder={accountInputPlaceholder} // 8. Use the dynamic placeholder
-                className="text-bg-dark focus:border-primary-pink focus:ring-primary-pink/30 w-full rounded-xl border border-gray-300 p-4 pl-12 outline-none focus:ring-2"
-              />
-            </div>
-          </div>
-
-          {/* Fee Display */}
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4 text-base">
-            <span className="text-gray-600">ค่าบริการ</span>
-            <span className="text-bg-dark font-bold">฿3.00</span>
-          </div>
-
-          {/* CTA Button */}
-          <div className="flex justify-center">
-            <CtaButton
-              className={"z-10 w-48 rounded-xl p-4 text-lg font-bold"}
-              onClick={handleConfirmTransfer}
-            >
-              ต่อไป
-            </CtaButton>
-          </div>
+            {/* Step 3: Confirm PIN */}
+            {uiStep === "confirmPin" && recipient && (
+              <motion.div
+                key="step3"
+                variants={pageVariants}
+                initial="initial"
+                animate="in"
+                exit="out"
+                className="flex h-full flex-col gap-6 text-center"
+              >
+                <div className="flex flex-col">
+                  <p className="text-sm text-gray-500">คุณกำลังจะโอนเงิน</p>
+                  <p className="text-4xl font-bold text-gray-800">
+                    ฿
+                    {parseFloat(amount).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </p>
+                  <p className="mt-2 text-sm text-gray-500">
+                    ให้กับ{" "}
+                    <span className="font-bold">
+                      {recipient.line_display_name}
+                    </span>
+                  </p>
+                </div>
+                <div className="flex flex-col gap-4">
+                  <label className="font-bold text-gray-700">
+                    กรุณายืนยันด้วยรหัส PIN
+                  </label>
+                  <PinInput length={6} onComplete={handlePinComplete} />
+                </div>
+                <div className="mt-auto flex justify-center">
+                  <button
+                    onClick={() => setUiStep("confirmRecipient")}
+                    className="rounded-xl px-6 py-3 font-bold text-gray-500"
+                  >
+                    ย้อนกลับ
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </FramerDiv>
     </>

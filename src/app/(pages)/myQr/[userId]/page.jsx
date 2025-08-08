@@ -3,18 +3,16 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
-import { useRouter } from "next/navigation";
-import { useUser } from "@/hooks/userUser"; // 1. Import useUser hook
+import { useParams, useRouter } from "next/navigation";
+import { useUser } from "@/hooks/useUser"; // 1. Import useUser hook
 import CtaButton from "@/components/Ui/CtaButton";
 import Loading from "@/components/StatusComponents/Loading";
 
 export default function MyQr() {
+  const params = useParams();
   const router = useRouter();
-  const {
-    data: userData,
-    isLoading,
-    error,
-  } = useUser("U5d2998909721fdea596f8e9e91e7bf85");
+  const { userId } = params;
+  const { data: userData, isLoading, error } = useUser(userId);
 
   const handleClose = () => {
     router.push("/");

@@ -12,7 +12,7 @@ import { useTransactions } from "@/hooks/useTransactions"; // 1. Import hook ใ
 import CtaButton from "@/components/Ui/CtaButton";
 import Loading from "@/components/StatusComponents/Loading";
 import Transaction from "@/components/TransactionComponents/Transaction";
-import { useUser } from "@/hooks/userUser";
+import { useUser } from "@/hooks/useUser";
 import { useLiff } from "@/components/provider/LiffProvider";
 import TransactionSkeleton from "@/components/Ui/TransactionSkeleton";
 

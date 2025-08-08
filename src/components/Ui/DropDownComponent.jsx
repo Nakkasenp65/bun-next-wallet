@@ -1,16 +1,16 @@
-// src/components/Ui/DropDownComponent.js
+// src/components/Ui/DropDownComponent.js (Final, Universal Version)
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import clsx from "clsx";
 
-// Animation for the dropdown menu
 const dropdownVariants = {
   initial: { opacity: 0, y: -5, scale: 0.98 },
   open: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { type: "spring", stiffness: 1000, damping: 25 },
+    transition: { type: "spring", stiffness: 300, damping: 25 },
   },
   exit: { opacity: 0, y: -5, scale: 0.98, transition: { duration: 0.1 } },
 };
@@ -20,9 +20,8 @@ export default function DropDownComponent({
   name,
   value,
   onChange,
-  options,
+  options = [],
   placeholder,
-  // New props to allow complete style overrides
   buttonClassName = "",
   optionsContainerClassName = "",
   optionClassName = "",
@@ -32,7 +31,19 @@ export default function DropDownComponent({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
+  // --- NEW: Check if the options are simple strings or objects ---
+  // This makes the component backward compatible with your UserInputMonthly.jsx
+  const isObjectOptions = options.length > 0 && typeof options[0] === "object";
+
+  const getDisplayLabel = () => {
+    if (isObjectOptions) {
+      const selectedOption = options.find((option) => option.value === value);
+      return selectedOption ? selectedOption.label : placeholder;
+    }
+    // For simple string arrays
+    return value || placeholder;
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -44,8 +55,15 @@ export default function DropDownComponent({
   }, [isOpen]);
 
   const handleOptionClick = (optionValue) => {
-    // Simulate the event object for the parent's handleChange
-    onChange({ target: { name, value: optionValue } });
+    // --- NEW: Simulate the event object for backward compatibility ---
+    // This is the key to making it work with UserInputMonthly's generic handleChange
+    const simulatedEvent = {
+      target: {
+        name: name,
+        value: optionValue,
+      },
+    };
+    onChange(simulatedEvent);
     setIsOpen(false);
   };
 
@@ -60,9 +78,14 @@ export default function DropDownComponent({
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className={`relative w-full text-left transition-all ${buttonClassName}`}
+          className={clsx(
+            "relative w-full text-left transition-all",
+            buttonClassName,
+          )}
         >
-          {value || placeholder}
+          <span className={value ? "text-gray-800" : "text-gray-400"}>
+            {getDisplayLabel()}
+          </span>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center">
             {icon || (
               <motion.svg
@@ -83,17 +106,29 @@ export default function DropDownComponent({
               initial="initial"
               animate="open"
               exit="exit"
-              className={`ring-opacity-5 scrollbar-hide absolute z-20 mt-1 max-h-60 w-full origin-top list-none overflow-y-auto rounded-xl bg-white shadow-lg ring-1 focus:outline-none ${optionsContainerClassName}`}
+              className={clsx(
+                "ring-opacity-5 scrollbar-hide absolute z-20 mt-1 max-h-60 w-full origin-top list-none overflow-y-auto rounded-xl bg-white shadow-lg ring-1 focus:outline-none",
+                optionsContainerClassName,
+              )}
             >
-              {options.map((option) => (
-                <li
-                  key={option}
-                  onClick={() => handleOptionClick(option)}
-                  className={`cursor-pointer p-3 font-medium text-gray-800 select-none hover:bg-pink-50/50 ${optionClassName}`}
-                >
-                  {option}
-                </li>
-              ))}
+              {options.map((option) => {
+                // --- NEW: Handle both string and object options ---
+                const optionValue = isObjectOptions ? option.value : option;
+                const optionLabel = isObjectOptions ? option.label : option;
+
+                return (
+                  <li
+                    key={optionValue} // Always use a unique primitive value for the key
+                    onClick={() => handleOptionClick(optionValue)}
+                    className={clsx(
+                      "cursor-pointer p-3 font-medium text-gray-800 select-none hover:bg-pink-50/50",
+                      optionClassName,
+                    )}
+                  >
+                    {optionLabel} {/* Always display a readable label */}
+                  </li>
+                );
+              })}
             </motion.ul>
           )}
         </AnimatePresence>

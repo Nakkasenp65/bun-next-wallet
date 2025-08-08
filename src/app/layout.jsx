@@ -37,7 +37,6 @@ export const toastOptions = {
   position: "top-center",
   duration: 5000,
 };
-
 export const metadata = {
   title: "NO1Money+",
   description: "app.no1.mobi",
@@ -46,13 +45,17 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`antialiased`}>
+      <body className={`gradient-bg antialiased`}>
         <QueryProvider>
           <LiffProvider>
             <TokenSynchronizer />
             {children}
             <ReactQueryDevtools />
-            <Toaster position="top-center" containerClassName="mx-auto z-[9999] w-5/6" toastOptions={toastOptions} />
+            <Toaster
+              position="top-center"
+              containerClassName="mx-auto z-[9999] w-5/6"
+              toastOptions={toastOptions}
+            />
           </LiffProvider>
         </QueryProvider>
       </body>

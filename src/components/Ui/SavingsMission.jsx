@@ -1,84 +1,55 @@
 import React from "react";
-import { GrMoney } from "react-icons/gr";
 import { MdOutlineSavings } from "react-icons/md";
-import { AiOutlineGift } from "react-icons/ai";
 import { RiExternalLinkFill } from "react-icons/ri";
 import FramerLink from "./FramerLink";
 import { useEnrollMission } from "@/hooks/useMission";
+import AvailableMissionCard from "./AvailableMissionCard"; // 1. Import Component ใหม่
 
 export default function SavingsMission({ missions, userId }) {
-  const { mutate: enroll, isPending } = useEnrollMission();
+  // 2. isPending จะถูกใช้เพื่อส่งไปยังการ์ดแต่ละใบ
+  const { mutate: enroll, isPending: isEnrolling } = useEnrollMission();
 
   const handleEnrollClick = (missionId) => {
     if (!userId) {
+      // อาจจะแสดง toast แจ้งเตือนให้ login ก่อน
       return;
     }
     enroll({ missionId, userId });
   };
 
   if (!missions || missions.length === 0) {
-    return null;
+    return null; // หรือแสดงข้อความว่า "ไม่มีภารกิจพิเศษในขณะนี้"
   }
 
-  if (missions)
-    return (
-      <div className="flex w-full flex-col gap-4">
-        {/* Section Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-6 w-1 rounded-full bg-purple-500" />
-            <h2 className="text-bg-dark text-lg font-bold">ภารกิจพิเศษ</h2>
-          </div>
-          <FramerLink
-            link={"/mission"}
-            icon={<RiExternalLinkFill size={16} />}
-            backgroundColor={"bg-primary-pink"}
-          >
-            ดูทั้งหมด
-          </FramerLink>
+  return (
+    <div className="flex w-full flex-col gap-4">
+      {/* Section Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="h-6 w-1 rounded-full bg-purple-500" />
+          <h2 className="text-bg-dark text-lg font-bold">ภารกิจพิเศษ</h2>
         </div>
-
-        {/* Horizontal Scroll Container */}
-        <div className="flex gap-4 overflow-x-auto">
-          {missions.map((mission) => {
-            return (
-              <div
-                key={mission.id}
-                className="flex w-64 flex-shrink-0 snap-start flex-col gap-1 rounded-3xl p-4 text-white shadow-sm [background:linear-gradient(135deg,_var(--vibrant-purple),_var(--primary-pink))]"
-              >
-                {/* Card Header */}
-                <div className="flex items-start gap-1">
-                  <AiOutlineGift size={32} />
-                  <span className="truncate text-lg font-bold first-letter:uppercase">
-                    {mission.title}
-                  </span>
-                </div>
-
-                <p className="min-h-12 text-sm text-white/80">
-                  {mission.description}
-                </p>
-
-                {/* Spacer to push the footer to the bottom */}
-                <div className="flex-grow" />
-
-                {/* Card Footer */}
-                <div className="mt-1 flex w-full items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 rounded-xl bg-black/25 px-3 py-2 text-sm font-bold">
-                    <GrMoney className="h-4 w-4 text-amber-300" />
-                    <span>ได้รับ ฿{mission.rewardAmount}</span>
-                  </div>
-                  <button
-                    onClick={() => handleEnrollClick(mission.id, userId)}
-                    disabled={isPending}
-                    className="text-primary-pink rounded-xl bg-white px-4 py-2 text-sm font-bold shadow-md transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {isPending ? "กำลังเข้าร่วม..." : "เข้าร่วม!"}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <FramerLink
+          link={"/mission"}
+          icon={<RiExternalLinkFill size={16} />}
+          backgroundColor={"bg-primary-pink"}
+        >
+          ดูทั้งหมด
+        </FramerLink>
       </div>
-    );
+
+      {/* Horizontal Scroll Container */}
+      <div className="noscrollbar -m-2 flex gap-4 overflow-x-auto p-2">
+        {/* 3. วนลูปและเรียกใช้ AvailableMissionCard */}
+        {missions.map((mission) => (
+          <AvailableMissionCard
+            key={mission.id}
+            mission={mission}
+            onEnroll={handleEnrollClick}
+            isEnrolling={isEnrolling}
+          />
+        ))}
+      </div>
+    </div>
+  );
 }

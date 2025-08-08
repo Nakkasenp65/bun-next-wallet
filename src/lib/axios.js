@@ -8,7 +8,7 @@ const devApiUrl = process.env.NEXT_PUBLIC_DEV_API_URL;
 const apiUrl = serverOption === "dev" ? devApiUrl : productionApiUrl;
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: productionApiUrl,
   headers: {
     "Content-Type": "application/json",
   },

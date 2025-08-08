@@ -6,10 +6,11 @@ import { useRouter } from "next/navigation";
 import axios from "@/lib/axios";
 import { useLiff } from "@/components/provider/LiffProvider";
 import toast from "react-hot-toast";
-import { useCreateGoal, useMainServerUser } from "@/hooks/userUser";
+import { useCreateGoal, useMainServerUser } from "@/hooks/useUser";
 import UserInputMonthly from "@/components/pages/UserInputMonthly";
 import GoalSetter from "@/components/Ui/GoalSetter";
 import MiniLoading from "@/components/StatusComponents/MiniLoading";
+import Loading from "@/components/StatusComponents/Loading";
 
 // GET https://checkuserdb.vercel.app/api/check-user/:liffID เช็คว่าเป็นสมาชิกหรือยัง
 // 1. Check ว่าเป็นสมาชิกกับ database เดิมไหม
@@ -52,50 +53,56 @@ export default function Page() {
 
   // สร้าง user ใหม่จากข้อมูล goal และ ข้อมูลบางส่วนจาก server หลัก
   const handleSetGoal = () => {
-    if (!goal.mobileId || !goal.planId) {
-      toast.error("กรุณาเลือกเป้าหมายการออมให้ครบถ้วน");
+    try {
+      setUiStep("final");
+      if (!goal.mobileId || !goal.planId) {
+        toast.error("กรุณาเลือกเป้าหมายการออมให้ครบถ้วน");
+      }
+      // ข้อมูลจากไลน์
+      const {
+        userId: line_user_id,
+        displayName: line_display_name,
+        pictureUrl: line_profile_url,
+      } = liffProfile;
+      // ข้อมูลจากหน้าเลือกโทรศัพท์
+      const { mobileId, planId } = goal;
+      // ข้อมูลจากหน้า userInputMonthLy (กรอกยอดเงินรายเดือน)
+      const finalOccupation =
+        inputData.occupation === "อื่นๆ"
+          ? inputData.customOccupation
+          : inputData.occupation;
+      // ข้อมูลจาก server หลัก
+
+      // const { fullname, phone, pin, chat_url } = mainServerUserProfile;
+      // Testint purpose ไม่เช็ค mobi เพราะไม่มีสมาชิก
+      let notHavingData = {
+        fullname: "test",
+        phone: "test",
+        pin: 111111,
+        chat_url: "test",
+      };
+
+      const dataToPost = {
+        line_user_id,
+        line_display_name,
+        line_profile_url,
+        mobileId,
+        planId,
+        fullname: notHavingData.fullname,
+        phone: notHavingData.phone,
+        pin: notHavingData.chat_url,
+        chat_url: notHavingData.chat_url,
+        occupation: finalOccupation,
+        ageRange: inputData.age,
+        monthlyPayment: inputData.monthlyPayment,
+      };
+      console.log("TEST PRODUCTION: NO MOBI INFO");
+      createGoalMutate(dataToPost);
+      return;
+    } catch (error) {
+      setUiStep("main");
+      console.log(error);
     }
-    // ข้อมูลจากไลน์
-    const {
-      userId: line_user_id,
-      displayName: line_display_name,
-      pictureUrl: line_profile_url,
-    } = liffProfile;
-    // ข้อมูลจากหน้าเลือกโทรศัพท์
-    const { mobileId, planId } = goal;
-    // ข้อมูลจากหน้า userInputMonthLy (กรอกยอดเงินรายเดือน)
-    const finalOccupation =
-      inputData.occupation === "อื่นๆ"
-        ? inputData.customOccupation
-        : inputData.occupation;
-    // ข้อมูลจาก server หลัก
-
-    // const { fullname, phone, pin, chat_url } = mainServerUserProfile;
-    // Testint purpose ไม่เช็ค mobi เพราะไม่มีสมาชิก
-    let notHavingData = {
-      fullname: "test",
-      phone: "test",
-      pin: "test",
-      chat_url: "test",
-    };
-
-    const dataToPost = {
-      line_user_id,
-      line_display_name,
-      line_profile_url,
-      mobileId,
-      planId,
-      fullname: notHavingData.fullname,
-      phone: notHavingData.phone,
-      pin: notHavingData.chat_url,
-      chat_url: notHavingData.chat_url,
-      occupation: finalOccupation,
-      ageRange: inputData.age,
-      monthlyPayment: inputData.monthlyPayment,
-    };
-    console.log("TEST PRODUCTION: NO MOBI INFO");
-    createGoalMutate(dataToPost);
-    return;
 
     // const dataToPost = {
     //   line_user_id,
@@ -164,7 +171,7 @@ export default function Page() {
   }, [uiStep, suggestedPhone]);
 
   if (createGoalPending) {
-    return <MiniLoading />;
+    return <Loading />;
   }
 
   return (
@@ -181,7 +188,7 @@ export default function Page() {
         />
       )}
 
-      {uiStep === "calculate" && <MiniLoading message="กำลังประมวลผล..." />}
+      {uiStep === "calculate" && <Loading message="กำลังประมวลผล..." />}
       {uiStep === "main" && suggestedPhone && (
         <div className="flex flex-col bg-white">
           <header className="from-primary-pink to-primary-orange flex flex-col items-center justify-center gap-2 rounded-b-4xl bg-gradient-to-br p-6 pt-14 text-white drop-shadow-lg">
@@ -208,6 +215,7 @@ export default function Page() {
           </footer>
         </div>
       )}
+      {uiStep === "final" && <Loading message="กำลังประมวลผล..." />}
     </main>
   );
 }

@@ -6,6 +6,7 @@ import { FiBell } from "react-icons/fi";
 import { faLock } from "@fortawesome/free-solid-svg-icons";
 import { faBell } from "@fortawesome/free-regular-svg-icons";
 import Image from "next/image";
+import Link from "next/link";
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -15,6 +16,7 @@ const getGreeting = () => {
 };
 
 export default function WalletHeader({
+  userLineId,
   userName,
   setShowNotifications,
   profileUrl,
@@ -28,19 +30,21 @@ export default function WalletHeader({
   return (
     <header className="relative z-10 flex items-center justify-between">
       {/* Welcome Text */}
-      <div className="flex items-center justify-center gap-2">
-        <img
-          src={profileUrl}
-          width={50}
-          height={50}
-          alt="profile image"
-          className="border-primary-pink shadow-neon-pink-sm h-10 w-auto rounded-full border-2 object-cover"
-        />
-        <div className="flex flex-col">
-          <div className="text-secondary-text text-xs">สวัสดี</div>
-          <div className="text-sm">{userName}</div>
+      <Link href={`/profile/${userLineId}`}>
+        <div className="flex items-center justify-center gap-2">
+          <img
+            src={profileUrl}
+            width={50}
+            height={50}
+            alt="profile image"
+            className="border-primary-pink shadow-neon-pink-sm h-10 w-auto rounded-full border-2 object-cover"
+          />
+          <div className="flex flex-col">
+            <div className="text-secondary-text text-xs">สวัสดี</div>
+            <div className="text-sm">{userName}</div>
+          </div>
         </div>
-      </div>
+      </Link>
 
       {/* App Logo (Centered) */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">

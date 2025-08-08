@@ -16,6 +16,48 @@ async function fetchSuccessTransactions(year, month, walletId) {
   return response.data;
 }
 
+async function findRecipientByPhone(phoneNumber) {
+  // Backend endpoint นี้คุณจะต้องสร้างขึ้นมา
+  const { data } = await axios.get(`/user/by-phone/${phoneNumber}`);
+  return data;
+}
+
+async function createInternalTransfer(payload) {
+  // Backend endpoint นี้คุณจะต้องสร้างขึ้นมา
+  const { data } = await axios.post("/transaction/transfer/internal", payload);
+  return data;
+}
+
+export function useCreateInternalTransfer({ onSuccessCallback }) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createInternalTransfer,
+    onSuccess: () => {
+      toast.success("โอนเงินสำเร็จ!");
+      setTimeout(() => {}, 500);
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      if (onSuccessCallback) {
+        onSuccessCallback();
+      }
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "การโอนเงินล้มเหลว");
+    },
+  });
+}
+
+export function useSearchRecipient() {
+  return useMutation({
+    mutationFn: findRecipientByPhone,
+    onError: (error) => {
+      toast.error(
+        error.response?.data?.message || "ไม่พบผู้ใช้ หรือเกิดข้อผิดพลาด",
+      );
+    },
+  });
+}
+
 export function useTransactions(year, month, walletId) {
   return useQuery({
     queryKey: ["transactions", year, month, walletId],

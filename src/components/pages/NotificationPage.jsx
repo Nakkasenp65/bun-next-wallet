@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import FramerDiv from "../framerComponents/FramerDiv";
 import NotificationTab from "../NotificationComponents/NotificationTab";
-import { useUser } from "@/hooks/userUser";
+import { useUser } from "@/hooks/useUser";
 import Loading from "../StatusComponents/Loading";
 import ErrorComponent from "../Ui/ErrorComponent";
 import { useNotification } from "@/hooks/useNotification";

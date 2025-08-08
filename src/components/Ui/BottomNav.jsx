@@ -12,12 +12,12 @@ import {
 import NavItem from "./NavItem";
 import Link from "next/link";
 
-export default function BottomNav({ setShowContact }) {
+export default function BottomNav({ setShowContact, userId }) {
   const [activeNav, setActiveNav] = useState("home");
 
   const navItems = [
     { id: "home", label: "หน้าแรก", icon: faHouse, url: "/" },
-    { id: "my-qr", label: "QR ของฉัน", icon: faIdCard, url: "/myQr" },
+    { id: "my-qr", label: "QR ของฉัน", icon: faIdCard, url: `/myQr/${userId}` },
     { id: "history", label: "ประวัติ", icon: faFileLines, url: "/history" },
     { id: "contact", label: "ติดต่อ", icon: faHeadset, url: "/contact" },
   ];
@@ -42,7 +42,7 @@ export default function BottomNav({ setShowContact }) {
 
       {/* Center Scan Button */}
       <Link
-        href={"/scan"}
+        href={`/scan/`}
         id="scan-to-pay-btn"
         className="group -mt-9 cursor-pointer"
         onClick={() => setActiveNav("scan")}

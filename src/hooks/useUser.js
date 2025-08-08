@@ -1,9 +1,4 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  userQueryOptions,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import externalLinkAxios from "axios";
 import { useRouter } from "next/navigation";
@@ -12,6 +7,11 @@ import toast from "react-hot-toast";
 async function fetchUserStatus(userId) {
   console.log("fetch user status");
   const { data } = await axios.get(`/user/status/${userId}`);
+  return data;
+}
+
+async function updateUserData({ userId, updateData }) {
+  const { data } = await axios.patch(`/user/${userId}`, updateData);
   return data;
 }
 
@@ -92,6 +92,30 @@ export function useCreateGoal() {
       const errorMessage =
         error.response?.data?.message || "สร้างเป้าหมายการออมเงินไม่สำเร็จ";
       toast.error(errorMessage);
+    },
+  });
+}
+
+export function useUpdateUser() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: updateUserData,
+    onSuccess: (data) => {
+      // 'data' คือ user object ที่อัปเดตแล้ว
+      toast.success("บันทึกข้อมูลสำเร็จ!");
+
+      // (สำคัญ) อัปเดต cache ของ 'user' ด้วยข้อมูลใหม่ทันที
+      queryClient.setQueryData(["user", data.line_user_id], data);
+
+      // กลับไปหน้าโปรไฟล์
+      router.back();
+    },
+    onError: (error) => {
+      toast.error(
+        error.response?.data?.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
+      );
     },
   });
 }
