@@ -24,7 +24,6 @@ async function fetchUser(userId) {
 async function fetchUserFromMainServer(lineUserId) {
   const mainUserApiUrl = process.env.NEXT_PUBLIC_MAIN_USER_API;
 
-  console.log("fetch main server user");
   let mainUser = {};
   try {
     if (!mainUserApiUrl) throw new Error("mainUserApiUrl is not defined");
