@@ -34,10 +34,13 @@ export default function DropDownComponent({
   // --- NEW: Check if the options are simple strings or objects ---
   // This makes the component backward compatible with your UserInputMonthly.jsx
   const isObjectOptions = options.length > 0 && typeof options[0] === "object";
+  console.log(isObjectOptions);
 
   const getDisplayLabel = () => {
     if (isObjectOptions) {
+      console.log(options);
       const selectedOption = options.find((option) => option.value === value);
+      console.log(selectedOption);
       return selectedOption ? selectedOption.label : placeholder;
     }
     // For simple string arrays
@@ -55,6 +58,7 @@ export default function DropDownComponent({
   }, [isOpen]);
 
   const handleOptionClick = (optionValue) => {
+    console.log("OPTION VLAUE", optionValue);
     // --- NEW: Simulate the event object for backward compatibility ---
     // This is the key to making it work with UserInputMonthly's generic handleChange
     const simulatedEvent = {
@@ -63,7 +67,7 @@ export default function DropDownComponent({
         value: optionValue,
       },
     };
-    onChange(simulatedEvent);
+    onChange(optionValue);
     setIsOpen(false);
   };
 
@@ -87,16 +91,14 @@ export default function DropDownComponent({
             {getDisplayLabel()}
           </span>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center">
-            {icon || (
-              <motion.svg
-                className="h-6 w-6 fill-current text-pink-500"
-                viewBox="0 0 20 20"
-                animate={{ rotate: isOpen ? 180 : 0 }}
-                transition={{ duration: 0.1 }}
-              >
-                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-              </motion.svg>
-            )}
+            <motion.svg
+              className="h-6 w-6 fill-current text-pink-500"
+              viewBox="0 0 20 20"
+              animate={{ rotate: isOpen ? 180 : 0 }}
+              transition={{ duration: 0.1 }}
+            >
+              <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+            </motion.svg>
           </div>
         </button>
         <AnimatePresence>

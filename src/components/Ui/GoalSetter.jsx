@@ -73,6 +73,7 @@ export default function GoalSetter({
         : [],
     [selectedBrand, selectedModel, groupedData],
   );
+
   const availableProductsInVariant = useMemo(
     () =>
       selectedBrand && selectedModel && selectedCapacity
@@ -80,6 +81,7 @@ export default function GoalSetter({
         : [],
     [selectedBrand, selectedModel, selectedCapacity, groupedData],
   );
+
   const colors = useMemo(
     () => availableProductsInVariant.map((p) => p.color),
     [availableProductsInVariant],

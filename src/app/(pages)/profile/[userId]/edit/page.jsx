@@ -17,7 +17,7 @@ export default function Page() {
 
   const handleSave = (updateData) => {
     // เรียกใช้ mutation พร้อมกับ userId และข้อมูลใหม่
-    updateUser({ userId: params.userId, updateData });
+    updateUser({ mongoId: userData.id, updateData });
   };
 
   if (isUserDataLoading) {

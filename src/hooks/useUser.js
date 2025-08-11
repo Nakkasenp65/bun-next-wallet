@@ -10,8 +10,8 @@ async function fetchUserStatus(userId) {
   return data;
 }
 
-async function updateUserData({ userId, updateData }) {
-  const { data } = await axios.patch(`/user/${userId}`, updateData);
+async function updateUserData({ mongoId, updateData }) {
+  const { data } = await axios.patch(`/user/${mongoId}`, updateData);
   return data;
 }
 

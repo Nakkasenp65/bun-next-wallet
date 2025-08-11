@@ -15,10 +15,19 @@ import DropDownComponent from "../Ui/DropDownComponent";
 
 const OCCUPATION_OPTIONS = [
   { value: "นักศึกษา", label: "นักศึกษา" },
-  { value: "พนักงานบริษัท", label: "พนักงานบริษัท" },
   { value: "ข้าราชการ / เจ้าหน้าที่รัฐ", label: "ข้าราชการ / เจ้าหน้าที่รัฐ" },
-  { value: "ธุรกิจส่วนตัว", label: "ธุรกิจส่วนตัว" },
+  { value: "พนักงานบริษัท", label: "พนักงานบริษัท" },
+  {
+    value: "ธุรกิจส่วนตัว / ค้าขาย",
+    label: "ธุรกิจส่ธุรกิจส่วนตัว / ค้าขายวนตัว",
+  },
   { value: "ฟรีแลนซ์", label: "ฟรีแลนซ์" },
+  { value: "แพทย์ / พยาบาล", label: "แพทย์ / พยาบาล" },
+  { value: "สถาปนิก / วิศวกร", label: "สถาปนิก / วิศวกร" },
+  { value: "นักการตลาด / PR", label: "นักการตลาด / PR" },
+  { value: "ศิลปิน / นักออกแบบ", label: "ศิลปิน / นักออกแบบ" },
+  { value: "เกษตรกร", label: "เกษตรกร" },
+  { value: "อื่นๆ", label: "อื่นๆ" },
 ];
 
 const AGE_RANGE_OPTIONS = [
@@ -26,7 +35,8 @@ const AGE_RANGE_OPTIONS = [
   { value: "15-20", label: "15-20 ปี" },
   { value: "21-30", label: "21-30 ปี" },
   { value: "31-40", label: "31-40 ปี" },
-  { value: "41 ปีขึ้นไป", label: "41 ปีขึ้นไป" },
+  { value: "41-50", label: "41-50" },
+  { value: "51-60", label: "51-60" },
 ];
 
 export default function EditProfileUI({ user, onSave, isSaving }) {
@@ -123,19 +133,24 @@ export default function EditProfileUI({ user, onSave, isSaving }) {
 
         {/* --- 3. Replace the native select with your Dropdown component --- */}
         <DropDownComponent
+          buttonClassName="text-bg-dark w-full rounded-xl border border-gray-300 p-4  outline-none focus:ring-2 focus:ring-pink-400"
+          labelClassName="text-bg-dark mb-2 block text-sm font-bold"
           label="อาชีพ"
-          icon={<FontAwesomeIcon icon={faBriefcase} />}
           placeholder="เลือกอาชีพของคุณ"
           options={OCCUPATION_OPTIONS}
           value={formData.occupation}
           onChange={(selectedValue) =>
-            setFormData((prev) => ({ ...prev, occupation: selectedValue }))
+            setFormData((prev) => ({
+              ...prev,
+              occupation: selectedValue,
+            }))
           }
         />
 
         <DropDownComponent
           label="ช่วงอายุ"
-          icon={<FontAwesomeIcon icon={faBirthdayCake} />}
+          buttonClassName="text-bg-dark w-full rounded-xl border border-gray-300 p-4  outline-none focus:ring-2 focus:ring-pink-400"
+          labelClassName="text-bg-dark mb-2 block text-sm font-bold"
           placeholder="เลือกช่วงอายุของคุณ"
           options={AGE_RANGE_OPTIONS}
           value={formData.ageRange}
@@ -145,8 +160,12 @@ export default function EditProfileUI({ user, onSave, isSaving }) {
         />
 
         {/* CTA Button */}
-        <div className="mt-auto pt-4">
-          <CtaButton onClick={handleSave} disabled={isSaving}>
+        <div className="mt-auto flex justify-center pt-4">
+          <CtaButton
+            onClick={handleSave}
+            disabled={isSaving}
+            className={"z-10 w-48 rounded-xl p-4 text-base font-bold"}
+          >
             {isSaving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
           </CtaButton>
         </div>

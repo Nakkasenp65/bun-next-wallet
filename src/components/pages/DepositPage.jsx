@@ -147,6 +147,7 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
       formData.append("from", userData.username);
       formData.append("to", "Aom-Down App");
       formData.append("walletId", userData.wallet.id);
+      formData.append("userId", userData.id);
 
       createTransactionMutation.mutate(formData);
     } catch (error) {}

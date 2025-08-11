@@ -9,7 +9,6 @@ import toast from "react-hot-toast";
 import { useCreateGoal, useMainServerUser } from "@/hooks/useUser";
 import UserInputMonthly from "@/components/pages/UserInputMonthly";
 import GoalSetter from "@/components/Ui/GoalSetter";
-import MiniLoading from "@/components/StatusComponents/MiniLoading";
 import Loading from "@/components/StatusComponents/Loading";
 
 // GET https://checkuserdb.vercel.app/api/check-user/:liffID เช็คว่าเป็นสมาชิกหรือยัง
@@ -158,7 +157,9 @@ export default function Page() {
     }
     setSuggestedPhone(data);
   };
+
   console.log("line profile: ", liffProfile);
+
   useEffect(() => {
     // ให้เช็ค user
     if (!isRegistered) handleUserRedirect(liffProfile?.userId);
@@ -177,7 +178,7 @@ export default function Page() {
   return (
     <main
       id="setup-page"
-      className="gradient-bg flex min-h-dvh flex-col justify-center overflow-x-hidden"
+      className="flex min-h-dvh flex-col justify-center overflow-x-hidden"
     >
       {uiStep === "input" && (
         <UserInputMonthly
@@ -191,6 +192,7 @@ export default function Page() {
       {uiStep === "calculate" && <Loading message="กำลังประมวลผล..." />}
       {uiStep === "main" && suggestedPhone && (
         <div className="flex flex-col bg-white">
+          {/* HEADER */}
           <header className="from-primary-pink to-primary-orange flex flex-col items-center justify-center gap-2 rounded-b-4xl bg-gradient-to-br p-6 pt-14 text-white drop-shadow-lg">
             <h1 className="text-2xl font-bold text-white drop-shadow-md drop-shadow-black/30">
               ตั้งค่าเป้าหมายการออม
@@ -199,12 +201,14 @@ export default function Page() {
               เลือกสิ่งที่คุณอยากได้ แล้วมาเริ่มวางแผนการออมกัน!
             </p>
           </header>
+          {/* GOAL SETTER */}
           <GoalSetter
             products={suggestedPhone}
             onGoalChange={handleGoalUpdate}
             onBack={goBack}
           />
           <footer className="flex w-full items-center justify-center bg-white p-6 pb-12 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+            {/* CONFIRM BUTTON */}
             <CtaButton
               onClick={handleSetGoal}
               disabled={createGoalPending}

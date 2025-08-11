@@ -48,6 +48,13 @@ export default function UserInputMonthly({
     // setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleDropDownChange = (key, value) => {
+    setInputData((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
   const pages = [
     {
       field: "age",
@@ -162,7 +169,9 @@ export default function UserInputMonthly({
                       labelClassName="text-bg-dark font-medium"
                       name={currentPageData.field}
                       value={inputData[currentPageData.field]}
-                      onChange={handleChange}
+                      onChange={(value) =>
+                        handleDropDownChange(currentPageData.field, value)
+                      }
                       options={currentPageData.options}
                       placeholder={currentPageData.placeholder}
                       buttonClassName="text-bg-dark focus:border-primary-pink w-full rounded-xl border-2 border-gray-200 bg-white p-4 font-bold shadow-sm transition-all focus:ring-4 focus:ring-pink-200 focus:outline-none"

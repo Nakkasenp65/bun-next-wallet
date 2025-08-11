@@ -38,14 +38,14 @@ export const toastOptions = {
   duration: 5000,
 };
 export const metadata = {
-  title: "NO1Money+",
-  description: "app.no1.mobi",
+  title: "1 Wallet Premium+",
+  description: "1 Wallet Premium+",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`gradient-bg antialiased`}>
+      <body className={`bg-bg-dark antialiased`}>
         <QueryProvider>
           <LiffProvider>
             <TokenSynchronizer />

@@ -25,11 +25,11 @@ export default function SavingsGoalCard({
   return (
     <div
       id="savings-goal-card"
-      className="text-light-text shadow-neon-purple inset-shadow-lg relative flex flex-col gap-4 overflow-hidden rounded-3xl p-6 inset-shadow-black/36 [background:linear-gradient(45deg,_#230640_0%,_#402E99_100%)]"
+      className="text-light-text shadow-neon-purple inset-shadow-lg relative flex flex-col gap-2 overflow-hidden rounded-3xl p-6 inset-shadow-black/36 [background:linear-gradient(45deg,_#230640_0%,_#402E99_100%)]"
     >
       {imageUrl ? (
         <Image
-          className="animate-floating drop-shadow-primary-pink absolute -right-28 -bottom-16 h-auto w-[240px] -rotate-6 drop-shadow-2xl sm:-bottom-12 sm:w-[300px] sm:-rotate-10"
+          className="animate-floating drop-shadow-primary-pink absolute -right-20 -bottom-14 h-auto w-[240px] -rotate-6 drop-shadow-2xl sm:-bottom-12 sm:w-[300px] sm:-rotate-10"
           src={imageUrl}
           alt="mobile phone image"
           width={300}

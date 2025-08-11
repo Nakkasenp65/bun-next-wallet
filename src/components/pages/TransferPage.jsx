@@ -18,20 +18,20 @@ export default function TransferPage({
   setShowTransfer,
   showTransfer,
 }) {
-  const [uiStep, setUiStep] = useState("inputPhoneNumber"); // 'inputPhoneNumber', 'confirmRecipient', 'confirmPin'
+  const [uiStep, setUiStep] = useState("inputPhone"); // 'inputPhone', 'confirmRecipient', 'inputPin'
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [recipient, setRecipient] = useState(null);
   const [amount, setAmount] = useState("");
+  const [recipient, setRecipient] = useState(null);
 
   const closePage = () => {
     setShowTransfer(false);
-    // Reset all states when closing
+    // Delay reset to allow for exit animation, preventing UI flicker
     setTimeout(() => {
-      setUiStep("inputPhoneNumber");
+      setUiStep("inputPhone");
       setPhoneNumber("");
       setRecipient(null);
       setAmount("");
-    }, 300); // Delay reset to allow for exit animation
+    }, 300);
   };
 
   const searchRecipientMutation = useSearchRecipient();
@@ -39,26 +39,32 @@ export default function TransferPage({
     onSuccessCallback: closePage,
   });
 
+  // Step 1 Handler: Search for the recipient
   const handleSearch = () => {
-    if (phoneNumber.length < 9)
+    if (phoneNumber.length < 9) {
       return toast.error("กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง");
+    }
     searchRecipientMutation.mutate(phoneNumber, {
       onSuccess: (data) => {
         setRecipient(data);
-        setUiStep("confirmRecipient");
+        setUiStep("confirmRecipient"); // Move to next step on success
       },
     });
   };
 
-  const handleAmountConfirm = () => {
+  // Step 2 Handler: Confirm recipient and amount, move to PIN
+  const handleConfirm = () => {
     const numericAmount = parseFloat(amount);
-    if (isNaN(numericAmount) || numericAmount <= 0)
+    if (isNaN(numericAmount) || numericAmount <= 0) {
       return toast.error("กรุณาระบุจำนวนเงินที่ถูกต้อง");
-    if (numericAmount > userData.wallet.balance)
+    }
+    if (numericAmount > userData.wallet.balance) {
       return toast.error("ยอดเงินของคุณไม่เพียงพอ");
-    setUiStep("confirmPin");
+    }
+    setUiStep("inputPin");
   };
 
+  // Step 3 Handler: PIN is complete, execute transfer
   const handlePinComplete = (pin) => {
     transferMutation.mutate({
       recipientUserId: recipient.id,
@@ -68,16 +74,23 @@ export default function TransferPage({
   };
 
   const pageVariants = {
-    initial: { opacity: 0, x: 300 },
+    initial: { opacity: 0, x: "100%" },
     in: { opacity: 1, x: 0 },
-    out: { opacity: 0, x: -300 },
+    out: { opacity: 0, x: "-100%" },
   };
+
+  const isLoading =
+    searchRecipientMutation.isPending || transferMutation.isPending;
 
   return (
     <>
-      {(searchRecipientMutation.isPending || transferMutation.isPending) && (
+      {isLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <Loading />
+          <Loading
+            message={
+              transferMutation.isPending ? "กำลังโอนเงิน..." : "กำลังค้นหา..."
+            }
+          />
         </div>
       )}
 
@@ -99,7 +112,7 @@ export default function TransferPage({
         <div className="relative flex-grow overflow-hidden rounded-t-4xl bg-white p-6">
           <AnimatePresence mode="wait">
             {/* Step 1: Input Phone Number */}
-            {uiStep === "inputPhoneNumber" && (
+            {uiStep === "inputPhone" && (
               <motion.div
                 key="step1"
                 variants={pageVariants}
@@ -108,6 +121,7 @@ export default function TransferPage({
                 exit="out"
                 className="flex h-full flex-col gap-6"
               >
+                {/* Balance */}
                 <div className="rounded-lg bg-gray-100 p-3 text-center text-sm text-gray-600">
                   ยอดเงินที่ใช้ได้
                   <span className="text-bg-dark ml-2 font-bold">
@@ -118,22 +132,30 @@ export default function TransferPage({
                   </span>
                 </div>
                 <div>
+                  {/* Phone Number Input */}
                   <label className="text-sm font-bold text-gray-500">
                     เบอร์โทรศัพท์ผู้รับ
                   </label>
                   <div className="relative mt-2">
-                    <FaPhoneAlt className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400" />
+                    <FaPhoneAlt className="absolute top-1/2 left-4 -translate-y-1/2" />
                     <input
                       type="tel"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
                       placeholder="กรอกเบอร์โทรศัพท์"
-                      className="w-full rounded-xl border border-gray-300 p-4 pl-12 outline-none focus:ring-2 focus:ring-pink-400"
+                      inputMode="numeric"
+                      className="text-bg-dark w-full rounded-xl border border-gray-300 p-4 pl-12 outline-none focus:ring-2 focus:ring-pink-400"
                     />
                   </div>
                 </div>
                 <div className="mt-auto flex justify-center">
-                  <CtaButton onClick={handleSearch}>ค้นหาผู้รับ</CtaButton>
+                  <CtaButton
+                    onClick={handleSearch}
+                    disabled={isLoading}
+                    className={"z-10 w-48 rounded-xl p-4 text-base font-bold"}
+                  >
+                    ค้นหาผู้รับ
+                  </CtaButton>
                 </div>
               </motion.div>
             )}
@@ -183,18 +205,20 @@ export default function TransferPage({
                 </div>
                 <div className="mt-auto flex justify-center gap-4">
                   <button
-                    onClick={() => setUiStep("inputPhoneNumber")}
+                    onClick={() => setUiStep("inputPhone")}
                     className="rounded-xl px-6 py-3 font-bold text-gray-500"
                   >
                     ย้อนกลับ
                   </button>
-                  <CtaButton onClick={handleAmountConfirm}>ต่อไป</CtaButton>
+                  <CtaButton onClick={handleConfirm} disabled={isLoading}>
+                    ต่อไป
+                  </CtaButton>
                 </div>
               </motion.div>
             )}
 
             {/* Step 3: Confirm PIN */}
-            {uiStep === "confirmPin" && recipient && (
+            {uiStep === "inputPin" && recipient && (
               <motion.div
                 key="step3"
                 variants={pageVariants}
@@ -222,6 +246,7 @@ export default function TransferPage({
                   <label className="font-bold text-gray-700">
                     กรุณายืนยันด้วยรหัส PIN
                   </label>
+                  {/* The PIN input is the only interactive element. All other inputs are "locked" by being on a different screen. */}
                   <PinInput length={6} onComplete={handlePinComplete} />
                 </div>
                 <div className="mt-auto flex justify-center">
