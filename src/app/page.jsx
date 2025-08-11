@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 
@@ -24,6 +24,8 @@ import { useGetAvailableMissions, useGetMyMissions } from "@/hooks/useMission";
 import MainTransactionList from "@/components/TransactionComponents/MainTransactionList";
 import MyMissions from "@/components/Ui/MyMissions";
 import { useSuccessTransactions } from "@/hooks/useTransactions";
+import RedeemConfirmationModal from "@/components/Ui/RedeemConfirmation";
+import toast from "react-hot-toast";
 
 export default function HomePage() {
   const router = useRouter();
@@ -62,6 +64,7 @@ export default function HomePage() {
 
   console.log(userData);
   const [showTransfer, setShowTransfer] = useState(false);
+  const [showRedeemModal, setShowRedeemModal] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showDeposit, setShowDeposit] = useState(false);
   const [showGoal, setShowGoal] = useState(false);
@@ -70,6 +73,32 @@ export default function HomePage() {
   useEffect(() => {
     if (userStatus?.isNewUser) router.push("/welcome");
   }, [userStatus, liffProfile]);
+
+  const confirmAndProceedToRedeem = () => {
+    setShowRedeemModal(false); // Close the modal first
+    // The original logic to open the redeem page
+    window
+      .open(
+        `http://app.no1.mobi/landing-page-installment/${userData.line_user_id}`,
+        "_blank",
+      )
+      ?.focus();
+  };
+
+  // 5. Create a new handler for the "Change Goal" action
+  const handleChangeToCloserGoal = () => {
+    setShowRedeemModal(false); // Close the confirmation modal
+
+    // Show the toast message you wanted
+    toast("เก็บเงินเพิ่มอีกนิดเพื่อรางวัลที่ใหญ่กว่า!", { icon: "🚀" });
+
+    // Open the Change Goal page
+    setShowGoal(true);
+  };
+
+  const handleRedeemPhone = () => {
+    setShowRedeemModal(true);
+  };
 
   if (!liffProfile || !isLoggedIn || isStatusLoading || isUserDataLoading) {
     return (
@@ -83,8 +112,17 @@ export default function HomePage() {
   if (userData)
     return (
       <>
+        <RedeemConfirmationModal
+          isOpen={showRedeemModal}
+          onClose={() => setShowRedeemModal(false)}
+          onConfirmRedeem={confirmAndProceedToRedeem}
+          onChangeGoal={handleChangeToCloserGoal}
+          currentBalance={userData?.wallet?.balance || 0}
+          goalProduct={userData?.goal?.product}
+        />
         <NotificationPage
-          userId={userData?.userId}
+          userData={userData}
+          notificationData={userData?.notifications}
           showNotifications={showNotifications}
           setShowNotifications={setShowNotifications}
         />
@@ -130,6 +168,7 @@ export default function HomePage() {
                 target={userData.goal.product.price}
                 balance={userData.wallet.balance}
                 imageUrl={userData.goal.product.imageUrl}
+                handleRedeem={handleRedeemPhone}
               />
               <ActionGrid
                 setShowTransfer={setShowTransfer}
@@ -145,7 +184,7 @@ export default function HomePage() {
                 <span className="h-1.5 w-10 rounded-full bg-gray-300" />
               </div>
 
-              <MyMissions missions={myMission} userId={userData?.id} />
+              <MyMissions missions={myMission} userData={userData} />
               <SavingsMission
                 missions={availableMission}
                 userId={userData?.id}

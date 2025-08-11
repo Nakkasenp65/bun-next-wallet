@@ -22,6 +22,7 @@ export default function Page() {
     liffProfile?.userId,
   );
   const router = useRouter();
+  const [isUserChecked, setIsUserChecked] = useState(false);
   const [goal, setGoal] = useState({});
   const [uiStep, setUiStep] = useState("input");
   const [inputData, setInputData] = useState({
@@ -72,14 +73,33 @@ export default function Page() {
           : inputData.occupation;
       // ข้อมูลจาก server หลัก
 
-      // const { fullname, phone, pin, chat_url } = mainServerUserProfile;
+      const { fullname, phone, pin, chat_url } = mainServerUserProfile;
+
       // Testint purpose ไม่เช็ค mobi เพราะไม่มีสมาชิก
-      let notHavingData = {
-        fullname: "test",
-        phone: "test",
-        pin: 111111,
-        chat_url: "test",
-      };
+      // let notHavingData = {
+      //   fullname: "test",
+      //   phone: "test",
+      //   pin: 111111,
+      //   chat_url: "test",
+      // };
+
+      // const dataToPost = {
+      //   line_user_id,
+      //   line_display_name,
+      //   line_profile_url,
+      //   mobileId,
+      //   planId,
+      //   fullname: notHavingData.fullname,
+      //   phone: notHavingData.phone,
+      //   pin: notHavingData.chat_url,
+      //   chat_url: notHavingData.chat_url,
+      //   occupation: finalOccupation,
+      //   ageRange: inputData.age,
+      //   monthlyPayment: inputData.monthlyPayment,
+      // };
+      // console.log("TEST PRODUCTION: NO MOBI INFO");
+      // createGoalMutate(dataToPost);
+      // return;
 
       const dataToPost = {
         line_user_id,
@@ -87,39 +107,21 @@ export default function Page() {
         line_profile_url,
         mobileId,
         planId,
-        fullname: notHavingData.fullname,
-        phone: notHavingData.phone,
-        pin: notHavingData.chat_url,
-        chat_url: notHavingData.chat_url,
+        fullname,
+        phone,
+        pin,
+        chat_url,
         occupation: finalOccupation,
         ageRange: inputData.age,
         monthlyPayment: inputData.monthlyPayment,
       };
-      console.log("TEST PRODUCTION: NO MOBI INFO");
+
+      // createGoalMutate = call mutation function -> useCreateGoal inside useUser.js
       createGoalMutate(dataToPost);
-      return;
     } catch (error) {
       setUiStep("main");
       console.log(error);
     }
-
-    // const dataToPost = {
-    //   line_user_id,
-    //   line_display_name,
-    //   line_profile_url,
-    //   mobileId,
-    //   planId,
-    //   fullname,
-    //   phone,
-    //   pin,
-    //   chat_url,
-    //   occupation: finalOccupation,
-    //   ageRange: inputData.age,
-    //   monthlyPayment: inputData.monthlyPayment,
-    // };
-
-    // createGoalMutate = call mutation function -> useCreateGoal inside useUser.js
-    // createGoalMutate(dataToPost);
   };
 
   // ตรวจสอบการเป็นสมาชิกกับ server หลักว่าเป็นสมาชิกไหมและ redirect ไปสมัครสมาชิก
@@ -131,13 +133,15 @@ export default function Page() {
       );
       // 404 คือไม่เป็นสมาชิก
       if (response) {
+        setIsUserChecked(true);
         toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
         setIsRegistered(true); // สมัครสมาชิกกับ server หลักแล้ว
       }
+      console.log("Is Registered");
     } catch (error) {
       if (error.status === 404) {
-        // router.replace("https://liff.line.me/2006703040-RYAyYAyA");
-        toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
+        router.replace("https://liff.line.me/2006703040-RYAyYAyA");
+        // toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
         setIsRegistered(true);
       } else if (error.status === 500)
         toast.error("ขออภัย ขณะเกิดข้อผิดพลาดระหว่างการดำเนินการ!");
@@ -145,17 +149,50 @@ export default function Page() {
   };
 
   // คำนวณเงินดาวน์ของผู้ใช้ในเวลา 6 เดือน
+  // Fetch products using the new service shape: { items, total, facets }
   const handleCalculateClick = async () => {
-    // คำนวณเงินดาวน์จากค่างวด
-    const potentialPrice = inputData.monthlyPayment * 6;
-    toast.loading("กำลังประมวลผล โปรดรอสักครู่");
-    setUiStep("calculate");
-    const { data } = await axios.get(`/product?maxPrice=${potentialPrice}`);
-    if (!data) {
-      toast.error("เกิดความผิดพลาดในการประมวลผล");
-      setUiStep("input");
+    const monthly = Number(inputData.monthlyPayment);
+    if (!monthly || monthly <= 0) {
+      return toast.error("กรุณากรอกยอดออมรายเดือนให้ถูกต้อง");
     }
-    setSuggestedPhone(data);
+
+    // 6 months saving capacity
+    const potentialPrice = monthly * 6;
+
+    const toastId = toast.loading("กำลังประมวลผล โปรดรอสักครู่…");
+    setUiStep("calculate");
+
+    try {
+      // If your controller path is `/products`, change the URL here accordingly.
+      const { data } = await axios.get("/product", {
+        params: {
+          mode: "affordable", // presets: affordable | upgrade | all
+          minPrice: null, // leave null for this preset
+          maxPrice: potentialPrice, // <= user's capacity
+          topPerBrand: false, // nicest UX: 1 best model per brand
+          sort: "asc",
+          take: 24,
+          skip: 0,
+        },
+      });
+
+      const items = Array.isArray(data?.items) ? data.items : [];
+      setSuggestedPhone(items); // GoalSetter expects an array of products
+
+      if (!items.length) {
+        toast("ยังไม่พบสินค้าที่ตรงเงื่อนไข ลองปรับยอดออมรายเดือนดูนะ");
+        setUiStep("input");
+      } else {
+        toast.success("คัดสินค้าที่เหมาะสมให้แล้ว ✨");
+        setUiStep("main");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("เกิดข้อผิดพลาดในการประมวลผล");
+      setUiStep("input");
+    } finally {
+      toast.dismiss(toastId);
+    }
   };
 
   console.log("line profile: ", liffProfile);
@@ -171,7 +208,7 @@ export default function Page() {
     }
   }, [uiStep, suggestedPhone]);
 
-  if (createGoalPending) {
+  if (createGoalPending || !isUserChecked) {
     return <Loading />;
   }
 
@@ -190,35 +227,37 @@ export default function Page() {
       )}
 
       {uiStep === "calculate" && <Loading message="กำลังประมวลผล..." />}
-      {uiStep === "main" && suggestedPhone && (
-        <div className="flex flex-col bg-white">
-          {/* HEADER */}
-          <header className="from-primary-pink to-primary-orange flex flex-col items-center justify-center gap-2 rounded-b-4xl bg-gradient-to-br p-6 pt-14 text-white drop-shadow-lg">
-            <h1 className="text-2xl font-bold text-white drop-shadow-md drop-shadow-black/30">
-              ตั้งค่าเป้าหมายการออม
-            </h1>
-            <p className="text-xs">
-              เลือกสิ่งที่คุณอยากได้ แล้วมาเริ่มวางแผนการออมกัน!
-            </p>
-          </header>
-          {/* GOAL SETTER */}
-          <GoalSetter
-            products={suggestedPhone}
-            onGoalChange={handleGoalUpdate}
-            onBack={goBack}
-          />
-          <footer className="flex w-full items-center justify-center bg-white p-6 pb-12 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-            {/* CONFIRM BUTTON */}
-            <CtaButton
-              onClick={handleSetGoal}
-              disabled={createGoalPending}
-              className={"z-10 w-48 rounded-xl p-4 text-lg font-bold"}
-            >
-              {createGoalPending ? "กำลังบันทึก..." : "เริ่มต้นการออม"}
-            </CtaButton>
-          </footer>
-        </div>
-      )}
+      {uiStep === "main" &&
+        Array.isArray(suggestedPhone) &&
+        suggestedPhone.length > 0 && (
+          <div className="flex flex-col bg-white">
+            {/* HEADER */}
+            <header className="from-primary-pink to-primary-orange flex flex-col items-center justify-center gap-2 rounded-b-4xl bg-gradient-to-br p-6 pt-14 text-white drop-shadow-lg">
+              <h1 className="text-2xl font-bold text-white drop-shadow-md drop-shadow-black/30">
+                ตั้งค่าเป้าหมายการออม
+              </h1>
+              <p className="text-xs">
+                เลือกสิ่งที่คุณอยากได้ แล้วมาเริ่มวางแผนการออมกัน!
+              </p>
+            </header>
+            {/* GOAL SETTER */}
+            <GoalSetter
+              products={suggestedPhone}
+              onGoalChange={handleGoalUpdate}
+              onBack={goBack}
+            />
+            <footer className="flex w-full items-center justify-center bg-white p-6 pb-12 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+              {/* CONFIRM BUTTON */}
+              <CtaButton
+                onClick={handleSetGoal}
+                disabled={createGoalPending}
+                className={"z-10 w-48 rounded-xl p-4 text-lg font-bold"}
+              >
+                {createGoalPending ? "กำลังบันทึก..." : "เริ่มต้นการออม"}
+              </CtaButton>
+            </footer>
+          </div>
+        )}
       {uiStep === "final" && <Loading message="กำลังประมวลผล..." />}
     </main>
   );

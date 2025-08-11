@@ -6,20 +6,6 @@ const fetchNotifications = async (userId) => {
   return data.data;
 };
 
-const markAsReadMutationFn = async ({ notificationId, userMongoId }) => {
-  if (!notificationId || !userMongoId) {
-    throw new Error("Notification ID and User ID are required.");
-  }
-  const url = `/notification/${notificationId}/${userMongoId}/read`;
-  const { data } = await axios.patch(url);
-  return data.data;
-};
-
-const clearNotificationsMutationFn = async (type) => {
-  const { data } = await axios.delete(`/notification/clear?type=${type}`);
-  return data.data;
-};
-
 // --- Data Fetching ---
 export function useNotification(userData) {
   return useQuery({
@@ -29,32 +15,61 @@ export function useNotification(userData) {
   });
 }
 
-// --- Mutations ---
-export function markAsReadMutation() {
+/**
+ * A hook for marking a single notification as read.
+ * This version is designed to work when notifications are nested inside a 'user' query object.
+ */
+export function useMarkNotificationAsRead() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: markAsReadMutationFn,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["notifications", userData?.id],
+    mutationFn: async ({ notificationId }) => {
+      const { data } = await axios.patch(
+        `/notification/${notificationId}/read`,
+      );
+      return data;
+    },
+    // This is the key change. We manually update the 'user' query cache.
+    onSuccess: (data, variables) => {
+      // `variables.userId` is the line_user_id we pass from the component
+      queryClient.setQueryData(["user", variables.userId], (oldUserData) => {
+        if (!oldUserData) return oldUserData;
+
+        // Create a new user object to avoid direct mutation
+        const newUserData = { ...oldUserData };
+
+        // Map over the old notifications to create a new array
+        newUserData.notifications = oldUserData.notifications.map((n) =>
+          n.id === variables.notificationId ? { ...n, isRead: true } : n,
+        );
+
+        return newUserData;
       });
     },
-    onError: (error) => {
-      toast.error(error.message || "Failed to mark as read.");
+    onError: () => {
+      toast.error("Failed to mark as read.");
     },
   });
 }
 
-export function clearNotificationsMutation() {
+/**
+ * A hook for clearing notifications.
+ * This version invalidates the entire 'user' query to refetch all data.
+ */
+export function useClearNotifications() {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: clearNotificationsMutationFn,
-    onSuccess: (data) => {
-      toast.success(`${data.count} notifications cleared!`);
-      queryClient.invalidateQueries({
-        queryKey: ["notifications", userData?.id],
-      });
+    mutationFn: async ({ type, userId }) => {
+      // userId is not needed in the API call itself
+      const { data } = await axios.delete(
+        `/notification/clear/${userId}?type=${type}`,
+      );
+      return data;
+    },
+    onSuccess: async (data, variables) => {
+      toast.success("Notifications cleared!");
+      // The key change is here: we invalidate the 'user' query,
+      // which will cause the useUser hook to refetch everything, including the updated notifications list.
+      queryClient.invalidateQueries({ queryKey: ["user", variables.userId] });
     },
     onError: () => {
       toast.error("Failed to clear notifications.");

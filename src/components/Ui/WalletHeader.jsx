@@ -22,17 +22,16 @@ export default function WalletHeader({
   profileUrl,
   notifications,
 }) {
-  const greeting = getGreeting();
   const unreadNotifications =
     notifications?.filter((notification) => !notification.isRead).length || 0;
   // const unreadNotifications = 9;
-
+  console.log(profileUrl);
   return (
     <header className="relative z-10 flex items-center justify-between">
       {/* Welcome Text */}
       <Link href={`/profile/${userLineId}`}>
-        <div className="flex items-center justify-center gap-2">
-          <img
+        <div className="flex items-center justify-center gap-1.5">
+          <Image
             src={profileUrl}
             width={50}
             height={50}
@@ -41,7 +40,7 @@ export default function WalletHeader({
           />
           <div className="flex flex-col">
             <div className="text-secondary-text text-xs">สวัสดี</div>
-            <div className="text-sm">{userName}</div>
+            <div className="text-[10px]">{userName}</div>
           </div>
         </div>
       </Link>

@@ -91,26 +91,6 @@ export default function EditProfileUI({ user, onSave, isSaving }) {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-grow flex-col gap-6 p-6"
       >
-        {/* Input: Full Name */}
-        <div>
-          <label className="text-bg-dark mb-2 block text-sm font-bold">
-            ชื่อ-นามสกุล
-          </label>
-          <div className="relative">
-            <FontAwesomeIcon
-              icon={faUser}
-              className="text-bg-dark absolute top-1/2 left-4 -translate-y-1/2"
-            />
-            <input
-              type="text"
-              name="fullname"
-              value={formData.fullname}
-              onChange={handleInputChange}
-              className="text-bg-dark w-full rounded-xl border border-gray-300 p-4 pl-12 outline-none focus:ring-2 focus:ring-pink-400"
-            />
-          </div>
-        </div>
-
         {/* Input: Phone */}
         <div>
           <label className="text-bg-dark mb-2 block text-sm font-bold">

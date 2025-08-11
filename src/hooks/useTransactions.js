@@ -25,7 +25,7 @@ async function findRecipientByPhone(phoneNumber) {
 
 async function createInternalTransfer(payload) {
   // Backend endpoint นี้คุณจะต้องสร้างขึ้นมา
-  const { data } = await axios.post("/transaction/transfer/internal", payload);
+  const { data } = await axios.post("/transaction/transfer", payload);
   return data;
 }
 

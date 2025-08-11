@@ -110,7 +110,9 @@ export default function Transaction({ transaction }) {
           {displayConfig.icon}
         </div>
         <div className="flex-grow">
-          <p className="font-semibold text-gray-800">{transaction.name}</p>
+          <p className="text-sm font-semibold text-gray-800">
+            {transaction.name}
+          </p>
           <p className="text-xs text-gray-500">
             {formatRelativeTime(transaction.createdAt)}
           </p>

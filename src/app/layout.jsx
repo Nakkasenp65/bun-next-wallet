@@ -50,7 +50,7 @@ export default function RootLayout({ children }) {
           <LiffProvider>
             <TokenSynchronizer />
             {children}
-            <ReactQueryDevtools />
+            {/* <ReactQueryDevtools /> */}
             <Toaster
               position="top-center"
               containerClassName="mx-auto z-[9999] w-5/6"

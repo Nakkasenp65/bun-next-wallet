@@ -3,56 +3,54 @@ import TransactionNotification from "../TransactionComponents/TransactionNotific
 import { AiOutlineNotification } from "react-icons/ai";
 import { FiGift } from "react-icons/fi";
 
+// This component is now much simpler. It just renders what it's given.
 export default function NotificationTab({
-  activeTab,
   notifications,
   onNotificationClick,
 }) {
-  const transactionNotifications = notifications.filter(
-    (n) => n.type === "RECEIVE" || n.type === "SENT",
-  );
-  const promoNotifications = notifications.filter(
-    (n) => n.type === "SYSTEM" || n.type === "REWARD",
-  );
-
-  if (activeTab === "promos") {
+  if (!notifications || notifications.length === 0) {
     return (
-      <ul id="notification-list-promos" className="space-y-2">
-        {promoNotifications.length > 0 ? (
-          promoNotifications.map((notification) => {
-            const displayIcon =
-              notification.type === "SYSTEM" ? AiOutlineNotification : FiGift;
-            return (
-              <PromoNotification
-                key={notification.id}
-                promo={notification}
-                displayIcon={displayIcon}
-                onClick={() => onNotificationClick(notification)}
-              />
-            );
-          })
-        ) : (
-          <p className="text-center text-gray-500">No promotions yet.</p>
-        )}
-      </ul>
+      <div className="flex flex-col items-center justify-center py-16 text-center text-gray-500">
+        <AiOutlineNotification className="mb-4 text-5xl text-gray-300" />
+        <p className="font-semibold">ไม่มีการแจ้งเตือน</p>
+        <p className="text-sm">การแจ้งเตือนใหม่ๆ จะปรากฏที่นี่</p>
+      </div>
     );
   }
 
-  if (activeTab === "transactions") {
-    return (
-      <ul id="notification-list-transactions" className="space-y-2">
-        {transactionNotifications.length > 0 ? (
-          transactionNotifications.map((notification) => (
+  return (
+    <ul id="notification-list" className="space-y-2">
+      {notifications.map((notification) => {
+        // We can decide which component to render based on the type here
+        const isTransactionType = notification.type === "WALLET";
+        const isPromoType =
+          notification.type === "REWARD" || notification.type === "SYSTEM";
+
+        if (isTransactionType) {
+          return (
             <TransactionNotification
               key={notification.id}
-              transaction={notification}
+              notification={notification} // Pass the whole notification object
               onClick={() => onNotificationClick(notification)}
             />
-          ))
-        ) : (
-          <p className="text-center text-gray-500">No transactions yet.</p>
-        )}
-      </ul>
-    );
-  }
+          );
+        }
+
+        if (isPromoType) {
+          const displayIcon =
+            notification.type === "SYSTEM" ? AiOutlineNotification : FiGift;
+          return (
+            <PromoNotification
+              key={notification.id}
+              promo={notification}
+              displayIcon={displayIcon}
+              onClick={() => onNotificationClick(notification)}
+            />
+          );
+        }
+
+        return null; // Fallback for any other types
+      })}
+    </ul>
+  );
 }

@@ -96,6 +96,29 @@ export function useCreateGoal() {
   });
 }
 
+export function useUpdateGoal() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (goalData) => {
+      // You will need to create this backend endpoint: PATCH /v1/goal/:userId
+      // It will update the user's goal with the new productId and planId.
+      const { userId, ...payload } = goalData;
+      const { data } = await axios.patch(`/goal/${userId}`, payload);
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      toast.success("เปลี่ยนเป้าหมายสำเร็จ!");
+      // Invalidate the user query to refetch all data, including the new goal.
+      queryClient.invalidateQueries({ queryKey: ["user", variables.userId] });
+    },
+    onError: (error) => {
+      toast.error(
+        error.response?.data?.message || "ไม่สามารถเปลี่ยนเป้าหมายได้",
+      );
+    },
+  });
+}
+
 export function useUpdateUser() {
   const queryClient = useQueryClient();
   const router = useRouter();

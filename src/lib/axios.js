@@ -9,23 +9,17 @@ const apiUrl = serverOption === "dev" ? devApiUrl : productionApiUrl;
 console.log("CHECK API URL", apiUrl);
 
 const axiosInstance = axios.create({
-  baseURL: apiUrl,
+  baseURL: devApiUrl,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// นี่คือส่วนที่สำคัญที่สุด: Request Interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    // --- ส่วนที่เพิ่มเข้ามาเพื่อจัดการ FormData ---
-    // ตรวจสอบว่าข้อมูล (data) ที่จะส่งไปกับ request นี้เป็น FormData object หรือไม่
     if (config.data instanceof FormData) {
       delete config.headers["Content-Type"];
     }
-    // --- สิ้นสุดส่วนที่เพิ่มเข้ามา ---
-
-    // Logic การใส่ Token ยังคงทำงานเหมือนเดิมสำหรับทุก request
     const token = getAuthToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

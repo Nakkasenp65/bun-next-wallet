@@ -6,7 +6,7 @@ import { FaHourglassHalf, FaExclamation } from "react-icons/fa";
 import clsx from "clsx";
 import useCountdown from "@/hooks/useCountdown"; // Import hook ที่เพิ่งสร้าง
 
-const MyMissionCard = ({ userMission }) => {
+const MyMissionCard = ({ userMission, onDoMission, onClaim }) => {
   const {
     mission,
     status,
@@ -23,37 +23,54 @@ const MyMissionCard = ({ userMission }) => {
   const countdownTarget =
     status === "AWAITING_CLAIM" ? claimExpiresAt : userExpiresAt;
   // ดึงค่า timeLeft และ isCounting ออกมาจาก hook
+
   const { timeLeft, isCounting } = useCountdown(countdownTarget);
+
+  const showTimer = Boolean(isCounting || timeLeft === "หมดเวลา");
 
   // ฟังก์ชันสำหรับแสดงผลปุ่ม CTA และสถานะต่างๆ
   const renderCTA = () => {
     switch (status) {
       case "ENROLLED":
         return (
-          <button className="w-full rounded-xl bg-white px-4 py-2 text-sm font-bold text-pink-500 shadow-md transition-transform hover:-translate-y-0.5">
+          <button
+            type="button"
+            onClick={onDoMission}
+            className="w-full rounded-xl bg-white px-4 py-2 text-base font-bold text-pink-500 shadow-md transition-transform hover:-translate-y-0.5 focus:ring-2 focus:ring-white/70 focus:outline-none"
+            aria-label="เริ่มทำภารกิจ"
+          >
             ทำภารกิจ!
           </button>
         );
       case "AWAITING_CLAIM":
         return (
           <motion.button
+            type="button"
             whileTap={{ scale: 0.95 }}
-            className="w-full rounded-xl bg-gradient-to-r from-green-500 to-teal-600 px-4 py-2 text-sm font-bold text-white shadow-lg"
+            onClick={onClaim}
+            className="w-full rounded-xl bg-white px-4 py-2 text-base font-bold text-orange-600 shadow-lg focus:ring-2 focus:ring-white/70 focus:outline-none"
+            aria-label="รับรางวัล"
           >
             รับรางวัล!
           </motion.button>
         );
       case "CLAIMED":
         return (
-          <div className="flex w-full items-center justify-center gap-2 rounded-xl bg-black/20 px-4 py-2 text-sm font-bold text-white/80">
-            <AiFillCheckCircle />
+          <div
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-black/20 px-4 py-2 text-base font-bold text-white/80"
+            aria-live="polite"
+          >
+            <AiFillCheckCircle aria-hidden />
             <span>รับแล้ว</span>
           </div>
         );
       case "EXPIRED":
       case "CLAIM_EXPIRED":
         return (
-          <div className="w-full rounded-xl bg-gray-700/50 px-4 py-2 text-center text-sm font-bold text-white/60">
+          <div
+            className="w-full rounded-xl bg-gray-700/50 px-4 py-2 text-center text-sm font-bold text-white/60"
+            aria-live="polite"
+          >
             หมดเวลา
           </div>
         );
@@ -68,7 +85,7 @@ const MyMissionCard = ({ userMission }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className={clsx(
-        "flex w-72 flex-shrink-0 snap-start flex-col gap-1 rounded-3xl p-4 text-white",
+        "flex w-full flex-shrink-0 snap-start flex-col gap-1 rounded-3xl p-4 text-white",
         status === "AWAITING_CLAIM" &&
           "bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500",
         status === "ENROLLED" &&
@@ -105,19 +122,22 @@ const MyMissionCard = ({ userMission }) => {
         </div>
       </div>
 
-      {/* Time Left / Status Message */}
-      <div className="flex items-center gap-2 text-xs font-semibold text-white/90">
-        {(isCounting || timeLeft === "หมดเวลา") && (
+      {/* Time Left */}
+      <div
+        className="flex items-center gap-2 text-xs font-semibold text-white/90"
+        aria-live="polite"
+      >
+        {showTimer && (
           <>
             {status === "AWAITING_CLAIM" ? (
-              <FaExclamation className="text-yellow-300" />
+              <FaExclamation className="text-yellow-300" aria-hidden />
             ) : (
-              <FaHourglassHalf />
+              <FaHourglassHalf aria-hidden />
             )}
             <span>
               {status === "AWAITING_CLAIM"
-                ? `หมดเวลาเคลมใน: ${timeLeft}`
-                : timeLeft}
+                ? `หมดเวลาเคลมใน: ${timeLeft ?? "-"}`
+                : (timeLeft ?? "-")}
             </span>
           </>
         )}

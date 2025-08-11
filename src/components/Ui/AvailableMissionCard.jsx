@@ -18,7 +18,7 @@ const AvailableMissionCard = ({ mission, onEnroll, isEnrolling }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="flex w-72 flex-shrink-0 snap-start flex-col gap-3 rounded-3xl bg-gradient-to-br from-purple-600 to-pink-600 p-4 text-white shadow-lg"
+      className="flex w-full flex-shrink-0 snap-start flex-col gap-3 rounded-3xl bg-gradient-to-br from-purple-600 to-pink-600 p-4 text-white shadow-lg"
     >
       {/* Header */}
       <div className="flex items-center gap-3">

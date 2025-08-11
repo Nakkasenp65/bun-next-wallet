@@ -27,6 +27,7 @@ export default function GoalSetter({
   products,
   onGoalChange = () => {},
   onBack,
+  showBack = true,
 }) {
   // Data Grouping Logic - No changes needed
   const groupedData = useMemo(() => {
@@ -200,12 +201,15 @@ export default function GoalSetter({
 
   return (
     <div className="w-full max-w-md bg-white p-5">
-      <FramerButton
-        onClick={onBack}
-        className="text-md bg-primary-pink mb-4 rounded-md px-2 py-1 text-white"
-      >
-        ย้อนกลับ
-      </FramerButton>
+      {showBack && (
+        <FramerButton
+          onClick={onBack}
+          className="text-md bg-primary-pink mb-4 rounded-md px-2 py-1 text-white"
+        >
+          ย้อนกลับ
+        </FramerButton>
+      )}
+
       <div className="rounded-xl bg-white">
         <h1 className="text-bg-dark mb-2 font-bold">
           เลือกแบรนด์ที่ต้องการดาวน์
@@ -243,7 +247,7 @@ export default function GoalSetter({
           <DropDownComponent
             name="model"
             value={selectedModel}
-            onChange={(e) => handleModelChange(e.target.value, selectedBrand)}
+            onChange={(newModel) => handleModelChange(newModel, selectedBrand)}
             options={models}
             buttonClassName="w-full text-md font-bold border-pink-400 text-pink-400  border p-2 rounded-lg"
             optionsContainerClassName="p-2"
@@ -253,8 +257,8 @@ export default function GoalSetter({
           <DropDownComponent
             name="capacity"
             value={selectedCapacity}
-            onChange={(e) =>
-              handleCapacityChange(e.target.value, selectedBrand, selectedModel)
+            onChange={(newCapacity) =>
+              handleCapacityChange(newCapacity, selectedBrand, selectedModel)
             }
             options={capacities}
             buttonClassName="w-full text-md font-bold border-pink-400 text-pink-400  border p-2 rounded-lg"

@@ -1,6 +1,7 @@
 import React from "react";
 import { IoMdTrophy } from "react-icons/io";
 import Image from "next/image";
+import CtaButton from "./CtaButton";
 
 const formatCurrency = (num) => `฿${num.toLocaleString("en-US")}`;
 
@@ -10,6 +11,7 @@ export default function SavingsGoalCard({
   target,
   balance = 20000,
   imageUrl,
+  handleRedeem,
 }) {
   const progress = progressDisplay();
   const remainingAmount = Math.max(0, target - balance);
@@ -29,7 +31,7 @@ export default function SavingsGoalCard({
     >
       {imageUrl ? (
         <Image
-          className="animate-floating drop-shadow-primary-pink absolute -right-20 -bottom-14 h-auto w-[240px] -rotate-6 drop-shadow-2xl sm:-bottom-12 sm:w-[300px] sm:-rotate-10"
+          className="animate-floating drop-shadow-primary-pink absolute -right-24 -bottom-14 h-auto w-[240px] -rotate-6 drop-shadow-2xl sm:-bottom-12 sm:w-[300px] sm:-rotate-10"
           src={imageUrl}
           alt="mobile phone image"
           width={300}
@@ -83,7 +85,7 @@ export default function SavingsGoalCard({
         </div>
       </div>
 
-      <div className="relative flex w-[60%] flex-col gap-2">
+      <div className="relative flex w-[60%] flex-col gap-4">
         {/* Progress Bar */}
         {/* <div className="text-accent-gold absolute -top-5 right-0 text-xs font-bold">{Math.round(progress)}%</div> */}
         <div className="h-3 rounded-full bg-black/50 shadow-inner">
@@ -103,6 +105,14 @@ export default function SavingsGoalCard({
               : `อีก: ${formatCurrency(remainingAmount)}`}
           </span>
         </div>
+        {isAchieved && (
+          <CtaButton
+            onClick={handleRedeem}
+            className={"z-10 w-48 rounded-xl p-4 font-bold"}
+          >
+            เริ่มการดาวน์!
+          </CtaButton>
+        )}
       </div>
 
       {/* Goal Details */}

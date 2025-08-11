@@ -1,5 +1,11 @@
 "use client";
-import React, { createContext, useState, useEffect, useContext } from "react";
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  useMemo,
+} from "react";
 import liff from "@line/liff";
 import Loading from "@/components/StatusComponents/Loading";
 
@@ -7,16 +13,30 @@ const LiffContext = createContext({
   liffProfile: null,
   isLoggedIn: false,
   isLoading: true,
+  lineAccessToken: "",
+  // expose the raw liff (may be null in dev or before init)
+  liff: null,
+  // safe wrappers so your app won’t crash outside LIFF
+  actions: {
+    closeWindow: () => {},
+    login: () => {},
+    logout: () => {},
+    openWindow: (_url, _external) => {},
+    share: async (_messages) => {},
+    getOS: () => "web",
+    isInClient: () => false,
+  },
 });
 
 const liffenvId = process.env.NEXT_PUBLIC_LIFF_ID;
-const server = process.env.NEXT_PUBLIC_SERVER_OPTION;
+const server = process.env.NEXT_PUBLIC_SERVER_OPTION; // "dev" | "prod" etc.
 
 export function LiffProvider({ children }) {
   const [liffProfile, setLiffProfile] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [lineAccessToken, setLineAccessToken] = useState("");
+  const [liffReady, setLiffReady] = useState(false);
 
   useEffect(() => {
     const longProfile = {
@@ -31,33 +51,149 @@ export function LiffProvider({ children }) {
       pictureUrl:
         "https://lh3.googleusercontent.com/d/1eXgDln7TvPQGiMpzaUdo7l2hKmsh8Kvc",
     };
-    const initialize = async () => {
+
+    const init = async () => {
       if (server === "dev") {
-        setLiffProfile(longProfile);
+        // Dev mode: mock login/profile, mark as ready
         setIsLoggedIn(true);
+        setLiffProfile(testProfile); // or longProfile
         setLineAccessToken("dev");
+        setLiffReady(false); // no real LIFF in dev
         setIsLoading(false);
-      } else {
-        try {
-          await liff.init({ liffId: liffenvId });
-          if (liff.isLoggedIn()) {
-            setIsLoggedIn(true);
-            const profile = await liff.getProfile();
-            setLiffProfile(profile);
-            const accessToken = liff.getAccessToken();
-            setLineAccessToken(accessToken);
-          } else {
-            liff.login();
-          }
-        } catch (e) {
-          console.error(e);
-        } finally {
-          setIsLoading(false);
+        return;
+      }
+
+      try {
+        await liff.init({ liffId: liffenvId });
+        setLiffReady(true);
+
+        if (liff.isLoggedIn()) {
+          setIsLoggedIn(true);
+          const profile = await liff.getProfile();
+          setLiffProfile(profile);
+          const accessToken = liff.getAccessToken();
+          setLineAccessToken(accessToken || "");
+        } else {
+          liff.login(); // redirect into LINE
         }
+      } catch (e) {
+        console.error("[LIFF init error]", e);
+      } finally {
+        setIsLoading(false);
       }
     };
-    initialize();
+
+    init();
   }, []);
+
+  // Safe wrappers so components can call without worrying about environment
+  const actions = useMemo(() => {
+    const inClient = () => {
+      try {
+        return liffReady && liff.isInClient();
+      } catch {
+        return false;
+      }
+    };
+
+    return {
+      isInClient: inClient,
+      getOS: () => {
+        try {
+          return liffReady ? liff.getOS() : "web";
+        } catch {
+          return "web";
+        }
+      },
+      closeWindow: () => {
+        try {
+          if (server === "dev") {
+            console.warn("[LIFF] closeWindow noop in dev");
+            // As a dev fallback, just navigate away or no-op.
+            return;
+          }
+          if (inClient()) {
+            liff.closeWindow();
+          } else {
+            // Fallback when opened in external browser
+            window.close();
+          }
+        } catch (e) {
+          console.error("[LIFF closeWindow error]", e);
+        }
+      },
+      login: () => {
+        try {
+          if (server === "dev") return;
+          liff.login();
+        } catch (e) {
+          console.error("[LIFF login error]", e);
+        }
+      },
+      logout: () => {
+        try {
+          if (server === "dev") {
+            console.warn("[LIFF] logout noop in dev");
+            return;
+          }
+          liff.logout();
+          window.location.reload();
+        } catch (e) {
+          console.error("[LIFF logout error]", e);
+        }
+      },
+      openWindow: (url, external = false) => {
+        try {
+          if (server === "dev") {
+            window.open(url, "_blank");
+            return;
+          }
+          liff.openWindow({ url, external });
+        } catch (e) {
+          console.error("[LIFF openWindow error]", e);
+        }
+      },
+      share: async (messages) => {
+        try {
+          if (server === "dev") {
+            console.warn("[LIFF] share noop in dev", messages);
+            return { status: "dev-noop" };
+          }
+          if (!inClient()) {
+            console.warn("[LIFF] share works only in LINE client");
+            return { status: "unsupported" };
+          }
+          return await liff.shareTargetPicker(messages);
+        } catch (e) {
+          console.error("[LIFF share error]", e);
+          return { status: "error", error: e?.message };
+        }
+      },
+      text: async (message) => {
+        try {
+          if (server === "dev") {
+            console.warn("[LIFF] text noop in dev:", message);
+            return { status: "dev-noop" };
+          }
+          if (!inClient()) {
+            console.warn("[LIFF] text() works only inside LINE client chat.");
+            return { status: "unsupported" };
+          }
+          if (!message || typeof message !== "string") {
+            return {
+              status: "error",
+              error: "message must be a non-empty string",
+            };
+          }
+          await liff.sendMessages([{ type: "text", text: message }]);
+          return { status: "sent" };
+        } catch (e) {
+          console.error("[LIFF text error]", e);
+          return { status: "error", error: e?.message };
+        }
+      },
+    };
+  }, [liffReady]);
 
   if (isLoading) {
     return (
@@ -69,7 +205,14 @@ export function LiffProvider({ children }) {
 
   return (
     <LiffContext.Provider
-      value={{ liffProfile, isLoggedIn, isLoading, lineAccessToken }}
+      value={{
+        liffProfile,
+        isLoggedIn,
+        isLoading,
+        lineAccessToken,
+        liff: liffReady ? liff : null,
+        actions,
+      }}
     >
       {children}
     </LiffContext.Provider>

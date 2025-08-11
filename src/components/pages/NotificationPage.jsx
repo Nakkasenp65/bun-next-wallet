@@ -1,85 +1,60 @@
 "use client";
-
 import React, { useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import FramerDiv from "../framerComponents/FramerDiv";
 import NotificationTab from "../NotificationComponents/NotificationTab";
-import { useUser } from "@/hooks/useUser";
-import Loading from "../StatusComponents/Loading";
-import ErrorComponent from "../Ui/ErrorComponent";
-import { useNotification } from "@/hooks/useNotification";
-import { clearNotificationsMutation } from "@/hooks/useNotification";
+// 1. Import the corrected hooks
+import {
+  useMarkNotificationAsRead,
+  useClearNotifications,
+} from "@/hooks/useNotification";
 
 export default function NotificationPage({
-  userId,
   showNotifications,
   setShowNotifications,
+  userData,
 }) {
   const [activeTab, setActiveTab] = useState("transactions");
-  const {
-    data: userData,
-    isLoading: isUserLoading,
-    error: userError,
-  } = useUser(userId);
-  const {
-    data: notificationData,
-    isLoading: notificationLoading,
-    error: notificationError,
-  } = useNotification(userData);
-  // --- Event Handlers ---
+
+  // The notification data is derived directly from the userData prop
+  const notificationData = userData?.notifications || [];
+
+  const markAsReadMutation = useMarkNotificationAsRead();
+  const clearNotificationsMutation = useClearNotifications();
+
   const handleNotificationClick = (notification) => {
     if (!notification.isRead && userData?.id) {
       markAsReadMutation.mutate({
-        notificationId: notificationData.id,
-        userMongoId: userData.id, // <-- Use the internal MongoDB ID here
+        notificationId: notification.id,
+        userId: userData.id, // Pass line_user_id for the onSuccess callback
       });
     }
   };
 
   const handleClear = () => {
-    if (
-      window.confirm(
-        `Are you sure you want to clear all ${activeTab} notifications?`,
-      )
-    ) {
-      clearNotificationsMutation.mutate(activeTab);
+    if (window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการล้างการแจ้งเตือนทั้งหมด?`)) {
+      // Define what types each tab represents for the backend
+      const typeToClear = activeTab === "transactions" ? "WALLET" : "PROMO"; // e.g., PROMO could clear SYSTEM and REWARD
+      console.log("Current tab: ", activeTab);
+      clearNotificationsMutation.mutate({
+        type: typeToClear,
+        userId: userData.id, // Pass line_user_id for the onSuccess callback
+      });
     }
   };
 
+  // Your filtering logic is correct based on your schema
   const filteredNotifications = React.useMemo(() => {
-    if (!notificationData) return []; // Return empty array if notifications haven't loaded
-
     if (activeTab === "transactions") {
-      // The "Transactions" tab should show SENT and RECEIVE types.
-      return notificationData.filter(
-        (n) => n.type === "SENT" || n.type === "RECEIVE",
-      );
+      return notificationData.filter((n) => n.type === "WALLET");
     }
     if (activeTab === "promos") {
-      // The "Promos" tab should show SYSTEM and REWARD types.
       return notificationData.filter(
         (n) => n.type === "SYSTEM" || n.type === "REWARD",
       );
     }
-    return []; // Fallback
+    return [];
   }, [notificationData, activeTab]);
-
-  const isLoading = isUserLoading || notificationLoading;
-  const error = userError || notificationError;
-
-  if (isLoading)
-    return (
-      <div className="bg-bg-dark fixed inset-0 z-50 flex items-center justify-center">
-        <Loading />
-      </div>
-    );
-
-  if (error)
-    return (
-      <div className="fixed inset-0 z-50">
-        <ErrorComponent message={error.message} />
-      </div>
-    );
 
   return (
     <FramerDiv
@@ -87,7 +62,7 @@ export default function NotificationPage({
       id="notifications-overlay"
       className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
     >
-      <header className="flex flex-shrink-0 items-center border-b border-white/20 px-5 pt-10 pb-4">
+      <header className="flex flex-shrink-0 items-center px-5 pt-10 pb-4">
         <button
           onClick={() => setShowNotifications(false)}
           className="text-secondary-text text-2xl transition-colors hover:text-white"
@@ -100,16 +75,16 @@ export default function NotificationPage({
         <div className="w-6"></div>
       </header>
       <div className="flex flex-grow flex-col overflow-y-auto rounded-t-[30px] bg-white">
-        <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-4">
+        <div className="flex flex-shrink-0 items-center justify-between px-4">
           {/* Tabs */}
-          <div className="flex flex-shrink-0 grow border-b border-gray-200 px-4">
+          <div className="flex flex-shrink-0 grow pr-4">
             <button
               className={`flex-1 py-4 text-center font-bold transition-colors ${
                 activeTab === "transactions"
                   ? "border-primary-pink text-primary-pink border-b-2"
                   : "hover:text-primary-pink text-gray-500"
-              } `}
-              onClick={() => setActiveTab("transactions")} /* ... */
+              }`}
+              onClick={() => setActiveTab("transactions")}
             >
               ธุรกรรม
             </button>
@@ -119,7 +94,7 @@ export default function NotificationPage({
                   ? "border-primary-pink text-primary-pink border-b-2"
                   : "hover:text-primary-pink text-gray-500"
               }`}
-              onClick={() => setActiveTab("promos")} /* ... */
+              onClick={() => setActiveTab("promos")}
             >
               โปรโมชั่นและข่าวสาร
             </button>
@@ -127,16 +102,21 @@ export default function NotificationPage({
           {/* Clear Button */}
           <button
             onClick={handleClear}
-            disabled={clearNotificationsMutation.isPending}
-            className="hover:text-danger-red text-sm font-bold text-gray-500 disabled:opacity-50"
+            disabled={
+              clearNotificationsMutation.isPending ||
+              filteredNotifications.length === 0
+            }
+            className="hover:text-danger-red text-sm font-bold text-gray-500 disabled:opacity-50 disabled:hover:text-gray-500"
           >
-            {clearNotificationsMutation.isPending ? "Clearing..." : "Clear All"}
+            {clearNotificationsMutation.isPending
+              ? "กำลังล้าง..."
+              : "ล้างทั้งหมด"}
           </button>
         </div>
         <div className="p-4">
+          {/* The NotificationTab component doesn't need to change */}
           <NotificationTab
-            activeTab={activeTab}
-            notifications={filteredNotifications} // <-- PASS THE FILTERED DATA
+            notifications={filteredNotifications}
             onNotificationClick={handleNotificationClick}
           />
         </div>

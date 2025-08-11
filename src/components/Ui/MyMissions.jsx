@@ -4,7 +4,7 @@ import { RiExternalLinkFill } from "react-icons/ri";
 import FramerLink from "./FramerLink";
 import MyMissionCard from "../MissionComponents/MyMissionCard";
 
-export default function MyMissions({ missions, userId }) {
+export default function MyMissions({ missions, userData }) {
   // Handler for the "Start Now" button
   const handleEnrollClick = (missionId) => {
     enroll(missionId);
@@ -29,7 +29,7 @@ export default function MyMissions({ missions, userId }) {
           <h2 className="text-bg-dark text-lg font-bold">ภารกิจของฉัน</h2>
         </div>
         <FramerLink
-          link={`/mission/${userId}`}
+          link={`/mission/${userData.line_user_id}`}
           icon={<RiExternalLinkFill size={16} />}
           backgroundColor={"bg-primary-pink"}
         >
