@@ -5,16 +5,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronLeft,
   faChevronRight,
-  faDownload,
 } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
-import { useTransactions } from "@/hooks/useTransactions"; // 1. Import hook ใหม่
+import { useTransactions } from "@/hooks/useTransactions";
 import CtaButton from "@/components/Ui/CtaButton";
-import Loading from "@/components/StatusComponents/Loading";
 import Transaction from "@/components/TransactionComponents/Transaction";
 import { useUser } from "@/hooks/useUser";
 import { useLiff } from "@/components/provider/LiffProvider";
 import TransactionSkeleton from "@/components/Ui/TransactionSkeleton";
+import DownloadModal from "@/components/modal/DownloadModal";
 
 const thaiMonths = [
   "มกราคม",
@@ -32,56 +31,65 @@ const thaiMonths = [
 ];
 
 export default function HistoryPage() {
-  const { liffProfile, isLoggedIn } = useLiff();
+  const { liffProfile } = useLiff();
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [openModal, setOpenModal] = useState(false);
+
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
-
-  const {
-    data: userData,
-    isLoading: userLoading,
-    error: userError,
-  } = useUser(liffProfile?.userId);
-  const {
-    data: transactions,
-    isLoading: transactionLoading,
-    error,
-  } = useTransactions(currentYear, currentMonth, userData?.wallet.id, {
-    enabled: !!userData,
-  });
-
-  const handlePrevMonth = () => {
-    setCurrentDate((prevDate) => {
-      const newDate = new Date(prevDate);
-      newDate.setMonth(newDate.getMonth() - 1);
-      return newDate;
-    });
-  };
-
-  const handleNextMonth = () => {
-    setCurrentDate((prevDate) => {
-      const newDate = new Date(prevDate);
-      newDate.setMonth(newDate.getMonth() + 1);
-      return newDate;
-    });
-  };
-
   const isCurrentMonth =
     currentYear === new Date().getFullYear() &&
     currentMonth === new Date().getMonth();
 
-  if (userLoading || transactionLoading) {
+  const { data: userData, isLoading: userLoading } = useUser(
+    liffProfile?.userId,
+  );
+
+  const {
+    data: transactions,
+    isLoading: transactionLoading,
+    error,
+  } = useTransactions(currentYear, currentMonth, userData?.wallet?.id, {
+    enabled: !!userData,
+  });
+
+  const handlePrevMonth = () => {
+    setCurrentDate((prev) => {
+      const d = new Date(prev);
+      d.setMonth(d.getMonth() - 1);
+      return d;
+    });
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate((prev) => {
+      const d = new Date(prev);
+      d.setMonth(d.getMonth() + 1);
+      return d;
+    });
+  };
+
+  // Show header + page chrome even when loading transactions
+  if (userLoading) {
     return (
-      <div className="flex h-dvh w-full items-center justify-center">
-        <Loading message="กำลังโหลดข้อมูลผู้ใช้" />
+      <div className="bg-bg-dark/80 fixed inset-0 z-40 flex items-center justify-center backdrop-blur-sm">
+        <TransactionSkeleton />
       </div>
     );
   }
 
   return (
     <div className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm">
-      {/* Page Header (remains visible) */}
+      {/* Modal */}
+      <DownloadModal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        walletId={userData?.wallet?.id}
+        defaultMonthDate={currentDate}
+      />
+
+      {/* Header */}
       <header className="flex flex-shrink-0 items-center px-5 pt-10 pb-4">
         <button
           onClick={() => router.push("/")}
@@ -92,13 +100,13 @@ export default function HistoryPage() {
         <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
           ประวัติธุรกรรม
         </h2>
-        <div className="w-6"></div>
+        <div className="w-6" />
       </header>
 
-      {/* Page Content (remains visible) */}
+      {/* Content */}
       <div className="flex flex-grow flex-col overflow-y-auto rounded-t-[30px] bg-white">
         <div className="p-6">
-          {/* Period Selector (remains visible and interactive) */}
+          {/* Period + top download */}
           <div className="flex items-center justify-between rounded-lg bg-gray-100 p-3">
             <button
               onClick={handlePrevMonth}
@@ -116,16 +124,11 @@ export default function HistoryPage() {
             >
               <FontAwesomeIcon icon={faChevronRight} />
             </button>
-            <button className="bg-info-blue ml-4 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold text-white transition hover:bg-blue-600">
-              <FontAwesomeIcon icon={faDownload} />
-              <span>ดาวน์โหลด</span>
-            </button>
           </div>
 
-          {/* --- 2. UPDATED Transaction List with inline loading --- */}
+          {/* Transactions List */}
           <ul id="full-history-list" className="mt-4">
             {transactionLoading ? (
-              // If transactions are loading, show the skeleton placeholders
               <>
                 <TransactionSkeleton />
                 <TransactionSkeleton />
@@ -137,8 +140,8 @@ export default function HistoryPage() {
                 เกิดข้อผิดพลาดในการโหลดข้อมูล
               </p>
             ) : transactions && transactions.length > 0 ? (
-              transactions.map((transaction) => (
-                <Transaction key={transaction.id} transaction={transaction} />
+              transactions.map((t) => (
+                <Transaction key={t.id} transaction={t} />
               ))
             ) : (
               <p className="p-8 text-center text-gray-500">
@@ -149,9 +152,12 @@ export default function HistoryPage() {
         </div>
       </div>
 
-      {/* Page Footer (remains visible) */}
+      {/* Footer download */}
       <footer className="flex justify-center bg-white p-6 pt-4">
-        <CtaButton className={"z-10 w-48 rounded-xl p-4 text-lg font-bold"}>
+        <CtaButton
+          onClick={() => setOpenModal(true)}
+          className="z-10 w-48 rounded-xl p-4 text-lg font-bold"
+        >
           ขอรายการเดินบัญชี
         </CtaButton>
       </footer>

@@ -7,9 +7,6 @@ import StatusBadge from "./StatusBadge";
 import { FaBan, FaReceipt } from "react-icons/fa6";
 import { FaInfoCircle } from "react-icons/fa";
 
-const incomeIcon = "text-green-500 w-6 h-auto ";
-const outcomeIcon = "text-red-500 w-6 h-auto ";
-
 const formatRelativeTime = (dateString) => {
   const timestamp = new Date(dateString).getTime();
 
@@ -41,17 +38,17 @@ export default function Transaction({ transaction }) {
 
   const iconConfig = {
     INCOME: {
-      icon: <MdArrowUpward />,
+      icon: <MdArrowDownward />,
       bg: "bg-green-100",
       text: "text-green-600",
     },
     REWARD: {
-      icon: <MdArrowUpward />,
+      icon: <MdArrowDownward />,
       bg: "bg-green-100",
       text: "text-green-600",
     },
     OUTCOME: {
-      icon: <MdArrowDownward />,
+      icon: <MdArrowUpward />,
       bg: "bg-red-100",
       text: "text-red-600",
     },

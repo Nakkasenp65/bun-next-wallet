@@ -298,7 +298,7 @@ export default function WithdrawPage({
             <div className="my-2 h-px w-full bg-gray-200" />
             <div className="flex items-center justify-between text-base">
               <span className="font-bold text-gray-700">ยอดที่จะได้รับ</span>
-              <span className="text-bg-dark text-xl font-extrabold">
+              <span className="text-bg-dark text-3xl font-extrabold">
                 {fmtTHB(net)}
               </span>
             </div>

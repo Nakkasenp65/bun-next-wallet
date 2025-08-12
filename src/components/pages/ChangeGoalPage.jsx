@@ -47,7 +47,7 @@ function ModeSwitch({ mode, onChange }) {
   );
 
   return (
-    <div className="px-5 pt-3 pb-2">
+    <div className="my-2">
       <div className="grid grid-cols-3 rounded-full bg-gray-100 p-1">
         {items.map((it) => {
           const active = mode === it.key;
@@ -216,7 +216,7 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
     <FramerDiv
       isOpen={isEditing}
       id="change-goal-overlay"
-      className="fixed inset-0 z-50 flex flex-col bg-white"
+      className="fixed inset-0 z-50 flex flex-col bg-white p-6"
     >
       {/* Header */}
       <header className="flex flex-shrink-0 items-center border-b border-gray-200 px-5 pt-10 pb-4">
@@ -232,13 +232,7 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
         <div className="w-6"></div>
       </header>
 
-      {/* Mode Switch */}
-      <ModeSwitch
-        mode={productQuery.mode}
-        onChange={(m) => setProductQuery((q) => ({ ...q, mode: m }))}
-      />
-
-      <div className="mx-auto w-5/6 rounded-full bg-gray-100 p-3 text-center text-sm text-gray-600">
+      <div className="rounded-lg bg-gray-100 p-3 text-center text-sm text-gray-600">
         ยอดเงินที่ใช้ได้
         <span className="text-bg-dark ml-2 font-bold">
           ฿
@@ -247,6 +241,12 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
           })}
         </span>
       </div>
+
+      {/* Mode Switch */}
+      <ModeSwitch
+        mode={productQuery.mode}
+        onChange={(m) => setProductQuery((q) => ({ ...q, mode: m }))}
+      />
 
       {/* Content */}
       <div className="relative flex-grow overflow-y-auto">

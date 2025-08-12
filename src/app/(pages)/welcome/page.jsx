@@ -32,10 +32,21 @@ export default function Page() {
     customOccupation: "",
   });
   const [suggestedPhone, setSuggestedPhone] = useState(null);
+  console.log(suggestedPhone);
   const { mutate: createGoalMutate, isPending: createGoalPending } =
     useCreateGoal();
   // ใช้เป็นค่าตรวจสอบ user จาก server หลัก
   const [isRegistered, setIsRegistered] = useState(false);
+  // Query สำหรับดึง Products
+  const [productQuery, setProductQuery] = useState({
+    mode: "affordable", // ใช้ค่า all | upgrade | affordable เพื่อระบุเอาราคามากกว่า น้อยกว่า หรือ เอา product ทั้งหมด
+    minPrice: null,
+    maxPrice: null,
+    topPerBrand: false, // เอามาแค่ 1 เครื่อง?
+    sort: "asc",
+    take: 100,
+    skip: 0,
+  });
 
   const handleGoalUpdate = (newGoal) => {
     setGoal((prev) => ({
@@ -137,7 +148,6 @@ export default function Page() {
         toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
         setIsRegistered(true); // สมัครสมาชิกกับ server หลักแล้ว
       }
-      console.log("Is Registered");
     } catch (error) {
       if (error.status === 404) {
         router.replace("https://liff.line.me/2006703040-RYAyYAyA");
@@ -155,7 +165,6 @@ export default function Page() {
     if (!monthly || monthly <= 0) {
       return toast.error("กรุณากรอกยอดออมรายเดือนให้ถูกต้อง");
     }
-
     // 6 months saving capacity
     const potentialPrice = monthly * 6;
 
@@ -164,28 +173,7 @@ export default function Page() {
 
     try {
       // If your controller path is `/products`, change the URL here accordingly.
-      const { data } = await axios.get("/product", {
-        params: {
-          mode: "affordable", // presets: affordable | upgrade | all
-          minPrice: null, // leave null for this preset
-          maxPrice: potentialPrice, // <= user's capacity
-          topPerBrand: false, // nicest UX: 1 best model per brand
-          sort: "asc",
-          take: 24,
-          skip: 0,
-        },
-      });
-
-      const items = Array.isArray(data?.items) ? data.items : [];
-      setSuggestedPhone(items); // GoalSetter expects an array of products
-
-      if (!items.length) {
-        toast("ยังไม่พบสินค้าที่ตรงเงื่อนไข ลองปรับยอดออมรายเดือนดูนะ");
-        setUiStep("input");
-      } else {
-        toast.success("คัดสินค้าที่เหมาะสมให้แล้ว ✨");
-        setUiStep("main");
-      }
+      fetchProducts(potentialPrice);
     } catch (err) {
       console.error(err);
       toast.error("เกิดข้อผิดพลาดในการประมวลผล");
@@ -195,7 +183,54 @@ export default function Page() {
     }
   };
 
-  console.log("line profile: ", liffProfile);
+  const fetchProducts = async (balance) => {
+    try {
+      setUiStep("calculate");
+
+      let { mode, minPrice, maxPrice, topPerBrand, take, skip, sort } =
+        productQuery;
+
+      // Derive min/max by mode (upgrade shows pricier targets than current balance)
+      if (mode === "affordable") {
+        minPrice = null;
+        maxPrice = maxPrice ?? balance;
+      } else if (mode === "upgrade") {
+        minPrice = minPrice ?? balance;
+        maxPrice = null;
+      } else {
+        // all
+        minPrice = null;
+        maxPrice = null;
+      }
+
+      const { data } = await axios.get("/product", {
+        params: {
+          mode,
+          minPrice,
+          maxPrice,
+          topPerBrand,
+          take,
+          skip,
+          sort,
+        },
+      });
+
+      const items = Array.isArray(data?.items) ? data.items : [];
+      setSuggestedPhone(items);
+
+      if (!items.length) {
+        toast("ยังไม่พบสินค้าที่ตรงเงื่อนไข ลองเปลี่ยนโหมดหรือช่วงราคา");
+        setUiStep("input");
+      } else {
+        toast.success("คัดสินค้าที่เหมาะสมให้แล้ว ✨");
+        setUiStep("main");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("เกิดข้อผิดพลาดในการค้นหาสินค้า");
+      setUiStep("input");
+    }
+  };
 
   useEffect(() => {
     // ให้เช็ค user

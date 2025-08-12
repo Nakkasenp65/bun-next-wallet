@@ -36,7 +36,7 @@ export default function MainTransactionList({ transactions }) {
           </FramerLink>
         </header>
         <ul id="transaction-list-container">
-          {transactions.map((transaction) => {
+          {transactions.slice(0, 5).map((transaction) => {
             if (transaction.status !== "PENDING")
               return (
                 <Transaction key={transaction.id} transaction={transaction} />

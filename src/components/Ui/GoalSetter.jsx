@@ -18,21 +18,35 @@ const brandLogos = {
   Xiaomi: <SiXiaomi />,
   Poco: <Poco />,
   Realme: <Realme />,
-  Default: <HiOutlineViewfinderCircle />, // ไอคอนสำรอง
+  Default: <HiOutlineViewfinderCircle />,
 };
 
-// This component now accepts an `onGoalChange` prop function
-// to communicate its state back to the parent component.
+const conditionOptions = [
+  { id: "มือหนึ่ง", name: "มือหนึ่ง" },
+  { id: "มือสอง", name: "มือสอง" },
+];
+
 export default function GoalSetter({
   products,
   onGoalChange = () => {},
   onBack,
   showBack = true,
 }) {
-  // Data Grouping Logic - No changes needed
+  const [selectedCondition, setSelectedCondition] = useState("มือหนึ่ง");
+
+  const filteredProducts = useMemo(() => {
+    if (!products) return [];
+    if (selectedCondition === "มือสอง") {
+      return products
+        .filter((p) => p.model.startsWith("2nd "))
+        .map((p) => ({ ...p, model: p.model.substring(4) }));
+    }
+    return products.filter((p) => !p.model.startsWith("2nd "));
+  }, [products, selectedCondition]);
+
   const groupedData = useMemo(() => {
-    if (!products || products.length === 0) return {};
-    return products.reduce((acc, product) => {
+    if (!filteredProducts || filteredProducts.length === 0) return {};
+    return filteredProducts.reduce((acc, product) => {
       const { brand, model, capacity } = product;
       if (!acc[brand]) acc[brand] = {};
       if (!acc[brand][model]) acc[brand][model] = {};
@@ -40,79 +54,65 @@ export default function GoalSetter({
       acc[brand][model][capacity].push(product);
       return acc;
     }, {});
-  }, [products]);
+  }, [filteredProducts]);
 
-  // State Management - No changes needed
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedCapacity, setSelectedCapacity] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [selectedPlan, setSelectedPlan] = useState("daily"); // Default plan
+  const [selectedPlan, setSelectedPlan] = useState("daily");
 
-  // Dynamic Options for Dropdowns - No changes needed
   const brands = useMemo(() => Object.keys(groupedData), [groupedData]);
+  const models = useMemo(
+    () => (selectedBrand ? Object.keys(groupedData[selectedBrand] || {}) : []),
+    [selectedBrand, groupedData],
+  );
+  const capacities = useMemo(
+    () =>
+      selectedBrand && selectedModel
+        ? Object.keys(groupedData[selectedBrand]?.[selectedModel] || {})
+        : [],
+    [selectedBrand, selectedModel, groupedData],
+  );
+  const availableProductsInVariant = useMemo(
+    () =>
+      selectedBrand && selectedModel && selectedCapacity
+        ? groupedData[selectedBrand]?.[selectedModel]?.[selectedCapacity] || []
+        : [],
+    [selectedBrand, selectedModel, selectedCapacity, groupedData],
+  );
+  const colors = useMemo(
+    () => availableProductsInVariant.map((p) => p.color),
+    [availableProductsInVariant],
+  );
 
   const brandOptions = useMemo(
     () =>
       brands.map((brandName) => ({
         id: brandName,
         name: brandName,
-        icon: brandLogos[brandName] || brandLogos.Default, // เปลี่ยนจาก imageUrl เป็น icon
+        icon: brandLogos[brandName] || brandLogos.Default,
       })),
     [brands],
   );
 
-  const models = useMemo(
-    () => (selectedBrand ? Object.keys(groupedData[selectedBrand]) : []),
-    [selectedBrand, groupedData],
-  );
-  // --- THIS IS THE CORRECTED LINE ---
-  const capacities = useMemo(
-    () =>
-      selectedBrand && selectedModel
-        ? Object.keys(groupedData[selectedBrand][selectedModel])
-        : [],
-    [selectedBrand, selectedModel, groupedData],
-  );
-
-  const availableProductsInVariant = useMemo(
-    () =>
-      selectedBrand && selectedModel && selectedCapacity
-        ? groupedData[selectedBrand][selectedModel][selectedCapacity]
-        : [],
-    [selectedBrand, selectedModel, selectedCapacity, groupedData],
-  );
-
-  const colors = useMemo(
-    () => availableProductsInVariant.map((p) => p.color),
-    [availableProductsInVariant],
-  );
-
-  // State Update Logic - No changes needed
-  useEffect(() => {
-    if (brands.length > 0 && !selectedBrand) {
-      handleBrandChange(brands[0]);
-    }
-  }, [brands, selectedBrand, groupedData]);
-
+  // Handlers remain the same
   const handleBrandChange = (newBrand) => {
     setSelectedBrand(newBrand);
-    const newModels = Object.keys(groupedData[newBrand]);
+    const newModels = Object.keys(groupedData[newBrand] || {});
     handleModelChange(newModels[0] || "", newBrand);
   };
-
   const handleModelChange = (newModel, currentBrand) => {
     setSelectedModel(newModel);
     const newCapacities = newModel
-      ? Object.keys(groupedData[currentBrand][newModel])
+      ? Object.keys(groupedData[currentBrand]?.[newModel] || {})
       : [];
     handleCapacityChange(newCapacities[0] || "", currentBrand, newModel);
   };
-
   const handleCapacityChange = (newCapacity, currentBrand, currentModel) => {
     setSelectedCapacity(newCapacity);
     const productsInVariant = newCapacity
-      ? groupedData[currentBrand][currentModel][newCapacity]
+      ? groupedData[currentBrand]?.[currentModel]?.[newCapacity] || []
       : [];
     if (productsInVariant.length > 0) {
       setSelectedProduct(productsInVariant[0]);
@@ -120,7 +120,6 @@ export default function GoalSetter({
       setSelectedProduct(null);
     }
   };
-
   const handleColorChange = (newColor) => {
     const product = availableProductsInVariant.find(
       (p) => p.color === newColor,
@@ -128,10 +127,8 @@ export default function GoalSetter({
     if (product) setSelectedProduct(product);
   };
 
-  // --- MODIFIED: Saving plans now include the backend planId ---
   const savingPlans = useMemo(() => {
     if (!selectedProduct) return [];
-
     const plansConfig = [
       {
         id: "daily",
@@ -162,7 +159,6 @@ export default function GoalSetter({
         unit: "งวด",
       },
     ];
-
     return plansConfig.map((plan) => {
       const calculatedAmount = Math.ceil(
         selectedProduct.downPaymentAmount / plan.divisor,
@@ -174,30 +170,35 @@ export default function GoalSetter({
     });
   }, [selectedProduct]);
 
-  // --- NEW: Effect to notify parent component of changes ---
+  // ===== FIX #1: STABILIZE THE BRAND SELECTION EFFECT =====
+  // This effect now ONLY runs when the user switches between "มือหนึ่ง" and "มือสอง".
+  // By removing `brands` from the dependency array, we break the infinite loop chain reaction.
   useEffect(() => {
-    const planObject = savingPlans.find((p) => p.id === selectedPlan);
+    if (brands.length > 0) {
+      handleBrandChange(brands[0]);
+    } else {
+      setSelectedBrand("");
+      setSelectedModel("");
+      setSelectedCapacity("");
+      setSelectedProduct(null);
+    }
+  }, [selectedCondition]);
 
-    // Ensure both a product and a plan are selected before notifying the parent.
-    // selectedProduct._id is assumed to be the mobileId.
-    if (selectedProduct?.id && planObject?.planId) {
+  // ===== FIX #2: STABILIZE THE GOAL CHANGE EFFECT =====
+  // We extract the primitive IDs from the state objects.
+  const selectedProductId = selectedProduct?.id;
+  const planId = savingPlans.find((p) => p.id === selectedPlan)?.planId;
+
+  // This effect now depends on the stable IDs, not object references.
+  // This prevents it from running just because an object was re-created in memory.
+  useEffect(() => {
+    if (selectedProductId && planId) {
       onGoalChange({
-        mobileId: selectedProduct.id,
-        planId: planObject.planId,
+        mobileId: selectedProductId,
+        planId: planId,
       });
     }
-    // This effect runs whenever the selected product or plan changes.
-  }, [selectedProduct, selectedPlan]);
-
-  if (!selectedProduct) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <p className="animate-pulse text-center text-slate-500">
-          กำลังโหลดข้อมูลสินค้า...
-        </p>
-      </div>
-    );
-  }
+  }, [selectedProductId, planId, onGoalChange]);
 
   return (
     <div className="w-full max-w-md bg-white p-5">
@@ -211,109 +212,139 @@ export default function GoalSetter({
       )}
 
       <div className="rounded-xl bg-white">
-        <h1 className="text-bg-dark mb-2 font-bold">
-          เลือกแบรนด์ที่ต้องการดาวน์
-        </h1>
+        <h1 className="text-bg-dark mb-2 font-bold">เลือกประเภทสินค้า</h1>
         <GridSelectorComponent
-          labelClassName="text-bg-dark mb-2 block font-bold"
-          name="brand"
-          value={selectedBrand}
-          onChange={(value) => handleBrandChange(value)}
-          options={brandOptions}
-          containerClassName="grid-cols-4 gap-3 md:grid-cols-4"
+          name="condition"
+          value={selectedCondition}
+          onChange={(value) => setSelectedCondition(value)}
+          options={conditionOptions}
+          containerClassName="grid-cols-2 gap-3"
           itemClassName="hover:bg-pink-50/50 shadow-sm"
           activeItemClassName="border-pink-500 bg-pink-50"
         />
-        <div className="my-5 flex h-48 items-center justify-center">
-          {/* Product Image */}
-          {selectedProduct.imageUrl ? (
-            <Image
-              src={selectedProduct.imageUrl}
-              alt={selectedProduct.model}
-              width={180}
-              height={180}
-              className="max-h-full w-auto object-contain"
-              priority
+
+        {!selectedProduct ? (
+          <div className="flex h-96 items-center justify-center">
+            <p className="animate-pulse text-center text-slate-500">
+              {brands.length > 0
+                ? "กำลังโหลดข้อมูลสินค้า..."
+                : "ไม่มีสินค้าประเภทนี้"}
+            </p>
+          </div>
+        ) : (
+          <>
+            <h1 className="text-bg-dark mt-5 mb-2 font-bold">
+              เลือกแบรนด์ที่ต้องการดาวน์
+            </h1>
+            <GridSelectorComponent
+              labelClassName="text-bg-dark mb-2 block font-bold"
+              name="brand"
+              value={selectedBrand}
+              onChange={(value) => handleBrandChange(value)}
+              options={brandOptions}
+              containerClassName="grid-cols-4 gap-3 md:grid-cols-4"
+              itemClassName="hover:bg-pink-50/50 shadow-sm"
+              activeItemClassName="border-pink-500 bg-pink-50"
             />
-          ) : (
-            <div className="flex h-40 w-40 items-center justify-center rounded-lg bg-slate-100 p-2 text-center text-sm text-slate-400">
-              NO1Money+ Product:{selectedProduct.model}
+            <div className="my-5 flex h-48 items-center justify-center">
+              {selectedProduct.imageUrl ? (
+                <Image
+                  src={selectedProduct.imageUrl}
+                  alt={selectedProduct.model}
+                  width={180}
+                  height={180}
+                  className="max-h-full w-auto object-contain"
+                  priority
+                />
+              ) : (
+                <div className="flex h-40 w-40 items-center justify-center rounded-lg bg-slate-100 p-2 text-center text-sm text-slate-400">
+                  NO1Money+ Product:{selectedProduct.model}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <div className="space-y-4 rounded-xl">
-          <h1 className="text-bg-dark font-black">เลือกรุ่นที่ต้องการดาวน์</h1>
-          {/* Choose Model Iphone */}
-          <DropDownComponent
-            name="model"
-            value={selectedModel}
-            onChange={(newModel) => handleModelChange(newModel, selectedBrand)}
-            options={models}
-            buttonClassName="w-full text-md font-bold border-pink-400 text-pink-400  border p-2 rounded-lg"
-            optionsContainerClassName="p-2"
-            optionClassName="rounded-lg font-semibold"
-          />
-          {/* Choose capacity GB */}
-          <DropDownComponent
-            name="capacity"
-            value={selectedCapacity}
-            onChange={(newCapacity) =>
-              handleCapacityChange(newCapacity, selectedBrand, selectedModel)
-            }
-            options={capacities}
-            buttonClassName="w-full text-md font-bold border-pink-400 text-pink-400  border p-2 rounded-lg"
-            optionsContainerClassName="p-2"
-            optionClassName="rounded-lg font-semibold"
-          />
-          {colors.length > 1 && colors[0] !== "N/A" && (
-            <div className="flex flex-col items-start justify-between gap-2">
-              <span className="font-medium text-slate-600">สี:</span>
-              <div className="flex flex-wrap gap-2">
-                {colors.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => handleColorChange(color)}
-                    className={`w-max shrink rounded-lg px-3 py-1 text-sm font-semibold transition-all ${selectedProduct.color === color ? "bg-pink-500 text-white shadow" : "bg-white text-slate-700 hover:bg-slate-200"}`}
-                  >
-                    {color}
-                  </button>
-                ))}
+            <div className="space-y-4 rounded-xl">
+              <h1 className="text-bg-dark font-black">
+                เลือกรุ่นที่ต้องการดาวน์
+              </h1>
+              <DropDownComponent
+                name="model"
+                value={selectedModel}
+                onChange={(newModel) =>
+                  handleModelChange(newModel, selectedBrand)
+                }
+                options={models}
+                buttonClassName="w-full text-md font-bold border-pink-400 text-pink-400  border p-2 rounded-lg"
+                optionsContainerClassName="p-2"
+                optionClassName="rounded-lg font-semibold"
+              />
+              <DropDownComponent
+                name="capacity"
+                value={selectedCapacity}
+                onChange={(newCapacity) =>
+                  handleCapacityChange(
+                    newCapacity,
+                    selectedBrand,
+                    selectedModel,
+                  )
+                }
+                options={capacities}
+                buttonClassName="w-full text-md font-bold border-pink-400 text-pink-400  border p-2 rounded-lg"
+                optionsContainerClassName="p-2"
+                optionClassName="rounded-lg font-semibold"
+              />
+              {colors.length > 1 && colors[0] !== "N/A" && (
+                <div className="flex flex-col items-start justify-between gap-2">
+                  <span className="font-medium text-slate-600">สี:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {colors.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => handleColorChange(color)}
+                        className={`w-max shrink rounded-lg px-3 py-1 text-sm font-semibold transition-all ${selectedProduct.color === color ? "bg-pink-500 text-white shadow" : "bg-white text-slate-700 hover:bg-slate-200"}`}
+                      >
+                        {color}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="flex items-baseline justify-between border-t border-slate-200 pt-4">
+                <span className="font-medium text-slate-600">ราคาดาวน์:</span>
+                <span className="text-2xl font-bold text-slate-900">
+                  {selectedProduct.downPaymentAmount.toLocaleString("en-US")}
+                </span>
               </div>
             </div>
-          )}
-          <div className="flex items-baseline justify-between border-t border-slate-200 pt-4">
-            <span className="font-medium text-slate-600">ราคาดาวน์:</span>
-            <span className="text-2xl font-bold text-slate-900">
-              {selectedProduct.downPaymentAmount.toLocaleString("en-US")}
-            </span>
+          </>
+        )}
+      </div>
+      {selectedProduct && (
+        <div className="mt-6">
+          <h3 className="mb-3 text-lg font-bold text-slate-800">
+            เลือกเป้าหมายการออมของคุณ
+          </h3>
+          <div className="grid w-full grid-cols-2 gap-3 overflow-x-auto px-2 pb-4">
+            {savingPlans.map((plan) => (
+              <button
+                key={plan.id}
+                onClick={() => setSelectedPlan(plan.id)}
+                className={`flex min-w-[130px] flex-shrink-0 flex-col items-center justify-center rounded-xl p-3 text-center transition-all duration-200 ${
+                  selectedPlan === plan.id
+                    ? "bg-pink-500 text-white shadow-lg shadow-pink-500/30"
+                    : "bg-white text-slate-700 shadow-md shadow-slate-500/10 hover:bg-pink-50"
+                }`}
+              >
+                <span className="font-semibold">{plan.label}</span>
+                <div className="my-1.5 flex items-baseline gap-1.5">
+                  <span className="text-xl font-bold">{plan.displayValue}</span>
+                  <span className="text-sm font-medium opacity-80">บาท</span>
+                </div>
+                <span className="text-xs opacity-80">{`/ ${plan.unit}`}</span>
+              </button>
+            ))}
           </div>
         </div>
-      </div>
-      <div className="mt-6">
-        <h3 className="mb-3 text-lg font-bold text-slate-800">
-          เลือกเป้าหมายการออมของคุณ
-        </h3>
-        <div className="grid w-full grid-cols-2 gap-3 overflow-x-auto px-2 pb-4">
-          {savingPlans.map((plan) => (
-            <button
-              key={plan.id}
-              onClick={() => setSelectedPlan(plan.id)}
-              className={`flex min-w-[130px] flex-shrink-0 flex-col items-center justify-center rounded-xl p-3 text-center transition-all duration-200 ${
-                selectedPlan === plan.id
-                  ? "bg-pink-500 text-white shadow-lg shadow-pink-500/30"
-                  : "bg-white text-slate-700 shadow-md shadow-slate-500/10 hover:bg-pink-50"
-              }`}
-            >
-              <span className="font-semibold">{plan.label}</span>
-              <div className="my-1.5 flex items-baseline gap-1.5">
-                <span className="text-xl font-bold">{plan.displayValue}</span>
-                <span className="text-sm font-medium opacity-80">บาท</span>
-              </div>
-              <span className="text-xs opacity-80">{`/ ${plan.unit}`}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

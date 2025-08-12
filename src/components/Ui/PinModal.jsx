@@ -3,7 +3,14 @@ import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import PinInput from "./PinInput";
 
-const PinModal = ({ isOpen, onClose, onComplete, recipient, amount }) => {
+const PinModal = ({
+  isOpen,
+  onClose,
+  onComplete,
+  recipient,
+  amount,
+  isPinDisabled,
+}) => {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -42,7 +49,11 @@ const PinModal = ({ isOpen, onClose, onComplete, recipient, amount }) => {
                 <label className="font-bold text-gray-700">
                   กรุณายืนยันด้วยรหัส PIN
                 </label>
-                <PinInput length={6} onComplete={onComplete} />
+                <PinInput
+                  length={6}
+                  onComplete={onComplete}
+                  isPinDisabled={isPinDisabled}
+                />
               </div>
             </div>
           </motion.div>

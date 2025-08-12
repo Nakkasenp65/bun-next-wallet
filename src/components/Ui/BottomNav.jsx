@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import { FaHouse } from "react-icons/fa6";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faHouse,
@@ -42,7 +41,7 @@ export default function BottomNav({ setShowContact, userId }) {
 
       {/* Center Scan Button */}
       <Link
-        href={`/scan/`}
+        href={`/scan/${userId}`}
         id="scan-to-pay-btn"
         className="group -mt-9 cursor-pointer"
         onClick={() => setActiveNav("scan")}

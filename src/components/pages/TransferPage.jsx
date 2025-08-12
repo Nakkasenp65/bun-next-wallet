@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import { FaPhoneAlt } from "react-icons/fa";
 import Image from "next/image";
@@ -16,21 +16,28 @@ import toast from "react-hot-toast";
 import { useDebounce } from "use-debounce";
 
 export default function TransferPage({
-  userData,
+  userData, // sender
   setShowTransfer,
   showTransfer,
+  receiverData = null,
+  setParentClose = () => {},
 }) {
+  // ---- Local state
   const [phoneNumber, setPhoneNumber] = useState("");
   const [amount, setAmount] = useState("");
   const [recipient, setRecipient] = useState(null);
   const [showPinModal, setShowPinModal] = useState(false);
 
-  // Debounce the phone number input to avoid spamming the API
-  const [debouncedPhoneNumber] = useDebounce(phoneNumber, 500); // 500ms delay
+  // Derived: are we in "QR mode"?
+  const hasReceiverPreset = useMemo(() => !!receiverData?.id, [receiverData]);
 
-  const closePage = () => {
-    setShowTransfer(false);
-    // Delay reset to allow for exit animation, preventing UI flicker
+  // Debounce only used in normal mode
+  const [debouncedPhoneNumber] = useDebounce(phoneNumber, 500);
+
+  // ✅ FIX: Renamed for clarity and reordered calls
+  const handleSuccessAndClose = () => {
+    setParentClose(); // Call parent to navigate first
+    setShowTransfer(false); // Then close the modal
     setTimeout(() => {
       setPhoneNumber("");
       setRecipient(null);
@@ -39,22 +46,37 @@ export default function TransferPage({
     }, 300);
   };
 
+  // ✅ FIX: A dedicated cancel handler for the back button
+  const handleCancel = () => {
+    setShowTransfer(false);
+  };
+
   const searchRecipientMutation = useSearchRecipient();
   const transferMutation = useCreateInternalTransfer({
-    onSuccessCallback: closePage,
+    onSuccessCallback: handleSuccessAndClose, // Use the updated success handler
   });
 
-  // This effect runs when the user stops typing the phone number
+  // ✅ If we came from QR, set recipient immediately and prefill phone (read-only UI below)
   useEffect(() => {
+    if (hasReceiverPreset) {
+      setRecipient(receiverData);
+      setPhoneNumber(receiverData?.phone || "");
+    }
+  }, [hasReceiverPreset, receiverData]);
+
+  // 🔎 Normal mode: search by phone (skip when QR preset exists)
+  useEffect(() => {
+    if (hasReceiverPreset) return;
+
     if (debouncedPhoneNumber && debouncedPhoneNumber.length >= 9) {
       searchRecipientMutation.mutate(debouncedPhoneNumber, {
         onSuccess: (data) => setRecipient(data),
-        onError: () => setRecipient(null), // Clear recipient on error
+        onError: () => setRecipient(null),
       });
     } else {
-      setRecipient(null); // Clear recipient if phone number is too short
+      setRecipient(null);
     }
-  }, [debouncedPhoneNumber]);
+  }, [debouncedPhoneNumber, hasReceiverPreset]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleConfirmTransfer = () => {
     const numericAmount = parseFloat(amount);
@@ -64,7 +86,6 @@ export default function TransferPage({
     if (numericAmount > userData.wallet.balance)
       return toast.error("ยอดเงินของคุณไม่เพียงพอ");
 
-    // Open the PIN modal
     setShowPinModal(true);
   };
 
@@ -74,32 +95,32 @@ export default function TransferPage({
       line_user_id: userData?.line_user_id,
       recipientUserId: recipient.id,
       amount: parseFloat(amount),
-      pin: pin,
+      pin,
     });
   };
 
+  const isSearching = hasReceiverPreset
+    ? false
+    : searchRecipientMutation.isPending;
   const isButtonDisabled =
-    !recipient ||
-    !amount ||
-    searchRecipientMutation.isPending ||
-    transferMutation.isPending;
+    !recipient || !amount || isSearching || transferMutation.isPending;
+  const isPinDisabled = transferMutation.isPending;
 
   return (
     <>
-      {/* Full screen loading for the final transfer action */}
       {transferMutation.isPending && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <Loading message="กำลังโอนเงิน..." />
         </div>
       )}
 
-      {/* PIN Modal Overlay */}
       <PinModal
         isOpen={showPinModal}
         onClose={() => setShowPinModal(false)}
         onComplete={handlePinComplete}
         recipient={recipient}
         amount={amount}
+        isPinDisabled={isPinDisabled}
       />
 
       <FramerDiv
@@ -108,7 +129,11 @@ export default function TransferPage({
         className="bg-bg-dark/80 fixed inset-0 z-20 flex flex-col backdrop-blur-xl"
       >
         <header className="flex items-center px-5 pt-10 pb-4">
-          <button onClick={closePage} className="text-secondary-text text-2xl">
+          {/* ✅ FIX: Use the dedicated cancel handler */}
+          <button
+            onClick={handleCancel}
+            className="text-secondary-text text-2xl"
+          >
             <IoIosArrowBack className="text-3xl" />
           </button>
           <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
@@ -128,62 +153,110 @@ export default function TransferPage({
             </span>
           </div>
 
-          {/* Phone Number Input */}
-          <div>
-            <label className="text-sm font-bold text-gray-500">
-              เบอร์โทรศัพท์ผู้รับ
-            </label>
-            <div className="relative mt-2">
-              <FaPhoneAlt className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400" />
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="กรอกเบอร์โทรศัพท์เพื่อค้นหา"
-                inputMode="numeric"
-                className="text-bg-dark w-full rounded-xl border border-gray-300 p-4 pl-12 outline-none focus:ring-2 focus:ring-pink-400"
-              />
-              {searchRecipientMutation.isPending && (
-                <div className="absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 animate-spin rounded-full border-2 border-solid border-pink-500 border-t-transparent"></div>
-              )}
+          {/* Phone Number / Scanned Recipient */}
+          {!hasReceiverPreset ? (
+            // Normal mode: user types phone
+            <div>
+              <label className="text-sm font-bold text-gray-500">
+                เบอร์โทรศัพท์ผู้รับ
+              </label>
+              <div className="relative mt-2">
+                <FaPhoneAlt className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="กรอกเบอร์โทรศัพท์เพื่อค้นหา"
+                  inputMode="numeric"
+                  className="text-bg-dark w-full rounded-xl border border-gray-300 p-4 pl-12 outline-none focus:ring-2 focus:ring-pink-400"
+                />
+                {isSearching && (
+                  <div className="absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 animate-spin rounded-full border-2 border-solid border-pink-500 border-t-transparent" />
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            // QR mode: show locked-in recipient info summary
+            <div>
+              <p className="text-sm font-bold text-gray-500">
+                ผู้รับ (จากการสแกน)
+              </p>
+              <div className="mt-2 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-3">
+                {receiverData?.line_profile_url && (
+                  <Image
+                    src={receiverData.line_profile_url}
+                    width={40}
+                    height={40}
+                    alt={
+                      receiverData?.line_display_name ||
+                      receiverData?.username ||
+                      "recipient"
+                    }
+                    className="rounded-full"
+                  />
+                )}
+                <div>
+                  <p className="font-bold text-gray-800">
+                    {receiverData?.line_display_name ||
+                      receiverData?.username ||
+                      receiverData?.name ||
+                      receiverData?.id}
+                  </p>
+                  {receiverData?.phone && (
+                    <p className="text-xs text-gray-500">
+                      เบอร์โทร: {receiverData.phone}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
-          {/* Recipient Info & Amount Input (Conditionally Animated) */}
+          {/* Recipient Info (animated) — shown when recipient is resolved in either mode */}
           <AnimatePresence>
             {recipient && (
               <motion.div
                 initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                animate={{ opacity: 1, height: "auto", marginTop: "1.5rem" }} // 1.5rem = gap-6
+                animate={{ opacity: 1, height: "auto", marginTop: "1.5rem" }}
                 exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
+                transition={{ duration: 0.35, ease: "easeInOut" }}
                 className="flex flex-col gap-6 overflow-hidden"
               >
-                {/* Recipient Info */}
-                <div>
-                  <p className="text-sm font-bold text-gray-500">โอนไปยัง</p>
-                  <div className="mt-2 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-3">
-                    <Image
-                      src={recipient.line_profile_url}
-                      width={40}
-                      height={40}
-                      alt={recipient.line_display_name}
-                      className="rounded-full"
-                    />
-                    <div>
-                      <p className="font-bold text-gray-800">
-                        {recipient.line_display_name}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        เบอร์โทร: {recipient.phone}
-                      </p>
+                {/* Repeat summary for normal mode to confirm found user */}
+                {!hasReceiverPreset && (
+                  <div>
+                    <p className="text-sm font-bold text-gray-500">โอนไปยัง</p>
+                    <div className="mt-2 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-3">
+                      {recipient?.line_profile_url && (
+                        <Image
+                          src={recipient.line_profile_url}
+                          width={40}
+                          height={40}
+                          alt={recipient?.line_display_name || "recipient"}
+                          className="rounded-full"
+                        />
+                      )}
+                      <div>
+                        <p className="font-bold text-gray-800">
+                          {recipient?.line_display_name ||
+                            recipient?.username ||
+                            recipient?.name ||
+                            recipient?.id}
+                        </p>
+                        {recipient?.phone && (
+                          <p className="text-xs text-gray-500">
+                            เบอร์โทร: {recipient.phone}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
-          {/* Amount Input */}
+
+          {/* Amount */}
           <div>
             <label className="text-sm font-bold text-gray-500">จำนวนเงิน</label>
             <input
@@ -195,7 +268,8 @@ export default function TransferPage({
               className="text-bg-dark mt-2 w-full rounded-xl border border-gray-300 p-4 text-lg font-bold outline-none focus:ring-2 focus:ring-pink-400"
             />
           </div>
-          {/* CTA Button */}
+
+          {/* CTA */}
           <div className="mt-auto flex justify-center pt-4">
             <CtaButton
               onClick={handleConfirmTransfer}

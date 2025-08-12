@@ -18,7 +18,14 @@ export default function TransferContent({ amount }) {
     <div className="py-4">
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <div className="flex items-center gap-3 border-b border-gray-200 pb-3">
-          <Image src={"/kbank-logo.png"} alt="KBank" width={40} height={40} />
+          <Image
+            src={
+              "https://lh3.googleusercontent.com/d/1fHHAJhVwsAsMaoVcTv8pJhxYGJbDrz0Z"
+            }
+            alt="KBank"
+            width={40}
+            height={40}
+          />
           <div>
             <h3 className="font-bold text-gray-800">ธนาคารกสิกรไทย</h3>
             <p className="text-sm text-gray-700">

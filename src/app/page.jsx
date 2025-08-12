@@ -165,7 +165,7 @@ export default function HomePage() {
               <SavingsGoalCard
                 brand={userData.goal.product.brand}
                 name={userData.goal.product.model}
-                target={userData.goal.product.price}
+                target={userData.goal.product.downPaymentAmount}
                 balance={userData.wallet.balance}
                 imageUrl={userData.goal.product.imageUrl}
                 handleRedeem={handleRedeemPhone}

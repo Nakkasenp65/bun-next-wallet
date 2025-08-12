@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 
-const PinInput = ({ length = 6, onComplete }) => {
+const PinInput = ({ length = 6, onComplete, isPinDisabled }) => {
   const [pin, setPin] = useState(new Array(length).fill(""));
   const inputRefs = useRef([]);
 
@@ -40,6 +40,7 @@ const PinInput = ({ length = 6, onComplete }) => {
           value={digit}
           onChange={(e) => handleChange(e, index)}
           onKeyDown={(e) => handleKeyDown(e, index)}
+          disabled={isPinDisabled}
           className="h-14 w-12 rounded-xl border-2 border-gray-300 text-center text-2xl font-bold text-gray-800 focus:border-pink-500 focus:ring-pink-500"
         />
       ))}
