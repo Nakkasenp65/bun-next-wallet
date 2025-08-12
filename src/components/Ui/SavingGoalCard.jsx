@@ -1,121 +1,143 @@
-import React from "react";
+"use client";
+import React, { useMemo } from "react";
 import { IoMdTrophy } from "react-icons/io";
 import Image from "next/image";
 import CtaButton from "./CtaButton";
 
-const formatCurrency = (num) => `฿${num.toLocaleString("en-US")}`;
+const fmtTHB = (n) =>
+  (Number(n) || 0).toLocaleString("th-TH", {
+    style: "currency",
+    currency: "THB",
+    minimumFractionDigits: 0,
+  });
 
 export default function SavingsGoalCard({
   brand,
   name,
-  target,
-  balance = 20000,
+  target, // downPaymentAmount = เป้าหมายดาวน์
+  balance = 0,
   imageUrl,
   handleRedeem,
+  className = "",
 }) {
-  const progress = progressDisplay();
-  const remainingAmount = Math.max(0, target - balance);
-  const isAchieved = balance >= target;
-
-  function progressDisplay() {
-    if (balance > 0 && balance <= target) return (balance / target) * 100;
-    else if (balance > target) {
-      return 100;
-    } else return 0;
-  }
+  const { pct, remaining, achieved } = useMemo(() => {
+    const t = Math.max(0, Number(target) || 0);
+    const b = Math.max(0, Number(balance) || 0);
+    const raw = t > 0 ? (b / t) * 100 : 0;
+    return {
+      pct: Math.max(0, Math.min(100, raw)),
+      remaining: Math.max(0, t - b),
+      achieved: b >= t && t > 0,
+    };
+  }, [target, balance]);
 
   return (
     <div
       id="savings-goal-card"
-      className="text-light-text shadow-neon-purple inset-shadow-lg relative flex flex-col gap-2 overflow-hidden rounded-3xl p-6 inset-shadow-black/36 [background:linear-gradient(45deg,_#230640_0%,_#402E99_100%)]"
+      className={[
+        // your original soul
+        "relative flex flex-col gap-3 overflow-hidden rounded-3xl p-6",
+        "text-light-text shadow-neon-purple inset-shadow-lg inset-shadow-black/36",
+        "drop-shadow-primary-pink/50 drop-shadow-lg [background:linear-gradient(45deg,_#230640_0%,_#402E99_100%)]",
+        className,
+      ].join(" ")}
     >
-      {imageUrl ? (
-        <Image
-          className="animate-floating drop-shadow-primary-pink absolute -right-24 -bottom-14 h-auto w-[240px] -rotate-6 drop-shadow-2xl sm:-bottom-12 sm:w-[300px] sm:-rotate-10"
-          src={imageUrl}
-          alt="mobile phone image"
-          width={300}
-          height={300}
-          priority
-        />
-      ) : (
-        <Image
-          className="animate-floating drop-shadow-primary-pink/50 absolute right-1 h-auto w-30 drop-shadow-2xl sm:-bottom-12 sm:-rotate-10"
-          alt="pig loading icon"
-          src="/videos/moneyLoading.gif"
-          width="300"
-          height="300"
-          controls
-          autoPlay
-          muted
-          loop
-          playsInline
-        />
-      )}
+      {/* soft vignette for readability */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(transparent,rgba(0,0,0,0.35))]"
+      />
 
-      <div className="flex justify-between">
-        {/* Profile Picture */}
-        {/* <Image
-          src={"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"}
-          width={100}
-          height={100}
-          alt="profile image"
-          className="border-primary-pink shadow-neon-pink absolute top-4 right-5 h-14 w-14 rounded-full border-2 bg-cover"
-        /> */}
-
-        {/* Card Title */}
-        <div id="card-title" className="flex flex-5/6 flex-col gap-6">
-          <div className="flex w-3/4 flex-col">
-            <div className="flex items-center gap-0.5">
-              <IoMdTrophy className="text-accent-gold drop-shadow-accent-gold/50 mb-0.5 h-4 w-4 drop-shadow-sm" />
-              <span className="text-xs">เป้าหมาย:</span>
-            </div>
-            <span className="text-base break-keep">
-              {brand} {name}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Saved Amount */}
-      <div className="flex flex-col">
-        <div className="text-xs text-white/50">ยอดเงินปัจจุบัน</div>
-        <div className="from-primary-pink bg-gradient-to-r to-amber-500 bg-clip-text text-3xl font-bold text-transparent">
-          {formatCurrency(balance)}
-        </div>
-      </div>
-
-      <div className="relative flex w-[60%] flex-col gap-4">
-        {/* Progress Bar */}
-        {/* <div className="text-accent-gold absolute -top-5 right-0 text-xs font-bold">{Math.round(progress)}%</div> */}
-        <div className="h-3 rounded-full bg-black/50 shadow-inner">
-          <div
-            className="h-full rounded-full [background:linear-gradient(90deg,_var(--gold-accent)_0%,_var(--primary-pink)_100%)]"
-            style={{ width: `${progress}%` }}
+      {/* floating product visual (kept your animation/placement) */}
+      <div className="pointer-events-none absolute -right-24 -bottom-14 w-[240px] -rotate-6 sm:-bottom-12 sm:w-[300px] sm:-rotate-10">
+        {imageUrl ? (
+          <Image
+            className="animate-floating drop-shadow-primary-pink/50 drop-shadow-2xl"
+            src={imageUrl}
+            alt={`${brand} ${name}`}
+            width={300}
+            height={300}
+            priority
           />
-        </div>
-        {/* GOAL */}
-        <div className="flex items-center justify-between text-[9px] text-white/90">
-          <span className="rounded-full bg-black/50 px-1 py-1">
-            ดาวน์: {formatCurrency(target)}
-          </span>
-          <span className="rounded-full bg-black/50 px-1 py-1">
-            {isAchieved
-              ? "สำเร็จแล้ว!"
-              : `อีก: ${formatCurrency(remainingAmount)}`}
-          </span>
-        </div>
-        {isAchieved && (
-          <CtaButton
-            onClick={handleRedeem}
-            className={"z-10 w-48 rounded-xl p-4 font-bold"}
-          >
-            เริ่มการดาวน์!
-          </CtaButton>
+        ) : (
+          // use <img> for animated gif (Next/Image strips the anim on some setups)
+          <img
+            className="animate-floating drop-shadow-primary-pink/50"
+            src="/videos/moneyLoading.gif"
+            alt="กำลังโหลดรูปสินค้า"
+            width={300}
+            height={300}
+          />
         )}
       </div>
 
-      {/* Goal Details */}
+      {/* title area */}
+      <div className="flex items-start justify-between">
+        <div className="min-w-0">
+          <div className="mb-1 flex items-center gap-1">
+            <IoMdTrophy className="text-accent-gold drop-shadow-accent-gold/50 h-4 w-4" />
+            <span className="text-xs text-white/80">เป้าหมายดาวน์</span>
+          </div>
+          <h3 className="truncate text-base leading-snug font-semibold">
+            {brand} {name}
+          </h3>
+        </div>
+
+        {/* progress pill */}
+        <span
+          className="rounded-full bg-white/10 px-2 py-1 text-[10px] font-bold text-white/90 ring-1 ring-white/20"
+          aria-live="polite"
+        >
+          {Math.round(pct)}%
+        </span>
+      </div>
+
+      {/* current balance */}
+      <div className="mt-1">
+        <div className="text-xs text-white/60">ยอดเงินปัจจุบัน</div>
+        <div className="from-primary-pink bg-gradient-to-r to-amber-500 bg-clip-text text-3xl font-extrabold text-transparent drop-shadow">
+          {fmtTHB(balance)}
+        </div>
+      </div>
+
+      {/* progress bar + figures */}
+      <div className="mt-1 w-[65%] max-w-xs">
+        <div
+          className="h-3 w-full rounded-full bg-black/45 shadow-inner ring-1 ring-white/10"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(pct)}
+          aria-label="ความคืบหน้าการออม"
+        >
+          <div
+            className="h-full rounded-full transition-[width] duration-700 [background:linear-gradient(90deg,_var(--gold-accent)_0%,_var(--primary-pink)_100%)]"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+
+        <div className="mt-2 flex items-center justify-between text-[10px] text-white/90">
+          <span className="rounded-full bg-black/40 px-2 py-1 ring-1 ring-white/10">
+            ดาวน์: {fmtTHB(target)}
+          </span>
+          <span className="rounded-full bg-black/40 px-2 py-1 ring-1 ring-white/10">
+            {achieved ? "สำเร็จแล้ว!" : `อีก: ${fmtTHB(remaining)}`}
+          </span>
+        </div>
+      </div>
+
+      {/* CTA */}
+      {achieved && (
+        <div className="mt-2">
+          <CtaButton
+            onClick={handleRedeem}
+            className="z-10 w-48 rounded-xl p-4 text-sm font-bold"
+            aria-label="เริ่มขั้นตอนการดาวน์"
+          >
+            เริ่มการดาวน์!
+          </CtaButton>
+        </div>
+      )}
     </div>
   );
 }

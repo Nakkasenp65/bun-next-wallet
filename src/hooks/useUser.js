@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 async function fetchUserStatus(userId) {
-  console.log("fetch user status");
   const { data } = await axios.get(`/user/status/${userId}`);
   return data;
 }
@@ -16,7 +15,6 @@ async function updateUserData({ mongoId, updateData }) {
 }
 
 async function fetchUser(userId) {
-  console.log("fetch aomdown user");
   const { data } = await axios.get(`/user/${userId}`);
   return data;
 }
