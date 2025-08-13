@@ -49,14 +49,14 @@ export default function SavingsGoalCard({
       />
 
       {/* floating product visual (kept your animation/placement) */}
-      <div className="pointer-events-none absolute -right-24 -bottom-14 w-[240px] -rotate-6 sm:-bottom-12 sm:w-[300px] sm:-rotate-10">
+      <div className="pointer-events-none absolute -right-22 -bottom-14 w-[225px] -rotate-6 sm:-bottom-12 sm:w-[300px] sm:-rotate-10">
         {imageUrl ? (
           <Image
             className="animate-floating drop-shadow-primary-pink/50 drop-shadow-2xl"
             src={imageUrl}
             alt={`${brand} ${name}`}
-            width={300}
-            height={300}
+            width={500}
+            height={500}
             priority
           />
         ) : (

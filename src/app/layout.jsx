@@ -7,6 +7,9 @@ import QueryProvider from "@/components/provider/QueryProvider";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { LiffProvider } from "@/components/provider/LiffProvider";
 import TokenSynchronizer from "@/components/provider/TokenSynchronizer";
+import { LockProvider } from "@/components/context/LockContext";
+import AppLockController from "@/components/provider/AppLockController";
+import AppGate from "@/components/provider/AppGate";
 
 const toastIconClass = "h-12 w-auto animate-pulse";
 const toastWaiting = "animate-spin text-primary-pink";
@@ -37,9 +40,13 @@ export const toastOptions = {
   position: "top-center",
   duration: 5000,
 };
+
 export const metadata = {
   title: "1 Wallet Premium+",
-  description: "1 Wallet Premium+",
+  icons: {
+    icon: [{ url: "/favicon.ico" }],
+    apple: [{ url: "/apple-touch-icon.png" }],
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -48,14 +55,16 @@ export default function RootLayout({ children }) {
       <body className={`bg-bg-dark antialiased`}>
         <QueryProvider>
           <LiffProvider>
-            <TokenSynchronizer />
-            {children}
-            {/* <ReactQueryDevtools /> */}
-            <Toaster
-              position="top-center"
-              containerClassName="mx-auto z-[9999] w-5/6"
-              toastOptions={toastOptions}
-            />
+            <LockProvider>
+              <TokenSynchronizer />
+              <AppGate>{children}</AppGate>
+              <ReactQueryDevtools />
+              <Toaster
+                position="top-center"
+                containerClassName="mx-auto z-[9999] w-5/6"
+                toastOptions={toastOptions}
+              />
+            </LockProvider>
           </LiffProvider>
         </QueryProvider>
       </body>

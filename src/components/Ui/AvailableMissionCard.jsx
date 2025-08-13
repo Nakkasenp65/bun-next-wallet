@@ -3,8 +3,17 @@ import { motion } from "framer-motion";
 import { AiOutlineGift } from "react-icons/ai";
 import { GrMoney } from "react-icons/gr";
 import { FaRocket } from "react-icons/fa";
+import useCountdown from "@/hooks/useCountdown";
+
+const missionTypeMap = {
+  ONBOARDING: "ครั้งแรก",
+  ACCUMULATION: "สะสมเงิน",
+  STREAK: "ออมต่อเนื่อง",
+  REFERRAL: "เชิญเพื่อน",
+};
 
 const AvailableMissionCard = ({ mission, onEnroll, isEnrolling }) => {
+  const { timeLeft, isCounting } = useCountdown(mission.webExpiresAt);
   // ฟังก์ชันป้องกันการกดซ้ำซ้อน
   const handleEnrollClick = (e) => {
     e.preventDefault();
@@ -13,12 +22,14 @@ const AvailableMissionCard = ({ mission, onEnroll, isEnrolling }) => {
     }
   };
 
+  const tagText = missionTypeMap[mission.type];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="flex w-full flex-shrink-0 snap-start flex-col gap-3 rounded-3xl bg-gradient-to-br from-purple-600 to-pink-600 p-4 text-white shadow-lg"
+      className="flex w-full flex-shrink-0 snap-start flex-col rounded-3xl bg-gradient-to-br from-purple-600 to-pink-600 p-4 text-white"
     >
       {/* Header */}
       <div className="flex items-center gap-3">
@@ -30,12 +41,18 @@ const AvailableMissionCard = ({ mission, onEnroll, isEnrolling }) => {
 
       {/* Description */}
       <p className="min-h-[60px] text-sm text-white/80">
-        {mission.description}
+        {mission.description}{" "}
+        {tagText && (
+          <span className="text-accent-gold rounded-md bg-red-500 px-1 py-0.5 text-[10px] font-bold text-nowrap">
+            {tagText}
+          </span>
+        )}
       </p>
-
+      <span className="text-accent-gold text-center text-sm font-bold">
+        หมดเวลาเข้าร่วมใน {timeLeft}
+      </span>
       {/* Spacer */}
       <div className="flex-grow" />
-
       {/* Footer: Reward & CTA */}
       <div className="mt-auto flex items-end justify-between gap-4 pt-2">
         <div className="flex flex-col items-start">

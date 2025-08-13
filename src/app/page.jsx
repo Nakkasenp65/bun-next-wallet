@@ -26,16 +26,19 @@ import MyMissions from "@/components/Ui/MyMissions";
 import { useSuccessTransactions } from "@/hooks/useTransactions";
 import RedeemConfirmationModal from "@/components/Ui/RedeemConfirmation";
 import toast from "react-hot-toast";
+import ReferralForm from "@/components/ReferralComponents/ReferralForm";
 
 export default function HomePage() {
   const router = useRouter();
   const date = new Date();
   const { liffProfile, isLoggedIn } = useLiff();
+
   const {
     data: userStatus,
     isLoading: isStatusLoading,
     error: statusError,
   } = useUserStatus(liffProfile?.userId);
+
   const {
     data: userData,
     isLoading: isUserDataLoading,
@@ -47,11 +50,13 @@ export default function HomePage() {
     isLoading: missionLoading,
     error: missionError,
   } = useGetAvailableMissions(userData?.id);
+
   const {
     data: myMission,
     isLoading: myMissionLoading,
     error: myMissionError,
   } = useGetMyMissions(userData?.id);
+
   const {
     data: transactions,
     isLoading: transactionLoading,
@@ -61,8 +66,9 @@ export default function HomePage() {
     date.getMonth(),
     userData?.wallet.id,
   );
+  console.log("userData: ", userData);
+  console.log("Mission: ", myMission);
 
-  console.log(userData);
   const [showTransfer, setShowTransfer] = useState(false);
   const [showRedeemModal, setShowRedeemModal] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
@@ -88,13 +94,13 @@ export default function HomePage() {
   // 5. Create a new handler for the "Change Goal" action
   const handleChangeToCloserGoal = () => {
     setShowRedeemModal(false); // Close the confirmation modal
-
     // Show the toast message you wanted
     toast("เก็บเงินเพิ่มอีกนิดเพื่อรางวัลที่ใหญ่กว่า!", { icon: "🚀" });
-
     // Open the Change Goal page
     setShowGoal(true);
   };
+
+  console.log("LINE USER ID: ", userData?.line_user_id);
 
   const handleRedeemPhone = () => {
     setShowRedeemModal(true);
@@ -109,6 +115,7 @@ export default function HomePage() {
   }
 
   if ((isUserDataError, statusError, missionError)) return <ErrorComponent />;
+
   if (userData)
     return (
       <>
@@ -185,10 +192,7 @@ export default function HomePage() {
               </div>
 
               <MyMissions missions={myMission} userData={userData} />
-              <SavingsMission
-                missions={availableMission}
-                userId={userData?.id}
-              />
+              <SavingsMission missions={availableMission} userData={userData} />
               <MainTransactionList transactions={transactions} />
             </section>
           </main>

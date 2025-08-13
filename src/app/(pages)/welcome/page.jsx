@@ -1,7 +1,7 @@
 "use client";
 
 import CtaButton from "@/components/Ui/CtaButton";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import axios from "@/lib/axios";
 import { useLiff } from "@/components/provider/LiffProvider";
@@ -30,6 +30,7 @@ export default function Page() {
     occupation: "",
     monthlyPayment: "",
     customOccupation: "",
+    referToCode: "",
   });
   const [suggestedPhone, setSuggestedPhone] = useState(null);
   console.log(suggestedPhone);
@@ -43,31 +44,34 @@ export default function Page() {
     minPrice: null,
     maxPrice: null,
     topPerBrand: false, // เอามาแค่ 1 เครื่อง?
-    sort: "asc",
-    take: 100,
+    sort: "desc",
+    take: 400,
     skip: 0,
   });
 
-  const handleGoalUpdate = (newGoal) => {
+  // FIXED: Memoize the goal update handler to prevent infinite re-renders
+  const handleGoalUpdate = useCallback((newGoal) => {
     setGoal((prev) => ({
       ...prev,
       mobileId: newGoal.mobileId,
       planId: newGoal.planId,
     }));
-  };
+  }, []);
 
-  const goBack = () => {
+  // FIXED: Memoize the goBack handler
+  const goBack = useCallback(() => {
     setTimeout(() => {
       setUiStep("input");
     }, 200);
-  };
+  }, []);
 
   // สร้าง user ใหม่จากข้อมูล goal และ ข้อมูลบางส่วนจาก server หลัก
-  const handleSetGoal = () => {
+  const handleSetGoal = useCallback(() => {
     try {
       setUiStep("final");
       if (!goal.mobileId || !goal.planId) {
         toast.error("กรุณาเลือกเป้าหมายการออมให้ครบถ้วน");
+        return;
       }
       // ข้อมูลจากไลน์
       const {
@@ -122,6 +126,7 @@ export default function Page() {
         phone,
         pin,
         chat_url,
+        referToCode: inputData.referToCode,
         occupation: finalOccupation,
         ageRange: inputData.age,
         monthlyPayment: inputData.monthlyPayment,
@@ -133,34 +138,44 @@ export default function Page() {
       setUiStep("main");
       console.log(error);
     }
-  };
+  }, [
+    goal.mobileId,
+    goal.planId,
+    liffProfile,
+    inputData,
+    mainServerUserProfile,
+    createGoalMutate,
+  ]);
 
   // ตรวจสอบการเป็นสมาชิกกับ server หลักว่าเป็นสมาชิกไหมและ redirect ไปสมัครสมาชิก
-  const handleUserRedirect = async (lineUserId) => {
-    // ตรวจสอบว่าเป็น user บน NUMBER 1 MOBI ไหม
-    try {
-      const response = await axios.get(
-        `https://checkuserdb.vercel.app/api/check-user/${lineUserId} `,
-      );
-      // 404 คือไม่เป็นสมาชิก
-      if (response) {
-        setIsUserChecked(true);
-        toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
-        setIsRegistered(true); // สมัครสมาชิกกับ server หลักแล้ว
+  const handleUserRedirect = useCallback(
+    async (lineUserId) => {
+      // ตรวจสอบว่าเป็น user บน NUMBER 1 MOBI ไหม
+      try {
+        const response = await axios.get(
+          `https://checkuserdb.vercel.app/api/check-user/${lineUserId} `,
+        );
+        // 404 คือไม่เป็นสมาชิก
+        if (response) {
+          setIsUserChecked(true);
+          toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
+          setIsRegistered(true); // สมัครสมาชิกกับ server หลักแล้ว
+        }
+      } catch (error) {
+        if (error.status === 404) {
+          router.replace("https://liff.line.me/2006703040-RYAyYAyA");
+          // toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
+          setIsRegistered(true);
+        } else if (error.status === 500)
+          toast.error("ขออภัย ขณะเกิดข้อผิดพลาดระหว่างการดำเนินการ!");
       }
-    } catch (error) {
-      if (error.status === 404) {
-        router.replace("https://liff.line.me/2006703040-RYAyYAyA");
-        // toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
-        setIsRegistered(true);
-      } else if (error.status === 500)
-        toast.error("ขออภัย ขณะเกิดข้อผิดพลาดระหว่างการดำเนินการ!");
-    }
-  };
+    },
+    [router],
+  );
 
   // คำนวณเงินดาวน์ของผู้ใช้ในเวลา 6 เดือน
   // Fetch products using the new service shape: { items, total, facets }
-  const handleCalculateClick = async () => {
+  const handleCalculateClick = useCallback(async () => {
     const monthly = Number(inputData.monthlyPayment);
     if (!monthly || monthly <= 0) {
       return toast.error("กรุณากรอกยอดออมรายเดือนให้ถูกต้อง");
@@ -181,61 +196,66 @@ export default function Page() {
     } finally {
       toast.dismiss(toastId);
     }
-  };
+  }, [inputData.monthlyPayment]);
 
-  const fetchProducts = async (balance) => {
-    try {
-      setUiStep("calculate");
+  const fetchProducts = useCallback(
+    async (balance) => {
+      try {
+        setUiStep("calculate");
 
-      let { mode, minPrice, maxPrice, topPerBrand, take, skip, sort } =
-        productQuery;
+        let { mode, minPrice, maxPrice, topPerBrand, take, skip, sort } =
+          productQuery;
 
-      // Derive min/max by mode (upgrade shows pricier targets than current balance)
-      if (mode === "affordable") {
-        minPrice = null;
-        maxPrice = maxPrice ?? balance;
-      } else if (mode === "upgrade") {
-        minPrice = minPrice ?? balance;
-        maxPrice = null;
-      } else {
-        // all
-        minPrice = null;
-        maxPrice = null;
-      }
+        // Derive min/max by mode (upgrade shows pricier targets than current balance)
+        if (mode === "affordable") {
+          minPrice = null;
+          maxPrice = maxPrice ?? balance;
+        } else if (mode === "upgrade") {
+          minPrice = minPrice ?? balance;
+          maxPrice = null;
+        } else {
+          // all
+          minPrice = null;
+          maxPrice = null;
+        }
 
-      const { data } = await axios.get("/product", {
-        params: {
-          mode,
-          minPrice,
-          maxPrice,
-          topPerBrand,
-          take,
-          skip,
-          sort,
-        },
-      });
+        const { data } = await axios.get("/product", {
+          params: {
+            mode,
+            minPrice,
+            maxPrice,
+            topPerBrand,
+            take,
+            skip,
+            sort,
+          },
+        });
 
-      const items = Array.isArray(data?.items) ? data.items : [];
-      setSuggestedPhone(items);
+        const items = Array.isArray(data?.items) ? data.items : [];
+        setSuggestedPhone(items);
 
-      if (!items.length) {
-        toast("ยังไม่พบสินค้าที่ตรงเงื่อนไข ลองเปลี่ยนโหมดหรือช่วงราคา");
+        if (!items.length) {
+          toast("ยังไม่พบสินค้าที่ตรงเงื่อนไข ลองเปลี่ยนโหมดหรือช่วงราคา");
+          setUiStep("input");
+        } else {
+          toast.success("คัดสินค้าที่เหมาะสมให้แล้ว ✨");
+          setUiStep("main");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("เกิดข้อผิดพลาดในการค้นหาสินค้า");
         setUiStep("input");
-      } else {
-        toast.success("คัดสินค้าที่เหมาะสมให้แล้ว ✨");
-        setUiStep("main");
       }
-    } catch (err) {
-      console.error(err);
-      toast.error("เกิดข้อผิดพลาดในการค้นหาสินค้า");
-      setUiStep("input");
-    }
-  };
+    },
+    [productQuery],
+  );
 
   useEffect(() => {
     // ให้เช็ค user
-    if (!isRegistered) handleUserRedirect(liffProfile?.userId);
-  }, [isRegistered]);
+    if (!isRegistered && liffProfile?.userId) {
+      handleUserRedirect(liffProfile.userId);
+    }
+  }, [isRegistered, liffProfile?.userId, handleUserRedirect]);
 
   useEffect(() => {
     if (uiStep === "calculate") {
@@ -246,6 +266,8 @@ export default function Page() {
   if (createGoalPending || !isUserChecked) {
     return <Loading />;
   }
+
+  console.log(inputData);
 
   return (
     <main

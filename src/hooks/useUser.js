@@ -3,6 +3,7 @@ import axios from "@/lib/axios";
 import externalLinkAxios from "axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { useLockContext } from "@/components/context/LockContext";
 
 async function fetchUserStatus(userId) {
   const { data } = await axios.get(`/user/status/${userId}`);
@@ -137,6 +138,55 @@ export function useUpdateUser() {
       toast.error(
         error.response?.data?.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
       );
+    },
+  });
+}
+
+export function useLockApp() {
+  const queryClient = useQueryClient();
+  const { lockApp } = useLockContext(); // Get the function to update the UI immediately
+
+  return useMutation({
+    mutationFn: async (lineUserId) => {
+      // The endpoint is /user/lock/:line_user_id, so we use a POST request
+      const { data } = await axios.post(`/user/lock/${lineUserId}`);
+      return data;
+    },
+    onSuccess: (data, lineUserId) => {
+      toast.success("แอปถูกล็อคแล้ว");
+      // Immediately update the UI to show the lock screen
+      lockApp();
+      // Invalidate the user status query to ensure the backend state is refetched
+      queryClient.invalidateQueries({ queryKey: ["user", lineUserId] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "ไม่สามารถล็อคแอปได้");
+    },
+  });
+}
+
+export function useUnlockApp() {
+  const queryClient = useQueryClient();
+  const { unlockApp } = useLockContext(); // Get the function to hide the lock screen
+
+  return useMutation({
+    mutationFn: async (unlockData) => {
+      // unlockData will be { line_user_id, pin }
+      const { data } = await axios.post(`/user/unlock`, unlockData);
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      // variables contains the { line_user_id, pin } we sent
+      toast.success("ปลดล็อคสำเร็จ!");
+      // Immediately hide the lock screen
+      unlockApp();
+      // Invalidate the user status to reflect the new unlocked state
+      queryClient.invalidateQueries({
+        queryKey: ["user", variables.line_user_id],
+      });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "รหัส PIN ไม่ถูกต้อง");
     },
   });
 }

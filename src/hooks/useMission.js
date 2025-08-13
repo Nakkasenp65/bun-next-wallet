@@ -37,7 +37,7 @@ const claimMissionRewardAPI = async ({ userId, userMissionId }) => {
  * const { mutate: claim, isPending } = useClaimMission();
  * claim({ userId, userMissionId: userMission.id });
  */
-export function useClaimMission() {
+export const useClaimMission = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -145,7 +145,7 @@ export function useClaimMission() {
       // queryClient.invalidateQueries({ queryKey: ["availableMissions", userId] });
     },
   });
-}
+};
 
 export const useGetAvailableMissions = (userId) => {
   return useQuery({
@@ -159,8 +159,9 @@ export const useGetAvailableMissions = (userId) => {
 };
 
 export const useGetMyMissions = (userId) => {
+  console.log("useGetmyMission: ", userId);
   return useQuery({
-    queryKey: ["myMissions", userId], // <-- already correct
+    queryKey: ["myMissions", userId],
     queryFn: () => fetchMyMissions(userId),
     enabled: !!userId,
     staleTime: 15_000,
@@ -169,7 +170,7 @@ export const useGetMyMissions = (userId) => {
   });
 };
 
-export function useEnrollMission() {
+export const useEnrollMission = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -264,4 +265,34 @@ export function useEnrollMission() {
       queryClient.invalidateQueries({ queryKey: ["myMissions", userId] });
     },
   });
-}
+};
+
+export const useSubmitReferral = ({ onSuccess } = {}) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ newcomerId, referralCode }) => {
+      if (!newcomerId) throw new Error("newcomerId is required");
+      if (!referralCode) throw new Error("referralCode is required");
+      const { data } = await axios.post("/user/refer", {
+        newcomerId,
+        referralCode,
+      });
+      return data;
+    },
+    onSuccess: async (data, variables) => {
+      // Invalidate anything that depends on the user/referrals
+      // tweak keys to match your app’s query keys
+      await Promise.allSettled([
+        queryClient.invalidateQueries({
+          queryKey: ["user", variables?.newcomerId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["referrals", variables?.newcomerId],
+        }),
+        queryClient.invalidateQueries({ queryKey: ["me"] }),
+      ]);
+      onSuccess?.(data, variables);
+    },
+  });
+};

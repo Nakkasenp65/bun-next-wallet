@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import CtaButton from "../Ui/CtaButton";
@@ -95,7 +95,7 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
     maxPrice: null,
     topPerBrand: false, // best model per brand (nicer grid)
     sort: "asc",
-    take: 100,
+    take: 400,
     skip: 0,
   });
 
@@ -187,7 +187,9 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
   }, [productQuery.mode]);
 
   // Receive goal from GoalSetter
-  const handleGoalUpdate = (goal) => setNewGoal(goal);
+  const handleGoalUpdate = useCallback((goal) => {
+    setNewGoal(goal);
+  }, []);
 
   // Save changes
   const { mutate: updateGoal, isPending: isUpdatingGoal } = useUpdateGoal();
@@ -219,7 +221,7 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
       className="fixed inset-0 z-50 flex flex-col bg-white p-6"
     >
       {/* Header */}
-      <header className="flex flex-shrink-0 items-center border-b border-gray-200 px-5 pt-10 pb-4">
+      <header className="flex flex-shrink-0 items-center border-b border-gray-200 px-5 pt-4 pb-4">
         <button
           onClick={closePage}
           className="text-2xl text-gray-600 transition-colors hover:text-gray-800"
@@ -232,7 +234,7 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
         <div className="w-6"></div>
       </header>
 
-      <div className="rounded-lg bg-gray-100 p-3 text-center text-sm text-gray-600">
+      <div className="rounded-lg bg-gray-100 p-2 text-center text-sm text-gray-600">
         ยอดเงินที่ใช้ได้
         <span className="text-bg-dark ml-2 font-bold">
           ฿
@@ -262,7 +264,7 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
               onGoalChange={handleGoalUpdate}
               onBack={() => setUiStep("input")}
             />
-            <footer className="sticky bottom-0 flex w-full items-center justify-center bg-white p-6 pb-12 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+            <footer className="sticky bottom-0 flex w-full items-center justify-center bg-white p-4 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
               <CtaButton
                 onClick={handleSaveChanges}
                 disabled={!newGoal.planId || isUpdatingGoal}

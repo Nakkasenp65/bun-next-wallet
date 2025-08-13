@@ -5,16 +5,16 @@ import FramerLink from "./FramerLink";
 import { useEnrollMission } from "@/hooks/useMission";
 import AvailableMissionCard from "./AvailableMissionCard"; // 1. Import Component ใหม่
 
-export default function SavingsMission({ missions, userId }) {
+export default function SavingsMission({ missions, userData }) {
   // 2. isPending จะถูกใช้เพื่อส่งไปยังการ์ดแต่ละใบ
   const { mutate: enroll, isPending: isEnrolling } = useEnrollMission();
 
   const handleEnrollClick = (missionId) => {
-    if (!userId) {
+    if (!userData?.id) {
       // อาจจะแสดง toast แจ้งเตือนให้ login ก่อน
       return;
     }
-    enroll({ missionId, userId });
+    enroll({ missionId, userId: userData.id });
   };
 
   if (!missions || missions.length === 0) {
@@ -30,7 +30,7 @@ export default function SavingsMission({ missions, userId }) {
           <h2 className="text-bg-dark text-lg font-bold">ภารกิจพิเศษ</h2>
         </div>
         <FramerLink
-          link={"/mission"}
+          link={`/mission/${userData.line_user_id}`}
           icon={<RiExternalLinkFill size={16} />}
           backgroundColor={"bg-primary-pink"}
         >

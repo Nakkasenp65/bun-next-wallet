@@ -2,10 +2,12 @@
 import Image from "next/image";
 import DropDownComponent from "@/components/Ui/DropDownComponent";
 import FramerButton from "../framerComponents/FramerButton";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { FaApple } from "react-icons/fa6";
 import { SiSamsung, SiOppo, SiVivo, SiXiaomi } from "react-icons/si";
 import { HiOutlineViewfinderCircle } from "react-icons/hi2";
+import { MdAutoAwesome } from "react-icons/md";
+import { FaExchangeAlt } from "react-icons/fa";
 import GridSelectorComponent from "./GridSelectorComponent";
 import Poco from "../logos/Poco";
 import Realme from "../logos/Realme";
@@ -22,8 +24,8 @@ const brandLogos = {
 };
 
 const conditionOptions = [
-  { id: "มือหนึ่ง", name: "มือหนึ่ง" },
-  { id: "มือสอง", name: "มือสอง" },
+  { id: "มือหนึ่ง", name: "มือหนึ่ง", icon: <MdAutoAwesome /> },
+  { id: "มือสอง", name: "มือสอง", icon: <FaExchangeAlt /> },
 ];
 
 export default function GoalSetter({
@@ -33,6 +35,11 @@ export default function GoalSetter({
   showBack = true,
 }) {
   const [selectedCondition, setSelectedCondition] = useState("มือหนึ่ง");
+  const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedModel, setSelectedModel] = useState("");
+  const [selectedCapacity, setSelectedCapacity] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState("daily");
 
   const filteredProducts = useMemo(() => {
     if (!products) return [];
@@ -46,6 +53,7 @@ export default function GoalSetter({
 
   const groupedData = useMemo(() => {
     if (!filteredProducts || filteredProducts.length === 0) return {};
+
     return filteredProducts.reduce((acc, product) => {
       const { brand, model, capacity } = product;
       if (!acc[brand]) acc[brand] = {};
@@ -56,17 +64,12 @@ export default function GoalSetter({
     }, {});
   }, [filteredProducts]);
 
-  const [selectedBrand, setSelectedBrand] = useState("");
-  const [selectedModel, setSelectedModel] = useState("");
-  const [selectedCapacity, setSelectedCapacity] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [selectedPlan, setSelectedPlan] = useState("daily");
-
   const brands = useMemo(() => Object.keys(groupedData), [groupedData]);
   const models = useMemo(
     () => (selectedBrand ? Object.keys(groupedData[selectedBrand] || {}) : []),
     [selectedBrand, groupedData],
   );
+
   const capacities = useMemo(
     () =>
       selectedBrand && selectedModel
@@ -74,6 +77,7 @@ export default function GoalSetter({
         : [],
     [selectedBrand, selectedModel, groupedData],
   );
+
   const availableProductsInVariant = useMemo(
     () =>
       selectedBrand && selectedModel && selectedCapacity
@@ -81,6 +85,7 @@ export default function GoalSetter({
         : [],
     [selectedBrand, selectedModel, selectedCapacity, groupedData],
   );
+
   const colors = useMemo(
     () => availableProductsInVariant.map((p) => p.color),
     [availableProductsInVariant],
@@ -96,36 +101,101 @@ export default function GoalSetter({
     [brands],
   );
 
-  // Handlers remain the same
-  const handleBrandChange = (newBrand) => {
+  // FIXED: Use useCallback to memoize handlers and prevent cascading updates
+  const handleBrandChange = useCallback((newBrand) => {
     setSelectedBrand(newBrand);
-    const newModels = Object.keys(groupedData[newBrand] || {});
-    handleModelChange(newModels[0] || "", newBrand);
-  };
-  const handleModelChange = (newModel, currentBrand) => {
+    // Reset dependent selections
+    setSelectedModel("");
+    setSelectedCapacity("");
+    setSelectedProduct(null);
+  }, []);
+
+  const handleModelChange = useCallback((newModel) => {
     setSelectedModel(newModel);
-    const newCapacities = newModel
-      ? Object.keys(groupedData[currentBrand]?.[newModel] || {})
-      : [];
-    handleCapacityChange(newCapacities[0] || "", currentBrand, newModel);
-  };
-  const handleCapacityChange = (newCapacity, currentBrand, currentModel) => {
+    // Reset dependent selections
+    setSelectedCapacity("");
+    setSelectedProduct(null);
+  }, []);
+
+  const handleCapacityChange = useCallback((newCapacity) => {
     setSelectedCapacity(newCapacity);
-    const productsInVariant = newCapacity
-      ? groupedData[currentBrand]?.[currentModel]?.[newCapacity] || []
-      : [];
-    if (productsInVariant.length > 0) {
-      setSelectedProduct(productsInVariant[0]);
-    } else {
+    setSelectedProduct(null);
+  }, []);
+
+  const handleColorChange = useCallback(
+    (newColor) => {
+      const product = availableProductsInVariant.find(
+        (p) => p.color === newColor,
+      );
+      if (product) setSelectedProduct(product);
+    },
+    [availableProductsInVariant],
+  );
+
+  // FIXED: Improved auto-selection logic with proper cascading
+
+  // Reset selections when condition changes and auto-select first brand
+  useEffect(() => {
+    setSelectedBrand("");
+    setSelectedModel("");
+    setSelectedCapacity("");
+    setSelectedProduct(null);
+
+    // Auto-select first brand immediately after reset
+    if (brands.length > 0) {
+      // Use setTimeout to ensure state updates are processed
+      setTimeout(() => {
+        setSelectedBrand(brands[0]);
+      }, 0);
+    }
+  }, [selectedCondition, brands]);
+
+  // Auto-select first model when brand changes and models are available
+  useEffect(() => {
+    if (selectedBrand && models.length > 0 && !selectedModel) {
+      setSelectedModel(models[0]);
+    } else if (!selectedBrand || models.length === 0) {
+      setSelectedModel("");
+      setSelectedCapacity("");
       setSelectedProduct(null);
     }
-  };
-  const handleColorChange = (newColor) => {
-    const product = availableProductsInVariant.find(
-      (p) => p.color === newColor,
-    );
-    if (product) setSelectedProduct(product);
-  };
+  }, [selectedBrand, models, selectedModel]);
+
+  // Auto-select first capacity when model changes and capacities are available
+  useEffect(() => {
+    if (
+      selectedBrand &&
+      selectedModel &&
+      capacities.length > 0 &&
+      !selectedCapacity
+    ) {
+      setSelectedCapacity(capacities[0]);
+    } else if (!selectedModel || capacities.length === 0) {
+      setSelectedCapacity("");
+      setSelectedProduct(null);
+    }
+  }, [selectedBrand, selectedModel, capacities, selectedCapacity]);
+
+  // Auto-select first product when capacity changes and products are available
+  useEffect(() => {
+    if (
+      selectedBrand &&
+      selectedModel &&
+      selectedCapacity &&
+      availableProductsInVariant.length > 0 &&
+      !selectedProduct
+    ) {
+      setSelectedProduct(availableProductsInVariant[0]);
+    } else if (!selectedCapacity || availableProductsInVariant.length === 0) {
+      setSelectedProduct(null);
+    }
+  }, [
+    selectedBrand,
+    selectedModel,
+    selectedCapacity,
+    availableProductsInVariant,
+    selectedProduct,
+  ]);
 
   const savingPlans = useMemo(() => {
     if (!selectedProduct) return [];
@@ -170,38 +240,42 @@ export default function GoalSetter({
     });
   }, [selectedProduct]);
 
-  // ===== FIX #1: STABILIZE THE BRAND SELECTION EFFECT =====
-  // This effect now ONLY runs when the user switches between "มือหนึ่ง" and "มือสอง".
-  // By removing `brands` from the dependency array, we break the infinite loop chain reaction.
+  // FIXED: Stable goal change effect with primitive dependencies
   useEffect(() => {
-    if (brands.length > 0) {
-      handleBrandChange(brands[0]);
-    } else {
-      setSelectedBrand("");
-      setSelectedModel("");
-      setSelectedCapacity("");
-      setSelectedProduct(null);
-    }
-  }, [selectedCondition]);
-
-  // ===== FIX #2: STABILIZE THE GOAL CHANGE EFFECT =====
-  // We extract the primitive IDs from the state objects.
-  const selectedProductId = selectedProduct?.id;
-  const planId = savingPlans.find((p) => p.id === selectedPlan)?.planId;
-
-  // This effect now depends on the stable IDs, not object references.
-  // This prevents it from running just because an object was re-created in memory.
-  useEffect(() => {
-    if (selectedProductId && planId) {
+    const planData = savingPlans.find((p) => p.id === selectedPlan);
+    if (selectedProduct?.id && planData?.planId) {
       onGoalChange({
-        mobileId: selectedProductId,
-        planId: planId,
+        mobileId: selectedProduct.id,
+        planId: planData.planId,
       });
     }
-  }, [selectedProductId, planId, onGoalChange]);
+  }, [selectedProduct?.id, selectedPlan, onGoalChange]);
+
+  // Debug logging to help identify issues
+  useEffect(() => {
+    console.log("GoalSetter Debug:", {
+      brands: brands.length,
+      selectedBrand,
+      models: models.length,
+      selectedModel,
+      capacities: capacities.length,
+      selectedCapacity,
+      availableProducts: availableProductsInVariant.length,
+      selectedProduct: selectedProduct?.id || "none",
+    });
+  }, [
+    brands,
+    selectedBrand,
+    models,
+    selectedModel,
+    capacities,
+    selectedCapacity,
+    availableProductsInVariant,
+    selectedProduct,
+  ]);
 
   return (
-    <div className="w-full max-w-md bg-white p-5">
+    <div className="w-full max-w-md bg-white py-2">
       {showBack && (
         <FramerButton
           onClick={onBack}
@@ -223,15 +297,17 @@ export default function GoalSetter({
           activeItemClassName="border-pink-500 bg-pink-50"
         />
 
-        {!selectedProduct ? (
+        {!selectedProduct && brands.length > 0 ? (
           <div className="flex h-96 items-center justify-center">
             <p className="animate-pulse text-center text-slate-500">
-              {brands.length > 0
-                ? "กำลังโหลดข้อมูลสินค้า..."
-                : "ไม่มีสินค้าประเภทนี้"}
+              กำลังโหลดข้อมูลสินค้า...
             </p>
           </div>
-        ) : (
+        ) : !selectedProduct && brands.length === 0 ? (
+          <div className="flex h-96 items-center justify-center">
+            <p className="text-center text-slate-500">ไม่มีสินค้าประเภทนี้</p>
+          </div>
+        ) : selectedProduct ? (
           <>
             <h1 className="text-bg-dark mt-5 mb-2 font-bold">
               เลือกแบรนด์ที่ต้องการดาวน์
@@ -240,7 +316,7 @@ export default function GoalSetter({
               labelClassName="text-bg-dark mb-2 block font-bold"
               name="brand"
               value={selectedBrand}
-              onChange={(value) => handleBrandChange(value)}
+              onChange={handleBrandChange}
               options={brandOptions}
               containerClassName="grid-cols-4 gap-3 md:grid-cols-4"
               itemClassName="hover:bg-pink-50/50 shadow-sm"
@@ -269,9 +345,7 @@ export default function GoalSetter({
               <DropDownComponent
                 name="model"
                 value={selectedModel}
-                onChange={(newModel) =>
-                  handleModelChange(newModel, selectedBrand)
-                }
+                onChange={handleModelChange}
                 options={models}
                 buttonClassName="w-full text-md font-bold border-pink-400 text-pink-400  border p-2 rounded-lg"
                 optionsContainerClassName="p-2"
@@ -280,13 +354,7 @@ export default function GoalSetter({
               <DropDownComponent
                 name="capacity"
                 value={selectedCapacity}
-                onChange={(newCapacity) =>
-                  handleCapacityChange(
-                    newCapacity,
-                    selectedBrand,
-                    selectedModel,
-                  )
-                }
+                onChange={handleCapacityChange}
                 options={capacities}
                 buttonClassName="w-full text-md font-bold border-pink-400 text-pink-400  border p-2 rounded-lg"
                 optionsContainerClassName="p-2"
@@ -316,7 +384,7 @@ export default function GoalSetter({
               </div>
             </div>
           </>
-        )}
+        ) : null}
       </div>
       {selectedProduct && (
         <div className="mt-6">
@@ -330,8 +398,8 @@ export default function GoalSetter({
                 onClick={() => setSelectedPlan(plan.id)}
                 className={`flex min-w-[130px] flex-shrink-0 flex-col items-center justify-center rounded-xl p-3 text-center transition-all duration-200 ${
                   selectedPlan === plan.id
-                    ? "bg-pink-500 text-white shadow-lg shadow-pink-500/30"
-                    : "bg-white text-slate-700 shadow-md shadow-slate-500/10 hover:bg-pink-50"
+                    ? "bg-pink-500 text-white shadow-md shadow-pink-500/30"
+                    : "border border-gray-200 bg-white text-slate-700 hover:bg-pink-50"
                 }`}
               >
                 <span className="font-semibold">{plan.label}</span>
@@ -339,7 +407,7 @@ export default function GoalSetter({
                   <span className="text-xl font-bold">{plan.displayValue}</span>
                   <span className="text-sm font-medium opacity-80">บาท</span>
                 </div>
-                <span className="text-xs opacity-80">{`/ ${plan.unit}`}</span>
+                <span className="textz-xs opacity-80">{`/ ${plan.unit}`}</span>
               </button>
             ))}
           </div>

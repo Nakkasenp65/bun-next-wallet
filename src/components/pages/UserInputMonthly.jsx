@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import CtaButton from "../Ui/CtaButton";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import ProgressIndicator from "../Ui/ProgressIndicator";
 import DropDownComponent from "../Ui/DropDownComponent";
 
@@ -19,6 +19,7 @@ const variants = {
   }),
 };
 
+// ไม่จำเป็นต้องรับ userData แล้ว เพราะเราแค่เก็บค่า referToCode ไว้ใน state
 export default function UserInputMonthly({
   inputData,
   setInputData,
@@ -28,24 +29,14 @@ export default function UserInputMonthly({
   const [direction, setDirection] = useState(1);
   const [waitFetch, setWaitFetch] = useState(false);
 
-  // const [formData, setFormData] = useState({
-  //   age: "",
-  //   occupation: "",
-  //   monthlyPayment: "",
-  // });
-
-  // useEffect(() => {
-  //   setInputData((prev) => ({ ...prev, inputData }));
-  // }, [monthlyPayment]);
-
+  // 1. ฟังก์ชัน handleChange เดิมสามารถจัดการ input ของ referral ได้เลย
   const handleChange = (e) => {
-    //set ...prev, inputData[name]:value
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    // ทำให้โค้ดเป็นตัวพิมพ์ใหญ่เสมอ
+    if (name === "referToCode") {
+      value = value.toUpperCase();
+    }
     setInputData((prev) => ({ ...prev, [name]: value }));
-    // if (name === "monthlyPayment") {
-    //   setMonthlyPayment(value);
-    // }
-    // setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleDropDownChange = (key, value) => {
@@ -55,6 +46,7 @@ export default function UserInputMonthly({
     }));
   };
 
+  // 2. ปรับปรุงหน้า referral ให้เป็นแค่ input ธรรมดา
   const pages = [
     {
       field: "age",
@@ -89,11 +81,25 @@ export default function UserInputMonthly({
       type: "number",
       inputMode: "numeric",
     },
+    {
+      field: "referToCode", // เปลี่ยน field ให้ตรงกับ key ใน state
+      label: "โค้ดแนะนำเพื่อน (ถ้ามี)",
+      type: "referral", // ใช้ type นี้เพื่อแสดงผล input พิเศษ
+      placeholder: "เช่น ABC123",
+    },
   ];
 
   const currentPageData = pages[page];
+
   const isStepValid = (() => {
-    const standardCheck = inputData[currentPageData.field]?.trim() !== "";
+    // 3. Logic การตรวจสอบยังคงเหมือนเดิม หน้านี้ไม่บังคับกรอก
+    if (currentPageData.type === "referral") {
+      return true;
+    }
+
+    const standardCheck =
+      inputData[currentPageData.field] &&
+      inputData[currentPageData.field].trim() !== "";
     if (
       currentPageData.field === "occupation" &&
       inputData.occupation === "อื่นๆ"
@@ -119,7 +125,8 @@ export default function UserInputMonthly({
 
   const handleSubmit = () => {
     if (!isStepValid) return;
-    if (monthlyPayment >= 500) setWaitFetch(true);
+    setWaitFetch(true);
+    // ตอนนี้ onCalculate จะได้รับ inputData ที่มี referToCode อยู่ข้างในแล้ว
     onCalculate();
   };
 
@@ -161,8 +168,31 @@ export default function UserInputMonthly({
                 }}
                 className="absolute flex w-full flex-col gap-2"
               >
-                {currentPageData.type === "dropdown" ? (
-                  // --- change to inputData
+                {/* 4. เปลี่ยนจากการเรียก <ReferralForm> มาเป็น input field ธรรมดา */}
+                {currentPageData.type === "referral" ? (
+                  <>
+                    <label
+                      htmlFor={currentPageData.field}
+                      className="text-bg-dark font-medium"
+                    >
+                      {currentPageData.label}
+                    </label>
+                    <input
+                      id={currentPageData.field}
+                      name={currentPageData.field} // สำคัญมาก: ต้องตรงกับ key ใน state
+                      type="text"
+                      placeholder={currentPageData.placeholder}
+                      value={inputData[currentPageData.field] || ""} // ทำให้เป็น Controlled Component
+                      onChange={handleChange} // ใช้ handleChange เดิมได้เลย
+                      autoCapitalize="characters"
+                      spellCheck={false}
+                      className="text-bg-dark focus:border-primary-pink w-full rounded-xl border-2 border-gray-200 p-4 font-bold shadow-sm transition-all focus:ring-4 focus:ring-pink-200 focus:outline-none"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      ระบบจะนำโค้ดไปตรวจสอบในขั้นตอนถัดไป
+                    </p>
+                  </>
+                ) : currentPageData.type === "dropdown" ? (
                   <>
                     <DropDownComponent
                       label={currentPageData.label}

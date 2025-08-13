@@ -97,7 +97,7 @@ export default function Transaction({ transaction }) {
     <li className="list-none border-b border-gray-100 last:border-b-0">
       {/* ส่วนหลักที่คลิกได้ */}
       <div
-        className="flex cursor-pointer items-center gap-4 p-4 transition-colors hover:bg-gray-50"
+        className="flex cursor-pointer items-center gap-4 py-4 transition-colors hover:bg-gray-50"
         onClick={() => setIsExpanded((prev) => !prev)}
       >
         {/* --- 5. ใช้ displayConfig ที่นี่ --- */}
