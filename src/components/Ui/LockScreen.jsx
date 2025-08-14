@@ -58,7 +58,7 @@ export default function LockScreen() {
           onChange={handleChange}
           onPaste={handlePaste}
           disabled={isPending}
-          className="w-full rounded-lg border-2 border-slate-300 p-4 text-center text-2xl tracking-[1rem] text-slate-900 focus:border-pink-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full rounded-lg border-2 border-slate-300 p-3 text-center text-2xl tracking-[1rem] text-slate-900 focus:border-pink-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           autoFocus
         />
 

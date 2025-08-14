@@ -17,8 +17,9 @@ const AvailableMissionCard = ({ mission, onEnroll, isEnrolling, cardSize }) => {
   // ฟังก์ชันป้องกันการกดซ้ำซ้อน
   const handleEnrollClick = (e) => {
     e.preventDefault();
+    const missionId = mission.id;
     if (!isEnrolling) {
-      onEnroll(mission.id);
+      onEnroll(missionId);
     }
   };
 

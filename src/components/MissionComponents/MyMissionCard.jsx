@@ -5,8 +5,15 @@ import { GrMoney } from "react-icons/gr";
 import { FaHourglassHalf, FaExclamation } from "react-icons/fa";
 import clsx from "clsx";
 import useCountdown from "@/hooks/useCountdown"; // Import hook ที่เพิ่งสร้าง
+import Link from "next/link";
 
-const MyMissionCard = ({ userMission, onDoMission, onClaim, cardSize }) => {
+const MyMissionCard = ({
+  userMission,
+  onDoMission,
+  onClaim,
+  cardSize,
+  type,
+}) => {
   const {
     mission,
     status,
@@ -35,7 +42,7 @@ const MyMissionCard = ({ userMission, onDoMission, onClaim, cardSize }) => {
         return (
           <button
             type="button"
-            onClick={onDoMission}
+            onClick={() => onDoMission(mission)}
             className="w-full rounded-xl bg-white px-4 py-2 text-base font-bold text-pink-500 shadow-md transition-transform hover:-translate-y-0.5 focus:ring-2 focus:ring-white/70 focus:outline-none"
             aria-label="เริ่มทำภารกิจ"
           >
@@ -152,7 +159,7 @@ const MyMissionCard = ({ userMission, onDoMission, onClaim, cardSize }) => {
             <span>{mission.rewardAmount}</span>
           </div>
         </div>
-        <div className="w-32">{renderCTA()}</div>
+        {/* <div className="w-32">{renderCTA()}</div> */}
       </div>
     </motion.div>
   );

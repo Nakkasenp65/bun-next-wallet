@@ -39,7 +39,6 @@ export default function HomePage() {
   const { liffProfile, isLoggedIn } = useLiff();
 
   const [gateStatus, setGateStatus] = useState("CHECKING"); // CHECKING | REDIRECTING | LOCKED | ALLOWED
-
   const {
     data: userStatus,
     isLoading: isStatusLoading,

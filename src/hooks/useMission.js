@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios"; // Assuming you use axios for API calls
+import toast from "react-hot-toast";
 
 const fetchAvailableMissions = async (userId) => {
   const { data } = await axios.get(`/mission/available/${userId}`);
@@ -9,15 +10,6 @@ const fetchAvailableMissions = async (userId) => {
 const fetchMyMissions = async (userId) => {
   const { data } = await axios.get(`/user-mission/${userId}`);
   return data;
-};
-
-const enrollInMission = async ({ missionId, userId }) => {
-  const { data } = await axios.post(`/user-mission/enroll`, {
-    missionId,
-    userId,
-  });
-  setTimeout(() => {}, 300);
-  return (data, userId);
 };
 
 const claimMissionRewardAPI = async ({ userId, userMissionId }) => {
@@ -149,127 +141,54 @@ export const useClaimMission = () => {
 
 export const useGetAvailableMissions = (userId) => {
   return useQuery({
-    queryKey: ["availableMissions", userId], // <-- add userId
+    queryKey: ["availableMissions", userId],
     queryFn: () => fetchAvailableMissions(userId),
-    enabled: !!userId,
-    staleTime: 30_000,
-    gcTime: 5 * 60_000,
-    placeholderData: (prev) => prev ?? [],
+    staleTime: 5_000, // don’t refetch immediately after our optimistic write
+    refetchOnWindowFocus: false, // avoid surprise refetch restoring stale server data
   });
 };
 
 export const useGetMyMissions = (userId) => {
-  console.log("useGetmyMission: ", userId);
   return useQuery({
     queryKey: ["myMissions", userId],
     queryFn: () => fetchMyMissions(userId),
     enabled: !!userId,
-    staleTime: 15_000,
-    gcTime: 5 * 60_000,
-    placeholderData: (prev) => prev ?? [],
   });
 };
 
-export const useEnrollMission = () => {
+async function enrollMission({ missionId, userId }) {
+  console.log("ENROLL MISSION FUNCTION: ", { missionId, userId });
+  const { data } = await axios.post(`/user-mission/enroll`, {
+    missionId,
+    userId,
+  });
+  console.log("ENROLLED MISSION FUNCTION: ", data);
+  return data;
+}
+
+export function useEnrollMission() {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: enrollInMission,
-
-    // Optimistic update for snappy UI
-    onMutate: async (variables) => {
-      const { userId, missionId } = variables;
-
-      const availableKey = ["availableMissions", userId];
-      const myKey = ["myMissions", userId];
-
-      // Cancel outgoing refetches to avoid clobbering our optimistic update
-      await Promise.all([
-        queryClient.cancelQueries({ queryKey: availableKey }),
-        queryClient.cancelQueries({ queryKey: myKey }),
-      ]);
-
-      // Snapshot previous cache
-      const prevAvailable = queryClient.getQueryData(availableKey);
-      const prevMy = queryClient.getQueryData(myKey);
-
-      // Optimistically remove from available missions
-      if (Array.isArray(prevAvailable)) {
-        queryClient.setQueryData(
-          availableKey,
-          prevAvailable.filter((m) => m.id !== missionId),
-        );
-      }
-
-      // Optimistically add a shell UserMission to "my missions"
-      if (Array.isArray(prevMy)) {
-        const optimisticUserMission = {
-          id: `optimistic-${missionId}`,
-          missionId,
-          mission: prevAvailable?.find((m) => m.id === missionId) ?? null,
-          status: "ENROLLED",
-          currentProgress: 0,
-          completeProgress: 0,
-          userExpiresAt: null,
-          claimExpiresAt: null,
-          _optimistic: true,
-        };
-        queryClient.setQueryData(myKey, [optimisticUserMission, ...prevMy]);
-      }
-
-      // context for rollback
-      return { prevAvailable, prevMy, userId, missionId };
-    },
-
-    // If server returns an error, rollback
-    onError: (error, _variables, context) => {
-      const { prevAvailable, prevMy, userId } = context ?? {};
-      if (prevAvailable)
-        queryClient.setQueryData(["availableMissions", userId], prevAvailable);
-      if (prevMy) queryClient.setQueryData(["myMissions", userId], prevMy);
-
-      toast.error(error?.response?.data?.message || "เข้าร่วมภารกิจไม่สำเร็จ");
-    },
-
-    // Success: replace optimistic with real data
-    onSuccess: (newUserMission, variables) => {
-      const { userId, missionId } = variables;
-
-      // Remove from available (defensive – server might refetch later)
-      queryClient.setQueryData(["availableMissions", userId], (old) => {
-        if (!Array.isArray(old)) return old;
-        return old.filter((m) => m.id !== missionId);
-      });
-
-      // Insert/replace in my missions
-      queryClient.setQueryData(["myMissions", userId], (old) => {
-        const list = Array.isArray(old) ? old : [];
-        // remove any optimistic one
-        const withoutOptimistic = list.filter(
-          (um) =>
-            um.id !== `optimistic-${missionId}` && um.missionId !== missionId,
-        );
-        return [newUserMission, ...withoutOptimistic];
-      });
-
+    mutationFn: enrollMission,
+    onSuccess: (data, variables, context) => {
+      const { userId } = variables;
+      console.log("Enrolled data from backend (onSuccess): ", data);
       toast.success("เข้าร่วมภารกิจสำเร็จ!");
-    },
-
-    // Finally, ensure server truth
-    onSettled: (_data, _error, variables) => {
-      const { userId } = variables ?? {};
-      if (!userId) return;
+      setTimeout(() => {
+        console.log("wait for 0.5 second");
+      }, 500);
       queryClient.invalidateQueries({
         queryKey: ["availableMissions", userId],
       });
       queryClient.invalidateQueries({ queryKey: ["myMissions", userId] });
+      if (onSuccessCallback)
+        onSuccessCallback(newUserMission, variables, context);
     },
   });
-};
+}
 
 export const useSubmitReferral = ({ onSuccess } = {}) => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({ newcomerId, referralCode }) => {
       if (!newcomerId) throw new Error("newcomerId is required");

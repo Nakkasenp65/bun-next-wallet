@@ -7,21 +7,31 @@ import AvailableMissionCard from "./AvailableMissionCard";
 import { motion } from "framer-motion";
 import { FaSearchPlus } from "react-icons/fa";
 import Link from "next/link";
+import toast from "react-hot-toast"; // Ensure toast is imported
+import { useRouter } from "next/navigation";
 
 export default function SavingsMission({ missions, userData }) {
-  // 2. isPending จะถูกใช้เพื่อส่งไปยังการ์ดแต่ละใบ
-  const { mutate: enroll, isPending: isEnrolling } = useEnrollMission();
+  const handleSuccessAndReload = () => {
+    setTimeout(() => {
+      "Wait for 5 sec handle enroll success";
+    }, 300);
+    window.location.reload();
+  };
+
+  const enrollMissionMutation = useEnrollMission({
+    onSuccessCallback: handleSuccessAndReload,
+  });
 
   const handleEnrollClick = (missionId) => {
     if (!userData?.id) {
-      // อาจจะแสดง toast แจ้งเตือนให้ login ก่อน
+      toast.error("User not found. Please try logging in again.");
       return;
     }
-    enroll({ missionId, userId: userData.id });
+    enrollMissionMutation.mutate({ missionId, userId: userData?.id });
   };
 
   if (!missions || missions.length === 0) {
-    return null; // หรือแสดงข้อความว่า "ไม่มีภารกิจพิเศษในขณะนี้"
+    return null; // Or a placeholder message
   }
 
   return (
@@ -43,13 +53,12 @@ export default function SavingsMission({ missions, userData }) {
 
       {/* Horizontal Scroll Container */}
       <div className="noscrollbar -m-2 flex gap-4 overflow-x-auto p-2">
-        {/* 3. วนลูปและเรียกใช้ AvailableMissionCard */}
         {missions.map((mission) => (
           <AvailableMissionCard
             key={mission.id}
             mission={mission}
             onEnroll={handleEnrollClick}
-            isEnrolling={isEnrolling}
+            isEnrolling={enrollMissionMutation.isPending}
             cardSize={"main"}
           />
         ))}

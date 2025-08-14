@@ -53,7 +53,7 @@ export default function TransferPage({
 
   const searchRecipientMutation = useSearchRecipient();
   const transferMutation = useCreateInternalTransfer({
-    onSuccessCallback: handleSuccessAndClose, // Use the updated success handler
+    onSuccessCallback: handleSuccessAndClose,
   });
 
   // ✅ If we came from QR, set recipient immediately and prefill phone (read-only UI below)

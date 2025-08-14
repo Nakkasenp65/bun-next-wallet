@@ -3,17 +3,7 @@ import React from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import Image from "next/image";
 import FramerDiv from "../framerComponents/FramerDiv";
-
-const banks = [
-  {
-    id: "promptpay",
-    name: "พร้อมเพย์ (PromptPay)",
-    logo: "/promptpay-logo.png",
-  },
-  { id: "kbank", name: "กสิกรไทย (KBank)", logo: "/kbank-logo.png" },
-  { id: "scb", name: "ไทยพาณิชย์ (SCB)", logo: "/scb-logo.png" },
-  { id: "bbl", name: "กรุงเทพ (BBL)", logo: "/bbl-logo.png" },
-];
+import { BANK_DATA } from "@/lib/bankData"; // <-- Import the data
 
 export default function BankSelectionModal({ isOpen, onClose, onBankSelect }) {
   return (
@@ -32,30 +22,25 @@ export default function BankSelectionModal({ isOpen, onClose, onBankSelect }) {
           <h2 className="text-bg-dark text-lg font-bold">เลือกธนาคาร</h2>
         </header>
 
-        {/* Bank List */}
-        <ul className="flex flex-grow flex-col gap-2 overflow-y-auto p-4">
-          {banks.map((bank) => (
+        {/* Bank Grid */}
+        <ul className="grid grid-cols-3 gap-4 overflow-y-auto p-6">
+          {BANK_DATA.map((bank) => (
             <li
-              key={bank.id}
-              onClick={() => onBankSelect(bank)}
-              className="flex cursor-pointer items-center gap-4 rounded-lg border border-stone-100 bg-stone-100 p-3 transition-colors hover:bg-gray-100"
+              key={bank.short_name_en}
+              // The parent component expects an object with a `name` property.
+              // We create it here to ensure compatibility.
+              onClick={() => onBankSelect({ name: bank.name_th })}
+              className="flex aspect-square cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white p-4 transition-all hover:border-pink-500 hover:bg-pink-50 hover:shadow-md"
             >
               <Image
-                width={50}
-                height={50}
-                src={bank.logo}
-                alt={bank.name}
-                className="h-8 w-8 rounded-md"
+                width={64}
+                height={64}
+                src={bank.logo_url}
+                alt={bank.name_th}
+                className="h-12 w-auto object-contain"
               />
-              <span className="text-bg-dark font-semibold">{bank.name}</span>
             </li>
           ))}
-          <div className="my-8 w-full border-t border-black" />
-          <li className="flex cursor-pointer items-center justify-center gap-4 rounded-lg border border-stone-100 bg-stone-100 p-3 transition-colors hover:bg-gray-100">
-            <span className="text-bg-dark font-semibold">
-              หรือชำระผ่านช่องทางอื่นๆ...
-            </span>
-          </li>
         </ul>
       </div>
     </FramerDiv>

@@ -89,7 +89,7 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
   // Query config for backend
   const [productQuery, setProductQuery] = useState({
     mode: "upgrade", // all | upgrade | affordable
-    minPrice: userData?.wallet?.balance ?? null,
+    minPrice: null,
     maxPrice: null,
     topPerBrand: false, // best model per brand (nicer grid)
     sort: "asc",
@@ -127,9 +127,9 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
       // Derive min/max by mode (upgrade shows pricier targets than current balance)
       if (mode === "affordable") {
         minPrice = null;
-        maxPrice = maxPrice ?? balance;
+        maxPrice = balance;
       } else if (mode === "upgrade") {
-        minPrice = minPrice ?? balance;
+        minPrice = balance;
         maxPrice = null;
       } else {
         // all
@@ -149,7 +149,6 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
         },
       });
 
-      console.log("data", data);
       const items = Array.isArray(data?.items) ? data.items : [];
       setSuggestedPhone(items);
       setFacets(data?.facets ?? null);

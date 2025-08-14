@@ -88,7 +88,6 @@ export function useCreateGoal() {
     // data from { data } = await axios.post
     // variables from goalData ที่เราส่งเข้ามา
     onSuccess: async (data) => {
-      console.log("Data to set after register: ", data);
       toast.success("สร้างเป้าหมายการออมเงินสำเร็จ!");
       setTimeout(() => {
         console.log("wait for 1 second");

@@ -190,12 +190,24 @@ export default function WithdrawPage({
 
           {/* Amount */}
           <div>
-            <label
-              htmlFor="withdraw-amount"
-              className="mb-2 block text-sm font-bold text-gray-500"
+            <div
+              className={`${belowMin || exceedsBalance ? "flex justify-between" : "flex justify-start"}`}
             >
-              จำนวนเงิน
-            </label>
+              <label
+                htmlFor="withdraw-amount"
+                className="mb-2 block text-sm font-bold text-gray-500"
+              >
+                จำนวนเงิน
+              </label>
+              <label
+                htmlFor="withdraw-amount"
+                className="mb-2 block text-sm font-bold text-gray-500"
+              >
+                <span className="text-xs text-red-500">
+                  {exceedsBalance && "ยอดเงินไม่เพียงพอ*"}
+                </span>
+              </label>
+            </div>
             <input
               type="number"
               id="withdraw-amount"
@@ -204,7 +216,7 @@ export default function WithdrawPage({
               onChange={handleInputChange}
               inputMode="decimal"
               placeholder="฿0.00"
-              className="text-bg-dark focus:border-primary-pink focus:ring-primary-pink/30 w-full rounded-xl border border-gray-300 p-4 text-lg font-bold outline-none focus:ring-2"
+              className={`text-bg-dark ${belowMin || exceedsBalance ? "border-red-500 bg-red-50" : "focus:border-primary-pink border-gray-300 bg-white"} focus:ring-primary-pink/30 w-full rounded-xl border p-4 text-lg font-bold outline-none focus:ring-2`}
             />
             {/* inline hints */}
             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
@@ -214,16 +226,6 @@ export default function WithdrawPage({
               <span className="rounded-full bg-gray-100 px-2 py-1 text-gray-600">
                 ค่าธรรมเนียม {Math.round(FEE_RATE * 100)}%
               </span>
-              {belowMin && (
-                <span className="rounded-full bg-red-100 px-2 py-1 text-red-600">
-                  น้อยกว่าขั้นต่ำ
-                </span>
-              )}
-              {exceedsBalance && (
-                <span className="rounded-full bg-red-100 px-2 py-1 text-red-600">
-                  เกินยอดคงเหลือ
-                </span>
-              )}
             </div>
           </div>
 

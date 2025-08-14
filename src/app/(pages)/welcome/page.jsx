@@ -18,7 +18,7 @@ import Loading from "@/components/StatusComponents/Loading";
 
 export default function Page() {
   const { liffProfile } = useLiff();
-  const { data: mainServerUserProfile } = useMainServerUser(
+  const { data: mainServerUserProfile, isError } = useMainServerUser(
     liffProfile?.userId,
   );
   const router = useRouter();
@@ -33,7 +33,7 @@ export default function Page() {
     referToCode: "",
   });
   const [suggestedPhone, setSuggestedPhone] = useState(null);
-  console.log(suggestedPhone);
+
   const { mutate: createGoalMutate, isPending: createGoalPending } =
     useCreateGoal();
   // ใช้เป็นค่าตรวจสอบ user จาก server หลัก
@@ -91,50 +91,50 @@ export default function Page() {
       const { fullname, phone, pin, chat_url } = mainServerUserProfile;
 
       // Testint purpose ไม่เช็ค mobi เพราะไม่มีสมาชิก
-      let notHavingData = {
-        fullname: "test",
-        phone: "test",
-        pin: 123456,
-        chat_url: "test",
-      };
-
-      const dataToPost = {
-        line_user_id,
-        line_display_name,
-        line_profile_url,
-        occupation: finalOccupation,
-        ageRange: inputData.age,
-        monthlyPayment: inputData.monthlyPayment,
-        fullname: notHavingData.fullname,
-        chat_url: notHavingData.chat_url,
-        pin: notHavingData.chat_url,
-        phone: notHavingData.phone,
-        referToCode: inputData.referToCode,
-        planId,
-        mobileId,
-      };
-      console.log("TEST PRODUCTION: NO MOBI INFO");
-      createGoalMutate(dataToPost);
-      return;
+      // let notHavingData = {
+      //   fullname: "test",
+      //   phone: "test",
+      //   pin: 123456,
+      //   chat_url: "test",
+      // };
 
       // const dataToPost = {
       //   line_user_id,
       //   line_display_name,
       //   line_profile_url,
-      //   mobileId,
-      //   planId,
-      //   fullname,
-      //   phone,
-      //   pin,
-      //   chat_url,
-      //   referToCode: inputData.referToCode,
       //   occupation: finalOccupation,
       //   ageRange: inputData.age,
       //   monthlyPayment: inputData.monthlyPayment,
+      //   fullname: notHavingData.fullname,
+      //   chat_url: notHavingData.chat_url,
+      //   pin: notHavingData.chat_url,
+      //   phone: notHavingData.phone,
+      //   referToCode: inputData.referToCode,
+      //   planId,
+      //   mobileId,
       // };
+      // console.log("TEST PRODUCTION: NO MOBI INFO");
+      // createGoalMutate(dataToPost);
+      // return;
+
+      const dataToPost = {
+        line_user_id,
+        line_display_name,
+        line_profile_url,
+        mobileId,
+        planId,
+        fullname,
+        phone,
+        pin,
+        chat_url,
+        referToCode: inputData.referToCode,
+        occupation: finalOccupation,
+        ageRange: inputData.age,
+        monthlyPayment: inputData.monthlyPayment,
+      };
 
       // createGoalMutate = call mutation function -> useCreateGoal inside useUser.js
-      // createGoalMutate(dataToPost);
+      createGoalMutate(dataToPost);
     } catch (error) {
       setUiStep("main");
       console.log(error);
@@ -148,6 +148,9 @@ export default function Page() {
     createGoalMutate,
   ]);
 
+  // new user lock is from main server
+  //
+
   // ตรวจสอบการเป็นสมาชิกกับ server หลักว่าเป็นสมาชิกไหมและ redirect ไปสมัครสมาชิก
   const handleUserRedirect = useCallback(
     async (lineUserId) => {
@@ -156,6 +159,8 @@ export default function Page() {
         const response = await axios.get(
           `https://checkuserdb.vercel.app/api/check-user/${lineUserId} `,
         );
+
+        console.log(response);
         // 404 คือไม่เป็นสมาชิก
         if (response) {
           setIsUserChecked(true);
@@ -165,8 +170,10 @@ export default function Page() {
       } catch (error) {
         if (error.status === 404) {
           router.replace("https://liff.line.me/2006703040-RYAyYAyA");
-          // toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
-          setIsRegistered(true);
+          toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
+          console.log("Is not 1mobile user");
+          // setIsUserChecked(true);
+          // setIsRegistered(true);
         } else if (error.status === 500)
           toast.error("ขออภัย ขณะเกิดข้อผิดพลาดระหว่างการดำเนินการ!");
       }

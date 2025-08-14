@@ -42,16 +42,21 @@ export default function MainPage({ liffProfile }) {
     isLoading: isUserDataLoading,
     error: isUserDataError,
   } = useUser(liffProfile?.userId);
+
+  console.log("userData main page: \n", userData);
+
   const {
     data: availableMission,
     isLoading: missionLoading,
     error: missionError,
   } = useGetAvailableMissions(userData?.id);
+
   const {
     data: myMission,
     isLoading: myMissionLoading,
     error: myMissionError,
   } = useGetMyMissions(userData?.id);
+
   const {
     data: transactions,
     isLoading: transactionLoading,
@@ -84,6 +89,42 @@ export default function MainPage({ liffProfile }) {
     setShowRedeemModal(false);
     toast("เก็บเงินเพิ่มอีกนิดเพื่อรางวัลที่ใหญ่กว่า!", { icon: "🚀" });
     setShowGoal(true);
+  };
+
+  const handleDoMission = (mission, location) => {
+    if (!mission || !mission.type) return;
+
+    console.log(`Executing mission type: ${mission.type}`);
+
+    switch (mission.type) {
+      case "ONBOARDING":
+      case "ACCUMULATION":
+        setShowDeposit(true);
+        break;
+      case "STREAK":
+        // For these types, we open the deposit page.
+        setShowDeposit(true);
+        break;
+
+      case "REFERRAL":
+        // For this type, we construct a link and copy it to the clipboard.
+        const referralLink = `https://your-app-domain.com/join?ref=${userData.referralCode}`;
+        navigator.clipboard
+          .writeText(referralLink)
+          .then(() => {
+            toast.success("คัดลอกลิงก์แนะนำเพื่อนแล้ว!");
+          })
+          .catch((err) => {
+            console.error("Failed to copy text: ", err);
+            toast.error("ไม่สามารถคัดลอกลิงก์ได้");
+          });
+        break;
+
+      default:
+        // Optional: handle any other mission types or do nothing.
+        console.log(`No action defined for mission type: ${mission.type}`);
+        break;
+    }
   };
 
   // Show a skeleton for the whole page while the main user data is loading.
@@ -166,7 +207,11 @@ export default function MainPage({ liffProfile }) {
             <div className="absolute top-3 flex h-2 w-full items-center justify-center">
               <span className="h-1.5 w-10 rounded-full bg-gray-300" />
             </div>
-            <MyMissions missions={myMission} userData={userData} />
+            <MyMissions
+              missions={myMission}
+              userData={userData}
+              onDoMission={handleDoMission}
+            />
             <SavingsMission missions={availableMission} userData={userData} />
             <MainTransactionList
               transactions={transactions}
