@@ -26,7 +26,7 @@ export default function WithdrawPage({
 }) {
   const [showBankModal, setShowBankModal] = useState(false);
   const [formData, setFormData] = useState({
-    userId: userData.id,
+    userId: userData?.id,
     amount: "",
     bank: "",
     accountNumber: "",
@@ -41,7 +41,7 @@ export default function WithdrawPage({
   const closePage = () => {
     setShowWithdraw(false);
     setFormData({
-      userId: userData.id,
+      userId: userData?.id,
       amount: "",
       bank: "",
       accountNumber: "",

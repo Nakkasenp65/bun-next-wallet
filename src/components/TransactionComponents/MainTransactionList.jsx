@@ -4,16 +4,36 @@ import Transaction from "./Transaction";
 import Loading from "../StatusComponents/Loading";
 import { RiExternalLinkFill } from "react-icons/ri";
 import FramerLink from "../Ui/FramerLink";
+import TransactionSkeleton from "../Ui/TransactionSkeleton";
 
 // Example data matching the original script
 
-export default function MainTransactionList({ transactions }) {
+export default function MainTransactionList({
+  transactions,
+  transactionLoading,
+  transactionError,
+}) {
   const date = new Date();
 
   if (!transactions) {
     return (
-      <div className="flex h-56 items-center justify-center">
-        <Loading textColor="text-black" />
+      <div className="grid h-56 w-full grid-cols-1 items-center justify-center">
+        {transactionLoading ? (
+          <>
+            <TransactionSkeleton />
+            <TransactionSkeleton />
+            <TransactionSkeleton />
+            <TransactionSkeleton />
+          </>
+        ) : transactionError ? (
+          <p className="p-8 text-center text-red-500">
+            เกิดข้อผิดพลาดในการโหลดข้อมูล
+          </p>
+        ) : transactions && transactions.length > 0 ? (
+          transactions.map((t) => <Transaction key={t.id} transaction={t} />)
+        ) : (
+          <p className="p-8 text-center text-gray-500">ไม่พบรายการในเดือนนี้</p>
+        )}
       </div>
     );
   }

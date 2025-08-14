@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react"; // Import useEffect
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -26,12 +26,17 @@ import { useCreateSavingTransaction } from "@/hooks/useTransactions";
 export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
   const [activeTab, setActiveTab] = useState("transfer");
   const [selectedFile, setSelectedFile] = useState(null);
+  // previewUrl will now store a Data URL (base64 string) instead of a blob URL
   const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
 
   const closePage = () => {
     setSelectedFile(null);
     setPreviewUrl(null);
+    // Ensure file input is cleared for the next selection
+    if (fileInputRef.current) {
+      fileInputRef.current.value = null;
+    }
     setActiveTab("transfer");
     setShowDeposit(false);
   };
@@ -61,76 +66,82 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
     </button>
   );
 
-  const handleFileChange = async (event) => {
-    // รีเซ็ต state ก่อนทุกครั้งเพื่อให้แน่ใจว่าเริ่มต้นจากค่าว่าง
+  // MODIFICATION 1: Refactor scanImageForQRCode to accept a data URL
+  const scanImageDataForQRCode = (dataUrl) => {
+    return new Promise((resolve) => {
+      const image = new window.Image();
+      image.onload = () => {
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        canvas.width = image.width;
+        canvas.height = image.height;
+        context.drawImage(image, 0, 0, image.width, image.height);
+        const imageData = context.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+        );
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+        resolve(!!code); // Resolve with true if code is found, false otherwise
+      };
+      image.onerror = () => {
+        // Handle potential errors loading the data URL
+        resolve(false);
+      };
+      image.src = dataUrl;
+    });
+  };
+
+  // MODIFICATION 2: Overhaul handleFileChange to use FileReader for preview
+  const handleFileChange = (event) => {
+    // Reset state first to ensure a clean slate
     setSelectedFile(null);
     setPreviewUrl(null);
 
     const file = event.target.files[0];
+    const input = event.target; // Keep a reference to the input
 
-    // --- 1. ตรวจสอบว่ามีไฟล์และเป็นไฟล์รูปภาพหรือไม่ ---
-    if (!file || !file.type.startsWith("image/")) {
-      if (file) {
-        // ถ้ามีไฟล์แต่ไม่ใช่รูปภาพ
-        toast.error("กรุณาเลือกไฟล์รูปภาพนามสกุล PNG หรือ JPG");
-      }
-      // รีเซ็ตค่าใน input element (สำคัญมาก)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = null;
-      }
-      return; // จบการทำงาน
-    }
-
-    const hasQRCode = await scanImageForQRCode(file);
-
-    if (!hasQRCode) {
-      toast.error("ไม่พบ QR Code ในรูปภาพสลิป กรุณาตรวจสอบและแนบใหม่อีกครั้ง");
-      if (fileInputRef.current) {
-        fileInputRef.current.value = null;
-      }
+    if (!file) {
       return;
     }
 
-    setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
-  };
+    if (!file.type.startsWith("image/")) {
+      toast.error("กรุณาเลือกไฟล์รูปภาพนามสกุล PNG หรือ JPG");
+      input.value = null; // Reset input value
+      return;
+    }
 
-  const scanImageForQRCode = (file) => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const image = new window.Image();
-        image.onload = () => {
-          // Create a canvas element to draw the image onto
-          const canvas = document.createElement("canvas");
-          const context = canvas.getContext("2d");
-          canvas.width = image.width;
-          canvas.height = image.height;
-          context.drawImage(image, 0, 0, image.width, image.height);
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const dataUrl = e.target.result;
 
-          // Get the image data from the canvas
-          const imageData = context.getImageData(
-            0,
-            0,
-            canvas.width,
-            canvas.height,
-          );
+      // Now use the dataUrl for both QR scan and preview
+      const hasQRCode = await scanImageDataForQRCode(dataUrl);
 
-          const code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: "dontInvert",
-          });
+      if (!hasQRCode) {
+        toast.error(
+          "ไม่พบ QR Code ในรูปภาพสลิป กรุณาตรวจสอบและแนบใหม่อีกครั้ง",
+        );
+        setPreviewUrl(null); // Clear preview if QR not found
+        setSelectedFile(null);
+        input.value = null; // Reset input value
+        return;
+      }
 
-          // If 'code' is not null, a QR code was found
-          if (code) {
-            resolve(true);
-          } else {
-            resolve(false);
-          }
-        };
-        image.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
+      // If everything is successful, set the state
+      setPreviewUrl(dataUrl);
+      setSelectedFile(file);
+    };
+    reader.onerror = () => {
+      toast.error("ไม่สามารถอ่านไฟล์ได้ กรุณาลองใหม่อีกครั้ง");
+      input.value = null; // Reset input value on error
+    };
+
+    // Read the file as a Data URL
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async () => {
@@ -150,7 +161,10 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
       formData.append("userId", userData.id);
 
       createTransactionMutation.mutate(formData);
-    } catch (error) {}
+    } catch (error) {
+      // It's good practice to handle potential errors here, e.g., show a toast.
+      toast.error("เกิดข้อผิดพลาดในการส่งข้อมูล");
+    }
   };
 
   return (
@@ -186,7 +200,7 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
                 ยอดเงินปัจจุบัน
                 <span className="text-bg-dark ml-2 font-bold">
                   ฿
-                  {userData.wallet.balance.toLocaleString("en-US", {
+                  {userData?.wallet.balance.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
@@ -250,7 +264,8 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
                   className="hover:border-primary-pink flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 p-6 text-center transition-all hover:bg-pink-50"
                 >
                   {previewUrl ? (
-                    <Image
+                    // Using `src` with a Data URL is reliable
+                    <img
                       src={previewUrl}
                       alt="Slip Preview"
                       width={100}

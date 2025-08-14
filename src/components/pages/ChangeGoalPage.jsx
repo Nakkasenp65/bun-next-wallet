@@ -216,7 +216,7 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
     <FramerDiv
       isOpen={isEditing}
       id="change-goal-overlay"
-      className="fixed inset-0 z-50 flex flex-col bg-white p-6"
+      className="fixed inset-0 z-50 flex flex-col bg-white p-2"
     >
       {/* Header */}
       <header className="flex flex-shrink-0 items-center border-b border-gray-200 px-5 pt-4 pb-4">

@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 // For a more modern, cohesive look, using icons from the popular 'react-icons' library
@@ -68,14 +67,12 @@ export default function ActionGrid({
           className={`group flex cursor-pointer flex-col items-center gap-2`}
           onClick={item.action}
         >
-          <motion.div
+          <div
             className={`flex h-14 w-14 items-center justify-center rounded-full bg-(--card-bg-dark) text-xl text-white/90 shadow-md transition-colors group-hover:bg-white/20 backdrop:blur-2xl`}
-            whileTap={{ scale: 0.9 }} // Bouncier, more satisfying tap effect
-            transition={{ type: "spring", stiffness: 1500, damping: 17 }}
           >
             {/* The Icon component is rendered dynamically */}
             <item.icon size={28} className="text-(--light-text)" />
-          </motion.div>
+          </div>
           <span className="text-xs font-bold text-(--light-text) transition-colors group-hover:text-white">
             {item.label}
           </span>

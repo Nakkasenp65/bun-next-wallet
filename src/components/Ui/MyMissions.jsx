@@ -5,6 +5,7 @@ import { RiExternalLinkFill } from "react-icons/ri";
 import FramerLink from "./FramerLink";
 import MyMissionCard from "../MissionComponents/MyMissionCard";
 import { FaSearchPlus } from "react-icons/fa";
+import Link from "next/link";
 
 export default function MyMissions({ missions, userData }) {
   // Handler for the "Start Now" button
@@ -49,18 +50,23 @@ export default function MyMissions({ missions, userData }) {
           />
         ))}
         {missions && (
-          <motion.a
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             whileTap={{ scale: 0.98 }}
             transition={{ type: "spring", stiffness: 1000, damping: 30 }}
             className="flex w-5/6 flex-shrink-0 snap-start items-center justify-center gap-1 rounded-3xl bg-gradient-to-br from-yellow-300 via-orange-400 to-red-400 p-4 font-bold text-white opacity-80"
           >
-            ไปยังหน้าภารกิจของคุณ
-            <span className="flex items-center gap-1 rounded-full bg-black/25 p-2 text-lg">
-              <FaSearchPlus size={24} />
-            </span>
-          </motion.a>
+            <Link
+              href={`/mission/${userData?.line_user_id}`}
+              className="flex h-full w-full items-center justify-center gap-2"
+            >
+              ไปยังหน้าภารกิจของคุณ
+              <span className="flex items-center gap-1 rounded-full bg-black/25 p-2 text-lg">
+                <FaSearchPlus size={24} />
+              </span>
+            </Link>
+          </motion.div>
         )}
       </div>
     </div>

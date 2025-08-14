@@ -15,6 +15,7 @@ import ErrorComponent from "@/components/Ui/ErrorComponent";
 import MyMissionCard from "@/components/MissionComponents/MyMissionCard";
 import AvailableMissionCard from "@/components/Ui/AvailableMissionCard";
 import MissionGridSkeleton from "@/components/MissionComponents/MissionGridSkeleton";
+import Link from "next/link";
 
 export default function Page() {
   const params = useParams();
@@ -104,12 +105,12 @@ export default function Page() {
       <header className="from-primary-pink to-primary-orange sticky top-0 z-20 bg-gradient-to-br text-white shadow-lg">
         {/* Top part of the header */}
         <div className="flex items-center justify-between px-5 pt-10 pb-4">
-          <button
-            onClick={() => router.back()}
+          <Link
+            href={"/"}
             className="text-2xl transition-transform hover:scale-110"
           >
             <FaChevronLeft />
-          </button>
+          </Link>
           <h1 className="text-xl font-bold drop-shadow-md">ศูนย์ภารกิจ</h1>
           <div className="w-6"></div>
         </div>

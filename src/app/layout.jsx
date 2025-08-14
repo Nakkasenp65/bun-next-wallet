@@ -57,7 +57,7 @@ export default function RootLayout({ children }) {
           <LiffProvider>
             <LockProvider>
               <TokenSynchronizer />
-              <AppGate>{children}</AppGate>
+              {children}
               <ReactQueryDevtools />
               <Toaster
                 position="top-center"

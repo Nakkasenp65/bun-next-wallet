@@ -1,11 +1,5 @@
 "use client";
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  useContext,
-  useMemo,
-} from "react";
+import React, { createContext, useState, useEffect, useContext } from "react";
 import liff from "@line/liff";
 import Loading from "@/components/StatusComponents/Loading";
 
@@ -71,6 +65,7 @@ export function LiffProvider({ children }) {
           setIsLoggedIn(true);
           const profile = await liff.getProfile();
           setLiffProfile(profile);
+          setIsLoading(false);
           const accessToken = liff.getAccessToken();
           setLineAccessToken(accessToken || "");
         } else {
@@ -78,127 +73,72 @@ export function LiffProvider({ children }) {
         }
       } catch (e) {
         console.error("[LIFF init error]", e);
-      } finally {
-        setIsLoading(false);
       }
     };
-
     init();
   }, []);
 
   // Safe wrappers so components can call without worrying about environment
-  const actions = useMemo(() => {
-    const inClient = () => {
+  const actions = {
+    closeWindow: () => {
       try {
-        return liffReady && liff.isInClient();
-      } catch {
-        return false;
+        if (server === "dev") {
+          console.warn("[LIFF] closeWindow noop in dev");
+          // As a dev fallback, just navigate away or no-op.
+          return;
+        }
+        if (inClient()) {
+          liff.closeWindow();
+        } else {
+          // Fallback when opened in external browser
+          window.close();
+        }
+      } catch (e) {
+        console.error("[LIFF closeWindow error]", e);
       }
-    };
+    },
 
-    return {
-      isInClient: inClient,
-      getOS: () => {
-        try {
-          return liffReady ? liff.getOS() : "web";
-        } catch {
-          return "web";
+    openWindow: (url, external = false) => {
+      try {
+        if (server === "dev") {
+          window.open(url, "_blank");
+          return;
         }
-      },
-      closeWindow: () => {
-        try {
-          if (server === "dev") {
-            console.warn("[LIFF] closeWindow noop in dev");
-            // As a dev fallback, just navigate away or no-op.
-            return;
-          }
-          if (inClient()) {
-            liff.closeWindow();
-          } else {
-            // Fallback when opened in external browser
-            window.close();
-          }
-        } catch (e) {
-          console.error("[LIFF closeWindow error]", e);
+        liff.openWindow({ url, external });
+      } catch (e) {
+        console.error("[LIFF openWindow error]", e);
+      }
+    },
+
+    text: async (message) => {
+      try {
+        if (server === "dev") {
+          console.warn("[LIFF] text noop in dev:", message);
+          return { status: "dev-noop" };
         }
-      },
-      login: () => {
-        try {
-          if (server === "dev") return;
-          liff.login();
-        } catch (e) {
-          console.error("[LIFF login error]", e);
+        if (!inClient()) {
+          console.warn("[LIFF] text() works only inside LINE client chat.");
+          return { status: "unsupported" };
         }
-      },
-      logout: () => {
-        try {
-          if (server === "dev") {
-            console.warn("[LIFF] logout noop in dev");
-            return;
-          }
-          liff.logout();
-          window.location.reload();
-        } catch (e) {
-          console.error("[LIFF logout error]", e);
+        if (!message || typeof message !== "string") {
+          return {
+            status: "error",
+            error: "message must be a non-empty string",
+          };
         }
-      },
-      openWindow: (url, external = false) => {
-        try {
-          if (server === "dev") {
-            window.open(url, "_blank");
-            return;
-          }
-          liff.openWindow({ url, external });
-        } catch (e) {
-          console.error("[LIFF openWindow error]", e);
-        }
-      },
-      share: async (messages) => {
-        try {
-          if (server === "dev") {
-            console.warn("[LIFF] share noop in dev", messages);
-            return { status: "dev-noop" };
-          }
-          if (!inClient()) {
-            console.warn("[LIFF] share works only in LINE client");
-            return { status: "unsupported" };
-          }
-          return await liff.shareTargetPicker(messages);
-        } catch (e) {
-          console.error("[LIFF share error]", e);
-          return { status: "error", error: e?.message };
-        }
-      },
-      text: async (message) => {
-        try {
-          if (server === "dev") {
-            console.warn("[LIFF] text noop in dev:", message);
-            return { status: "dev-noop" };
-          }
-          if (!inClient()) {
-            console.warn("[LIFF] text() works only inside LINE client chat.");
-            return { status: "unsupported" };
-          }
-          if (!message || typeof message !== "string") {
-            return {
-              status: "error",
-              error: "message must be a non-empty string",
-            };
-          }
-          await liff.sendMessages([{ type: "text", text: message }]);
-          return { status: "sent" };
-        } catch (e) {
-          console.error("[LIFF text error]", e);
-          return { status: "error", error: e?.message };
-        }
-      },
-    };
-  }, [liffReady]);
+        await liff.sendMessages([{ type: "text", text: message }]);
+        return { status: "sent" };
+      } catch (e) {
+        console.error("[LIFF text error]", e);
+        return { status: "error", error: e?.message };
+      }
+    },
+  };
 
   if (isLoading) {
     return (
       <div className="gradient-background flex h-dvh w-full items-center justify-center">
-        <Loading />
+        <Loading message={"liff init"} />
       </div>
     );
   }

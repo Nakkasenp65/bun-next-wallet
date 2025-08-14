@@ -275,7 +275,7 @@ export default function GoalSetter({
   ]);
 
   return (
-    <div className="w-full max-w-md bg-white py-2">
+    <div className="w-full max-w-md bg-white p-4">
       {showBack && (
         <FramerButton
           onClick={onBack}

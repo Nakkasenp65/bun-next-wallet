@@ -91,12 +91,31 @@ export default function Page() {
       const { fullname, phone, pin, chat_url } = mainServerUserProfile;
 
       // Testint purpose ไม่เช็ค mobi เพราะไม่มีสมาชิก
-      // let notHavingData = {
-      //   fullname: "test",
-      //   phone: "test",
-      //   pin: 111111,
-      //   chat_url: "test",
-      // };
+      let notHavingData = {
+        fullname: "test",
+        phone: "test",
+        pin: 123456,
+        chat_url: "test",
+      };
+
+      const dataToPost = {
+        line_user_id,
+        line_display_name,
+        line_profile_url,
+        occupation: finalOccupation,
+        ageRange: inputData.age,
+        monthlyPayment: inputData.monthlyPayment,
+        fullname: notHavingData.fullname,
+        chat_url: notHavingData.chat_url,
+        pin: notHavingData.chat_url,
+        phone: notHavingData.phone,
+        referToCode: inputData.referToCode,
+        planId,
+        mobileId,
+      };
+      console.log("TEST PRODUCTION: NO MOBI INFO");
+      createGoalMutate(dataToPost);
+      return;
 
       // const dataToPost = {
       //   line_user_id,
@@ -104,36 +123,18 @@ export default function Page() {
       //   line_profile_url,
       //   mobileId,
       //   planId,
-      //   fullname: notHavingData.fullname,
-      //   phone: notHavingData.phone,
-      //   pin: notHavingData.chat_url,
-      //   chat_url: notHavingData.chat_url,
+      //   fullname,
+      //   phone,
+      //   pin,
+      //   chat_url,
+      //   referToCode: inputData.referToCode,
       //   occupation: finalOccupation,
       //   ageRange: inputData.age,
       //   monthlyPayment: inputData.monthlyPayment,
       // };
-      // console.log("TEST PRODUCTION: NO MOBI INFO");
-      // createGoalMutate(dataToPost);
-      // return;
-
-      const dataToPost = {
-        line_user_id,
-        line_display_name,
-        line_profile_url,
-        mobileId,
-        planId,
-        fullname,
-        phone,
-        pin,
-        chat_url,
-        referToCode: inputData.referToCode,
-        occupation: finalOccupation,
-        ageRange: inputData.age,
-        monthlyPayment: inputData.monthlyPayment,
-      };
 
       // createGoalMutate = call mutation function -> useCreateGoal inside useUser.js
-      createGoalMutate(dataToPost);
+      // createGoalMutate(dataToPost);
     } catch (error) {
       setUiStep("main");
       console.log(error);

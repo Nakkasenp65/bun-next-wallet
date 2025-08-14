@@ -64,7 +64,7 @@ export default function MyQr() {
       </header>
 
       {/* Content */}
-      <div className="flex flex-grow flex-col items-center justify-center gap-5 overflow-y-auto rounded-t-[30px] bg-white p-6 text-center">
+      <div className="flex flex-grow flex-col items-center gap-5 overflow-y-auto rounded-t-[30px] bg-white p-6 pt-20 text-center">
         <p className="text-base text-gray-500">รับเงินผ่าน QR Code</p>
 
         {/* QR image (local) */}
@@ -85,22 +85,22 @@ export default function MyQr() {
         </div>
 
         {/* Download button */}
-        <button
+        {/* <button
           onClick={handleDownload}
           disabled={!qrDataUrl}
           className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-black px-4 py-5 font-medium text-white disabled:opacity-50"
         >
           <FontAwesomeIcon icon={faDownload} />
           บันทึก QR
-        </button>
+        </button> */}
 
         {/* Close */}
-        <button
+        {/* <button
           onClick={handleClose}
           className="mt-auto w-full rounded-xl border px-4 py-3"
         >
           ปิด
-        </button>
+        </button> */}
       </div>
     </div>
   );

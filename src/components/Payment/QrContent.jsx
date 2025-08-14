@@ -11,33 +11,33 @@ export default function QrContent({ amount = 0 }) {
   )}`;
   const [saving, setSaving] = useState(false);
   const { actions } = useLiff();
-  const handleSave = async () => {
-    try {
-      actions.openWindow(
-        "https://no-1-genqrcodepromptpay.vercel.app/api/?amount=0",
-        true,
-      );
-      setSaving(true);
-      // Try to fetch the image and download as a file
-      const res = await fetch(qrCodeUrl, { cache: "no-store" });
-      if (!res.ok) throw new Error("QR fetch failed");
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
+  // const handleSave = async () => {
+  //   try {
+  //     actions.openWindow(
+  //       "https://no-1-genqrcodepromptpay.vercel.app/api/?amount=0",
+  //       true,
+  //     );
+  //     setSaving(true);
+  //     // Try to fetch the image and download as a file
+  //     const res = await fetch(qrCodeUrl, { cache: "no-store" });
+  //     if (!res.ok) throw new Error("QR fetch failed");
+  //     const blob = await res.blob();
+  //     const url = URL.createObjectURL(blob);
 
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `promptpay-qr-${amount || 0}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      // Fallback: open in new tab if cross-origin download is blocked
-      window.open(qrCodeUrl, "_blank", "noopener,noreferrer");
-    } finally {
-      setSaving(false);
-    }
-  };
+  //     const a = document.createElement("a");
+  //     a.href = url;
+  //     a.download = `promptpay-qr-${amount || 0}.png`;
+  //     document.body.appendChild(a);
+  //     a.click();
+  //     a.remove();
+  //     URL.revokeObjectURL(url);
+  //   } catch (err) {
+  //     // Fallback: open in new tab if cross-origin download is blocked
+  //     window.open(qrCodeUrl, "_blank", "noopener,noreferrer");
+  //   } finally {
+  //     setSaving(false);
+  //   }
+  // };
 
   return (
     <div className="py-6 text-center">
@@ -74,7 +74,7 @@ export default function QrContent({ amount = 0 }) {
         </div>
 
         {/* Save button */}
-        <div className="mt-4 flex justify-center">
+        {/* <div className="mt-4 flex justify-center">
           <button
             onClick={handleSave}
             disabled={saving}
@@ -83,7 +83,7 @@ export default function QrContent({ amount = 0 }) {
             {saving ? "กำลังบันทึก..." : "บันทึกรูป QR"}
             <FaDownload />
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

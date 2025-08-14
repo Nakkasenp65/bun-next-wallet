@@ -1,28 +1,28 @@
-"use client";
 import React from "react";
-import { useLiff } from "./LiffProvider";
-import { useUser } from "@/hooks/useUser";
+import { useLockContext } from "../context/LockContext"; // Adjust path
 import LockScreen from "@/components/Ui/LockScreen";
 import Loading from "../StatusComponents/Loading";
 
 export default function AppGate({ children }) {
-  const { liffProfile } = useLiff();
+  const { isCheckingStatus, status, isLocked, isError } = useLockContext();
 
-  const { data: user, isLoading, isError } = useUser(liffProfile?.userId);
-
-  // Show a loading screen while LIFF is initializing or the user data is being fetched.
-  if (isLoading || !liffProfile) {
-    return <Loading message="กำลังเริ่มต้น..." />;
+  if (isCheckingStatus) {
+    return <Loading message={"Verifying user access..."} />;
   }
 
   if (isError) {
+    return (
+      <Loading message={"Could not verify user status. Please try again."} />
+    );
+  }
+
+  if (status?.isNewUser) {
     return children;
   }
 
-  if (user?.isLocked) {
+  if (isLocked) {
     return <LockScreen />;
   }
 
-  // If the user is not locked, we render the actual application.
   return children;
 }

@@ -38,6 +38,12 @@ async function fetchUserFromMainServer(lineUserId) {
   }
 }
 
+async function fetchLockStatus(lineUserId) {
+  const { data } = await axios.get(`/user/lock/${lineUserId}`);
+  console.log("CHECK LOCK DATA: ", data);
+  return data;
+}
+
 export function useUserStatus(lineUserId) {
   return useQuery({
     queryKey: ["userStatus", lineUserId],
@@ -50,6 +56,14 @@ export function useUser(lineUserId) {
   return useQuery({
     queryKey: ["user", lineUserId],
     queryFn: () => fetchUser(lineUserId),
+    enabled: !!lineUserId,
+  });
+}
+
+export function useLockStatus(lineUserId) {
+  return useQuery({
+    queryKey: ["lockStatus", lineUserId],
+    queryFn: () => fetchLockStatus(lineUserId),
     enabled: !!lineUserId,
   });
 }
@@ -148,7 +162,6 @@ export function useLockApp() {
 
   return useMutation({
     mutationFn: async (lineUserId) => {
-      // The endpoint is /user/lock/:line_user_id, so we use a POST request
       const { data } = await axios.post(`/user/lock/${lineUserId}`);
       return data;
     },
@@ -157,7 +170,7 @@ export function useLockApp() {
       // Immediately update the UI to show the lock screen
       lockApp();
       // Invalidate the user status query to ensure the backend state is refetched
-      queryClient.invalidateQueries({ queryKey: ["user", lineUserId] });
+      queryClient.invalidateQueries({ queryKey: ["lockStatus", lineUserId] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || "ไม่สามารถล็อคแอปได้");
@@ -182,7 +195,7 @@ export function useUnlockApp() {
       unlockApp();
       // Invalidate the user status to reflect the new unlocked state
       queryClient.invalidateQueries({
-        queryKey: ["user", variables.line_user_id],
+        queryKey: ["lockStatus", variables.line_user_id],
       });
     },
     onError: (error) => {
