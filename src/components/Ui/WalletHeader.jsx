@@ -7,12 +7,38 @@ import Link from "next/link";
 import { useLockApp } from "@/hooks/useUser";
 import { motion } from "framer-motion";
 
-const getGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return "สวัสดีตอนเช้า,";
-  if (hour >= 12 && hour < 18) return "สวัสดีตอนบ่าย,";
-  return "สวัสดีตอนเย็น,";
-};
+export function WalletHeaderSkeleton() {
+  return (
+    <header
+      className="relative z-10 flex items-center justify-between"
+      aria-busy="true"
+      aria-live="polite"
+    >
+      {/* Left: profile */}
+      <div className="flex items-center justify-center gap-1.5">
+        <div className="h-10 w-10 animate-pulse rounded-full bg-gray-200" />
+        <div className="flex flex-col gap-1">
+          <div className="h-3 w-10 animate-pulse rounded bg-gray-200" />
+          <div className="h-3 w-20 animate-pulse rounded bg-gray-200" />
+        </div>
+      </div>
+
+      {/* Center: app logo placeholder */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div className="h-12 w-12 animate-pulse rounded-xl bg-gray-200 shadow-sm" />
+      </div>
+
+      {/* Right: actions */}
+      <div className="flex items-center gap-2">
+        <div className="h-7 w-7 animate-pulse rounded bg-gray-200" />
+        <div className="relative">
+          <div className="h-7 w-7 animate-pulse rounded bg-gray-200" />
+          <span className="absolute -top-1.5 -right-2 h-5 w-5 animate-pulse rounded-full bg-gray-300" />
+        </div>
+      </div>
+    </header>
+  );
+}
 
 export default function WalletHeader({
   userLineId,
@@ -22,20 +48,23 @@ export default function WalletHeader({
   notifications,
 }) {
   const unreadNotifications =
-    notifications?.filter((notification) => !notification.isRead).length || 0;
-  // const unreadNotifications = 9;
+    notifications?.filter((n) => !n.isRead).length || 0;
 
   const { mutate: lock, isPending } = useLockApp(userLineId);
 
   const handleLockClick = () => {
     if (userLineId && !isPending) {
-      console.log("Hello");
       lock(userLineId);
     }
   };
 
   return (
-    <header className="relative z-10 flex items-center justify-between">
+    <motion.header
+      className="relative z-10 flex items-center justify-between"
+      initial={{ opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+    >
       {/* Welcome Text */}
       <Link href={`/profile/${userLineId}`}>
         <div className="flex items-center justify-center gap-1.5">
@@ -61,25 +90,28 @@ export default function WalletHeader({
           className="h-12 w-12 shadow-sm"
           width={200}
           height={200}
+          priority
         />
       </div>
 
       {/* Header Actions */}
       <div className="flex items-center gap-2">
-        {/* Lock Icon: Notification */}
-        <div
+        {/* Lock Icon */}
+        <button
           id="lock-btn"
           onClick={handleLockClick}
           className="text-secondary-text cursor-pointer text-2xl transition"
+          aria-label="Lock app"
         >
           <MdLock className="h-auto w-7" />
-        </div>
+        </button>
+
         {/* Bell Icon: Notification */}
-        <div
+        <button
           onClick={() => setShowNotifications(true)}
-          href={"/notification"}
           id="notification-bell-btn"
           className="text-secondary-text hover:text-primary-pink relative cursor-pointer text-2xl transition"
+          aria-label="Open notifications"
         >
           <FiBell className="h-auto w-7" />
           {unreadNotifications > 0 && (
@@ -90,8 +122,8 @@ export default function WalletHeader({
               </span>
             </>
           )}
-        </div>
+        </button>
       </div>
-    </header>
+    </motion.header>
   );
 }

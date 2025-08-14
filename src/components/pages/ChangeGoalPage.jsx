@@ -78,8 +78,6 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
   const [facets, setFacets] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
 
-  console.log(suggestedPhone);
-
   // keep for future; only monthlyPayment is relevant to your “capacity” math
   const [inputData] = useState({
     monthlyPayment: userData?.monthlyPayment || "",

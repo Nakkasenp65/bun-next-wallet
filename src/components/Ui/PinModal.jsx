@@ -2,6 +2,7 @@
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import PinInput from "./PinInput";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 const PinModal = ({
   isOpen,
@@ -26,13 +27,14 @@ const PinModal = ({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="relative w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl"
+            className="relative w-max max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col gap-6">
               <div className="flex flex-col">
-                <p className="text-sm text-gray-500">คุณกำลังจะโอนเงิน</p>
-                <p className="text-4xl font-bold text-gray-800">
+                <p className="text-sm text-gray-500"> "คุณกำลังจะโอนเงิน"</p>
+                <p className="flex justify-center text-2xl font-bold text-gray-800">
+                  {" "}
                   ฿
                   {parseFloat(amount || 0).toLocaleString("en-US", {
                     minimumFractionDigits: 2,
@@ -45,10 +47,18 @@ const PinModal = ({
                   </span>
                 </p>
               </div>
-              <div className="flex flex-col gap-4">
-                <label className="font-bold text-gray-700">
-                  กรุณายืนยันด้วยรหัส PIN
-                </label>
+              <div className="flex flex-col gap-4 text-2xl">
+                {isPinDisabled ? (
+                  <div className="flex items-center justify-center gap-2 font-bold">
+                    <span className="text-bg-dark">กำลังโอนเงิน</span>
+                    <AiOutlineLoading3Quarters className="text-bg-dark h-5 w-auto animate-spin" />{" "}
+                  </div>
+                ) : (
+                  <label className="font-bold text-gray-700">
+                    กรุณายืนยันด้วยรหัส PIN
+                  </label>
+                )}
+
                 <PinInput
                   length={6}
                   onComplete={onComplete}

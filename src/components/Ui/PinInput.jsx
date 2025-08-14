@@ -29,19 +29,19 @@ const PinInput = ({ length = 6, onComplete, isPinDisabled }) => {
   };
 
   return (
-    <div className="flex justify-center gap-2">
+    <div className="flex justify-center gap-1">
       {pin.map((digit, index) => (
         <input
           key={index}
           ref={(el) => (inputRefs.current[index] = el)}
-          type="tel"
+          type="password"
           inputMode="numeric"
           maxLength="1"
           value={digit}
           onChange={(e) => handleChange(e, index)}
           onKeyDown={(e) => handleKeyDown(e, index)}
           disabled={isPinDisabled}
-          className="h-14 w-12 rounded-xl border-2 border-gray-300 text-center text-2xl font-bold text-gray-800 focus:border-pink-500 focus:ring-pink-500"
+          className="h-12 w-10 rounded-xl border-2 border-gray-300 text-center text-2xl font-bold text-gray-800 focus:border-pink-500 focus:ring-pink-500"
         />
       ))}
     </div>

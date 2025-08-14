@@ -3,15 +3,20 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { IoIosWarning } from "react-icons/io";
 import { FaDownload } from "react-icons/fa";
+import { useLiff } from "../provider/LiffProvider";
 
 export default function QrContent({ amount = 0 }) {
   const qrCodeUrl = `https://no-1-genqrcodepromptpay.vercel.app/api/?amount=${encodeURIComponent(
     amount,
   )}`;
   const [saving, setSaving] = useState(false);
-
+  const { actions } = useLiff();
   const handleSave = async () => {
     try {
+      actions.openWindow(
+        "https://no-1-genqrcodepromptpay.vercel.app/api/?amount=0",
+        true,
+      );
       setSaving(true);
       // Try to fetch the image and download as a file
       const res = await fetch(qrCodeUrl, { cache: "no-store" });

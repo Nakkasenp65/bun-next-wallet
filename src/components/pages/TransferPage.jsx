@@ -216,10 +216,10 @@ export default function TransferPage({
           <AnimatePresence>
             {recipient && (
               <motion.div
-                initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                animate={{ opacity: 1, height: "auto", marginTop: "1.5rem" }}
-                exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                transition={{ duration: 0.35, ease: "easeInOut" }}
+                initial={{ opacity: 0, height: 0, marginTop: -2 }}
+                animate={{ opacity: 1, height: "auto", marginTop: 0 }}
+                exit={{ opacity: 0, height: 0, marginTop: 2 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="flex flex-col gap-6 overflow-hidden"
               >
                 {/* Repeat summary for normal mode to confirm found user */}

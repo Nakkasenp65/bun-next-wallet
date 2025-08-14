@@ -6,7 +6,7 @@ import { FaHourglassHalf, FaExclamation } from "react-icons/fa";
 import clsx from "clsx";
 import useCountdown from "@/hooks/useCountdown"; // Import hook ที่เพิ่งสร้าง
 
-const MyMissionCard = ({ userMission, onDoMission, onClaim }) => {
+const MyMissionCard = ({ userMission, onDoMission, onClaim, cardSize }) => {
   const {
     mission,
     status,
@@ -85,7 +85,7 @@ const MyMissionCard = ({ userMission, onDoMission, onClaim }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className={clsx(
-        "flex w-full flex-shrink-0 snap-start flex-col gap-1 rounded-3xl p-4 text-white",
+        `flex ${cardSize === "main" ? "w-5/6" : "w-full"} flex-shrink-0 snap-start flex-col rounded-3xl bg-gradient-to-br from-purple-600 to-pink-600 p-4 text-white`,
         status === "AWAITING_CLAIM" &&
           "bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500",
         status === "ENROLLED" &&

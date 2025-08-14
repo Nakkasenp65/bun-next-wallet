@@ -61,7 +61,7 @@ export default function RootLayout({ children }) {
               <ReactQueryDevtools />
               <Toaster
                 position="top-center"
-                containerClassName="mx-auto z-[9999] w-5/6"
+                containerClassName="mx-auto z-[9999] w-[90%]"
                 toastOptions={toastOptions}
               />
             </LockProvider>

@@ -12,7 +12,7 @@ const missionTypeMap = {
   REFERRAL: "เชิญเพื่อน",
 };
 
-const AvailableMissionCard = ({ mission, onEnroll, isEnrolling }) => {
+const AvailableMissionCard = ({ mission, onEnroll, isEnrolling, cardSize }) => {
   const { timeLeft, isCounting } = useCountdown(mission.webExpiresAt);
   // ฟังก์ชันป้องกันการกดซ้ำซ้อน
   const handleEnrollClick = (e) => {
@@ -29,7 +29,7 @@ const AvailableMissionCard = ({ mission, onEnroll, isEnrolling }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="flex w-full flex-shrink-0 snap-start flex-col rounded-3xl bg-gradient-to-br from-purple-600 to-pink-600 p-4 text-white"
+      className={`flex ${cardSize === "main" ? "w-5/6" : "w-full"} flex-shrink-0 snap-start flex-col rounded-3xl bg-gradient-to-br from-purple-600 to-pink-600 p-4 text-white`}
     >
       {/* Header */}
       <div className="flex items-center gap-3">
