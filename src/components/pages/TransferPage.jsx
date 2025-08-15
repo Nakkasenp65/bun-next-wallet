@@ -22,19 +22,15 @@ export default function TransferPage({
   receiverData = null,
   setParentClose = () => {},
 }) {
-  // ---- Local state
   const [phoneNumber, setPhoneNumber] = useState("");
   const [amount, setAmount] = useState("");
   const [recipient, setRecipient] = useState(null);
   const [showPinModal, setShowPinModal] = useState(false);
-
   // Derived: are we in "QR mode"?
   const hasReceiverPreset = useMemo(() => !!receiverData?.id, [receiverData]);
-
-  // Debounce only used in normal mode
+  // Debounce only used in normal mode (Delay and call function on phoneNumber change)
   const [debouncedPhoneNumber] = useDebounce(phoneNumber, 500);
 
-  // ✅ FIX: Renamed for clarity and reordered calls
   const handleSuccessAndClose = () => {
     setParentClose(); // Call parent to navigate first
     setShowTransfer(false); // Then close the modal
@@ -46,7 +42,6 @@ export default function TransferPage({
     }, 300);
   };
 
-  // ✅ FIX: A dedicated cancel handler for the back button
   const handleCancel = () => {
     setShowTransfer(false);
   };
@@ -67,7 +62,6 @@ export default function TransferPage({
   // 🔎 Normal mode: search by phone (skip when QR preset exists)
   useEffect(() => {
     if (hasReceiverPreset) return;
-
     if (debouncedPhoneNumber && debouncedPhoneNumber.length >= 9) {
       searchRecipientMutation.mutate(debouncedPhoneNumber, {
         onSuccess: (data) => setRecipient(data),
@@ -76,7 +70,7 @@ export default function TransferPage({
     } else {
       setRecipient(null);
     }
-  }, [debouncedPhoneNumber, hasReceiverPreset]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [debouncedPhoneNumber, hasReceiverPreset]);
 
   const handleConfirmTransfer = () => {
     const numericAmount = parseFloat(amount);

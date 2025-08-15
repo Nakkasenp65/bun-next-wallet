@@ -13,15 +13,15 @@ import Loading from "@/components/StatusComponents/Loading";
 
 // GET https://checkuserdb.vercel.app/api/check-user/:liffID เช็คว่าเป็นสมาชิกหรือยัง
 // 1. Check ว่าเป็นสมาชิกกับ database เดิมไหม
-// 2. เป็นสมาชิกให้เลือก Goal ได้เลย
+// 2. เป็นสมาชิกแล้วไปต่อ
 // 3. ไม่เป็นสมาชิกให้ redirect ไปสมัครที่ https://liff.line.me/2006703040-RYAyYAyA
 
 export default function Page() {
+  const router = useRouter();
   const { liffProfile } = useLiff();
   const { data: mainServerUserProfile, isError } = useMainServerUser(
     liffProfile?.userId,
   );
-  const router = useRouter();
   const [isUserChecked, setIsUserChecked] = useState(false);
   const [goal, setGoal] = useState({});
   const [uiStep, setUiStep] = useState("input");
@@ -36,7 +36,6 @@ export default function Page() {
 
   const { mutate: createGoalMutate, isPending: createGoalPending } =
     useCreateGoal();
-  // ใช้เป็นค่าตรวจสอบ user จาก server หลัก
   const [isRegistered, setIsRegistered] = useState(false);
   // Query สำหรับดึง Products
   const [productQuery, setProductQuery] = useState({
@@ -81,57 +80,58 @@ export default function Page() {
       } = liffProfile;
       // ข้อมูลจากหน้าเลือกโทรศัพท์
       const { mobileId, planId } = goal;
-      // ข้อมูลจากหน้า userInputMonthLy (กรอกยอดเงินรายเดือน)
+      // ข้อมูลจากหน้า userInputMonthly (กรอกยอดเงินรายเดือน)
       const finalOccupation =
         inputData.occupation === "อื่นๆ"
           ? inputData.customOccupation
           : inputData.occupation;
       // ข้อมูลจาก server หลัก
-
       const { fullname, phone, pin, chat_url } = mainServerUserProfile;
 
-      // Testint purpose ไม่เช็ค mobi เพราะไม่มีสมาชิก
-      // let notHavingData = {
-      //   fullname: "test",
-      //   phone: "test",
-      //   pin: 123456,
-      //   chat_url: "test",
-      // };
+      // Test purpose ไม่เช็ค mobi เพราะไม่มีสมาชิก
+      let notHavingData = {
+        fullname: "test",
+        phone: "test",
+        pin: 123456,
+        chat_url: "test",
+      };
+
+      // Test no mobi user data
+      const dataToPost = {
+        line_user_id,
+        line_display_name,
+        line_profile_url,
+        occupation: finalOccupation,
+        ageRange: inputData.age,
+        monthlyPayment: inputData.monthlyPayment,
+        fullname: notHavingData.fullname,
+        chat_url: notHavingData.chat_url,
+        pin: notHavingData.chat_url,
+        phone: notHavingData.phone,
+        referToCode: inputData.referToCode,
+        planId,
+        mobileId,
+        isLocked: false,
+      };
+      // console.log("TEST PRODUCTION: NO MOBI INFO");
+      // createGoalMutate(dataToPost);
+      // return;
 
       // const dataToPost = {
       //   line_user_id,
       //   line_display_name,
       //   line_profile_url,
+      //   mobileId,
+      //   planId,
+      //   fullname,
+      //   phone,
+      //   pin,
+      //   chat_url,
+      //   referToCode: inputData.referToCode,
       //   occupation: finalOccupation,
       //   ageRange: inputData.age,
       //   monthlyPayment: inputData.monthlyPayment,
-      //   fullname: notHavingData.fullname,
-      //   chat_url: notHavingData.chat_url,
-      //   pin: notHavingData.chat_url,
-      //   phone: notHavingData.phone,
-      //   referToCode: inputData.referToCode,
-      //   planId,
-      //   mobileId,
       // };
-      // console.log("TEST PRODUCTION: NO MOBI INFO");
-      // createGoalMutate(dataToPost);
-      // return;
-
-      const dataToPost = {
-        line_user_id,
-        line_display_name,
-        line_profile_url,
-        mobileId,
-        planId,
-        fullname,
-        phone,
-        pin,
-        chat_url,
-        referToCode: inputData.referToCode,
-        occupation: finalOccupation,
-        ageRange: inputData.age,
-        monthlyPayment: inputData.monthlyPayment,
-      };
 
       // createGoalMutate = call mutation function -> useCreateGoal inside useUser.js
       createGoalMutate(dataToPost);
@@ -147,9 +147,6 @@ export default function Page() {
     mainServerUserProfile,
     createGoalMutate,
   ]);
-
-  // new user lock is from main server
-  //
 
   // ตรวจสอบการเป็นสมาชิกกับ server หลักว่าเป็นสมาชิกไหมและ redirect ไปสมัครสมาชิก
   const handleUserRedirect = useCallback(
@@ -169,11 +166,11 @@ export default function Page() {
         }
       } catch (error) {
         if (error.status === 404) {
-          router.replace("https://liff.line.me/2006703040-RYAyYAyA");
+          // Not found from api : (not registered user)
+          // router.replace("https://liff.line.me/2006703040-RYAyYAyA");
           toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
-          console.log("Is not 1mobile user");
-          // setIsUserChecked(true);
-          // setIsRegistered(true);
+          setIsUserChecked(true);
+          setIsRegistered(true);
         } else if (error.status === 500)
           toast.error("ขออภัย ขณะเกิดข้อผิดพลาดระหว่างการดำเนินการ!");
       }
@@ -190,7 +187,6 @@ export default function Page() {
     }
     // 6 months saving capacity
     const potentialPrice = monthly * 6;
-
     const toastId = toast.loading("กำลังประมวลผล โปรดรอสักครู่…");
     setUiStep("calculate");
 
@@ -217,12 +213,12 @@ export default function Page() {
         // Derive min/max by mode (upgrade shows pricier targets than current balance)
         if (mode === "affordable") {
           minPrice = null;
-          maxPrice = maxPrice ?? balance;
+          maxPrice = balance;
         } else if (mode === "upgrade") {
-          minPrice = minPrice ?? balance;
+          minPrice = balance;
           maxPrice = null;
         } else {
-          // all
+          // mode === all
           minPrice = null;
           maxPrice = null;
         }
@@ -274,8 +270,6 @@ export default function Page() {
   if (createGoalPending || !isUserChecked) {
     return <Loading />;
   }
-
-  console.log(inputData);
 
   return (
     <main

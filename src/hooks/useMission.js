@@ -13,8 +13,6 @@ const fetchMyMissions = async (userId) => {
 };
 
 const claimMissionRewardAPI = async ({ userId, userMissionId }) => {
-  // Your backend route: POST /user-mission/claim
-  // Body should contain userId + userMissionId
   const { data } = await axios.post(`/user-mission/claim`, {
     userId,
     userMissionId,
@@ -22,13 +20,6 @@ const claimMissionRewardAPI = async ({ userId, userMissionId }) => {
   return data; // Updated UserMission object
 };
 
-/**
- * Claim a mission reward.
- *
- * Usage:
- * const { mutate: claim, isPending } = useClaimMission();
- * claim({ userId, userMissionId: userMission.id });
- */
 export const useClaimMission = () => {
   const queryClient = useQueryClient();
 

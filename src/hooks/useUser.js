@@ -121,6 +121,9 @@ export function useUpdateGoal() {
     onSuccess: (data, variables) => {
       toast.success("เปลี่ยนเป้าหมายสำเร็จ!");
       // Invalidate the user query to refetch all data, including the new goal.
+      setTimeout(() => {
+        console.log("wait for 0.5 second (race condition)");
+      }, 500);
       queryClient.invalidateQueries({ queryKey: ["user", variables.userId] });
     },
     onError: (error) => {

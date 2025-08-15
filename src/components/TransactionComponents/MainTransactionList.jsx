@@ -1,20 +1,14 @@
 import React from "react";
-import { GrTransaction } from "react-icons/gr";
 import Transaction from "./Transaction";
-import Loading from "../StatusComponents/Loading";
 import { RiExternalLinkFill } from "react-icons/ri";
 import FramerLink from "../Ui/FramerLink";
 import TransactionSkeleton from "../Ui/TransactionSkeleton";
-
-// Example data matching the original script
 
 export default function MainTransactionList({
   transactions,
   transactionLoading,
   transactionError,
 }) {
-  const date = new Date();
-
   if (!transactions) {
     return (
       <div className="grid h-56 w-full grid-cols-1 items-center justify-center">

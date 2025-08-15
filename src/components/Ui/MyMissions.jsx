@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { motion, scale } from "framer-motion";
+import { motion } from "framer-motion";
 import { RiExternalLinkFill } from "react-icons/ri";
 import FramerLink from "./FramerLink";
 import MyMissionCard from "../MissionComponents/MyMissionCard";
@@ -11,7 +11,7 @@ export default function MyMissions({ missions, userData, onDoMission }) {
   if (!missions || missions.length === 0) {
     // อาจจะแสดงข้อความว่า "ยังไม่มีภารกิจที่กำลังทำอยู่" แทนการ return null
     return (
-      <div className="py-8 text-center text-gray-500">
+      <div className="py-2 text-center text-gray-500">
         <p>ยังไม่มีภารกิจที่กำลังทำอยู่</p>
         <p className="text-sm">ลองไปดูภารกิจใหม่ๆ สิ!</p>
       </div>

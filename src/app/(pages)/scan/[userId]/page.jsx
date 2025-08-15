@@ -5,15 +5,21 @@ import { useRouter, useParams } from "next/navigation";
 import jsQR from "jsqr";
 import { useUser } from "@/hooks/useUser";
 import dynamic from "next/dynamic";
-import { Router } from "next/router";
+import { FaImages } from "react-icons/fa";
+import Link from "next/link";
+import { IoIosArrowBack } from "react-icons/io";
 
 const TransferPage = dynamic(() => import("@/components/pages/TransferPage"), {
   ssr: false,
 });
 
+// --- Helpers ---
+const isValidLineUserId = (s) => /^U[a-f0-9]{32}$/i.test(String(s).trim());
+
 export default function Page() {
   const router = useRouter();
   const params = useParams();
+
   // Sender (current user) from route
   const myUserId = Array.isArray(params?.userId)
     ? params.userId[0]
@@ -22,23 +28,23 @@ export default function Page() {
 
   // Recipient (scanned from QR)
   const [scannedUserId, setScannedUserId] = useState("");
-  const { data: scannedUser, isLoading: scannedLoading } = useUser?.(
-    scannedUserId || "",
-  ) ?? { data: null };
+  const { data: scannedUser } = useUser?.(scannedUserId || "") ?? {
+    data: null,
+  };
 
   // Scanner refs/state
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const rafRef = useRef(null);
   const canvasRef = useRef(null);
+
   const [facing, setFacing] = useState("environment");
   const [isScanning, setIsScanning] = useState(false);
-  const [torchOn, setTorchOn] = useState(false);
-  const [lastResult, setLastResult] = useState("");
   const [error, setError] = useState("");
   const [showTransfer, setShowTransfer] = useState(false);
+
   const lastHitRef = useRef(0);
-  const scanDelayMs = 3000;
+  const scanDelayMs = 3000; // throttle decoding
   const isNavigatingAway = useRef(false);
 
   useEffect(() => {
@@ -70,12 +76,11 @@ export default function Page() {
       video.muted = true;
       await video.play();
 
-      if (torchOn) await setTorch(true);
-
       setIsScanning(true);
       setError("");
       loop();
     } catch (e) {
+      // fallback to front camera if back not available
       if (mode === "environment") {
         setFacing("user");
         startCamera("user");
@@ -99,20 +104,6 @@ export default function Page() {
     router.replace("/");
   }
 
-  async function setTorch(on) {
-    try {
-      const track = streamRef.current?.getVideoTracks?.()[0];
-      if (!track) return false;
-      const caps = track.getCapabilities?.();
-      if (!caps || !caps.torch) return false;
-      await track.applyConstraints({ advanced: [{ torch: !!on }] });
-      setTorchOn(!!on);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
   function loop() {
     const video = videoRef.current;
     rafRef.current = requestAnimationFrame(loop);
@@ -132,25 +123,28 @@ export default function Page() {
       inversionAttempts: "dontInvert",
     });
 
-    if (code) {
-      const now = Date.now();
-      if (now - lastHitRef.current > scanDelayMs) {
-        lastHitRef.current = now;
-        const uid = String(code.data || "").trim();
+    if (!code) return;
 
-        if (uid && uid.length >= 6) {
-          setLastResult(uid);
-          setScannedUserId(uid);
+    const now = Date.now();
+    if (now - lastHitRef.current <= scanDelayMs) return;
+    lastHitRef.current = now;
 
-          // Open transfer; camera can stop to save battery
-          setShowTransfer(true);
-          stopCamera();
+    const uid = String(code.data || "").trim();
 
-          try {
-            navigator.vibrate?.(60);
-          } catch {}
-        }
-      }
+    if (isValidLineUserId(uid)) {
+      setScannedUserId(uid);
+      setShowTransfer(true);
+      stopCamera();
+      try {
+        navigator.vibrate?.(60);
+      } catch {}
+      setError("");
+    } else {
+      // Live-scan invalid QR (not LINE user id)
+      setError("QR ไม่ถูกต้อง (ต้องเป็น LINE user ID เช่น U006fb5…)");
+      try {
+        navigator.vibrate?.([90, 60, 90]);
+      } catch {}
     }
   }
 
@@ -167,54 +161,62 @@ export default function Page() {
       const code = jsQR(img.data, img.width, img.height, {
         inversionAttempts: "dontInvert",
       });
-      if (code) {
-        const uid = String(code.data || "").trim();
-        setLastResult(uid);
+
+      if (!code) {
+        setError("ไม่พบ QR ในรูปภาพ");
+        try {
+          navigator.vibrate?.([60, 40, 60]);
+        } catch {}
+        return;
+      }
+
+      const uid = String(code.data || "").trim();
+
+      if (isValidLineUserId(uid)) {
         setScannedUserId(uid);
         setShowTransfer(true);
         stopCamera();
         try {
           navigator.vibrate?.(60);
         } catch {}
+        setError("");
       } else {
-        setLastResult("No QR found in image.");
+        // *** Requested behavior: prompt when image QR is NOT a LINE user id ***
+        setError("QR Code ในรูปภาพไม่ถูกต้อง (ต้องเป็น LINE user ID)");
+        // Simple prompt/alert for clarity
+        alert(
+          "รูปภาพนี้มี QR Code แต่ไม่ได้อยู่ในรูปแบบ LINE user ID (เช่น U006fb519ba07650932c6981af95d0620)\nกรุณาเลือกรูปใหม่หรือสแกน QR ที่ถูกต้อง",
+        );
+        try {
+          navigator.vibrate?.([90, 60, 90]);
+        } catch {}
       }
     } catch {
-      setLastResult("Failed to read image.");
+      setError("ไม่สามารถอ่านรูปภาพได้");
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="flex min-h-screen w-screen flex-col items-start justify-center">
       {/* Top bar */}
-      <div className="sticky top-0 z-10 border-b bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-xl items-center gap-3 p-3">
-          <button
-            onClick={() => router.push("/")}
-            className="text-bg-dark rounded-xl p-2 hover:bg-gray-100"
-            aria-label="Back"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M15 18l-6-6 6-6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <h1 className="text-lg font-semibold">Scan QR</h1>
-          <div className="ml-auto text-xs text-gray-500">
-            {myUserData?.name ?? ""}
-          </div>
-        </div>
+      <div className="bg-bg-dark sticky top-0 z-10 w-full self-center backdrop-blur">
+        <header className="flex items-center px-5 pt-10 pb-4">
+          {/* ✅ FIX: Use the dedicated cancel handler */}
+          <Link href={"/"} className="text-secondary-text text-2xl">
+            <IoIosArrowBack className="text-3xl" />
+          </Link>
+          <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
+            แสกนโอนเงิน
+          </h2>
+          <div className="w-6" />
+        </header>
       </div>
 
       {/* Scanner section */}
       {!showTransfer && (
-        <div className="mx-auto flex max-w-xl flex-col gap-4 p-4">
-          <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-black">
+        <div className="flex w-full max-w-xl flex-grow flex-col gap-4 rounded-t-4xl bg-white p-8">
+          <div className="drop-shadow-primary-pink/50 relative aspect-[3/4] overflow-hidden rounded-2xl bg-black drop-shadow-xl">
+            {/* Camera feed */}
             <video
               ref={videoRef}
               className="absolute inset-0 h-full w-full object-cover"
@@ -222,67 +224,32 @@ export default function Page() {
               autoPlay
               muted
             />
+
+            {/* Reticle mask */}
             <div className="pointer-events-none absolute inset-0 grid place-items-center">
-              <div className="h-40 w-40 rounded-xl border-2 border-white/80 shadow-[0_0_0_100vmax_rgba(0,0,0,.35)] outline outline-2 outline-white/20"></div>
+              <div className="h-40 w-40 rounded-xl border-2 border-white/80 shadow-[0_0_0_100vmax_rgba(0,0,0,.35)] outline outline-white/20"></div>
             </div>
-            <div className="absolute right-2 bottom-2 left-2 rounded bg-black/30 px-2 py-1 text-xs text-white/90">
-              {isScanning ? "Scanning…" : "Camera idle"}
-              {error && ` • ${error}`}
-            </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => (isScanning ? stopCamera() : startCamera(facing))}
-              className="text-bg-dark rounded-xl border bg-white px-3 py-2"
+            {/* Single photo icon (choose from gallery) */}
+            <label
+              className="absolute right-3 bottom-3 z-10 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/95 shadow-md hover:bg-white"
+              title="เลือกจากรูปภาพ"
             >
-              {isScanning ? "Stop" : "Start"} camera
-            </button>
-            <button
-              onClick={() => {
-                const next = facing === "environment" ? "user" : "environment";
-                setFacing(next);
-                startCamera(next);
-              }}
-              className="text-bg-dark rounded-xl border bg-white px-3 py-2"
-            >
-              Flip camera
-            </button>
-            <button
-              onClick={async () => {
-                const ok = await setTorch(!torchOn);
-                if (!ok) alert("Torch not supported on this device/browser.");
-              }}
-              className="text-bg-dark rounded-xl border bg-white px-3 py-2"
-            >
-              {torchOn ? "Torch off" : "Torch on"}
-            </button>
-
-            <label className="text-bg-dark cursor-pointer rounded-xl border bg-white px-3 py-2 text-center">
-              Choose photo
               <input
                 type="file"
                 accept="image/*"
-                className="text-bg-dark hidden"
+                className="hidden"
                 onChange={(e) => decodeFile(e.target.files?.[0])}
               />
+              {/* Photo/gallery icon */}
+              <FaImages className="text-primary-pink" size={24} />
             </label>
-          </div>
 
-          <div className="rounded-2xl border bg-white p-3">
-            <div className="mb-1 text-xs text-gray-500">Scanned userId</div>
-            <pre className="text-bg-dark text-sm break-words whitespace-pre-wrap">
-              {lastResult || "—"}
-            </pre>
-            {scannedUserId && (
-              <div className="mt-2 text-xs text-gray-500">
-                {scannedLoading
-                  ? "Loading recipient…"
-                  : scannedUser
-                    ? `Recipient: ${scannedUser?.line_display_name ?? scannedUser?.username ?? scannedUser?.name ?? scannedUser?.id}`
-                    : "Recipient not found"}
-              </div>
-            )}
+            {/* Status bar */}
+            <div className="absolute right-2 bottom-2 left-2 rounded bg-black/30 px-2 py-1 text-xs text-white/90">
+              {isScanning ? "กำลังสแกน…" : "Camera idle"}
+              {error && ` • ${error}`}
+            </div>
           </div>
         </div>
       )}
