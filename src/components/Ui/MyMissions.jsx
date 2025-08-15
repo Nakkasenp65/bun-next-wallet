@@ -7,7 +7,12 @@ import MyMissionCard from "../MissionComponents/MyMissionCard";
 import { FaSearchPlus } from "react-icons/fa";
 import Link from "next/link";
 
-export default function MyMissions({ missions, userData, onDoMission }) {
+export default function MyMissions({
+  missions,
+  userData,
+  onDoMission,
+  onClaim,
+}) {
   if (!missions || missions.length === 0) {
     // อาจจะแสดงข้อความว่า "ยังไม่มีภารกิจที่กำลังทำอยู่" แทนการ return null
     return (
@@ -41,8 +46,10 @@ export default function MyMissions({ missions, userData, onDoMission }) {
           <MyMissionCard
             key={userMission.id}
             userMission={userMission}
+            userId={userData?.id}
             cardSize={"main"}
             onDoMission={onDoMission}
+            onClaim={onClaim}
           />
         ))}
         {missions && (

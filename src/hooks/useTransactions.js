@@ -32,11 +32,12 @@ export function useCreateInternalTransfer({ onSuccessCallback }) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createInternalTransfer,
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("โอนเงินสำเร็จ!");
       setTimeout(() => {}, 500);
       queryClient.invalidateQueries({ queryKey: ["user"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
+
       if (onSuccessCallback) {
         onSuccessCallback();
       }

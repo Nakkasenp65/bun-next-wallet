@@ -13,12 +13,8 @@ const LiffContext = createContext({
   // safe wrappers so your app won’t crash outside LIFF
   actions: {
     closeWindow: () => {},
-    login: () => {},
-    logout: () => {},
     openWindow: (_url, _external) => {},
-    share: async (_messages) => {},
-    getOS: () => "web",
-    isInClient: () => false,
+    text: () => {},
   },
 });
 
@@ -39,6 +35,12 @@ export function LiffProvider({ children }) {
       pictureUrl:
         "https://profile.line-scdn.net/0hPsTql5LvD1x5CB7EtsVxYglYDDZaeVZOVjxHahgOUGhMPU9ZVDxIORwJAj5BOhxZAWxBakoIV21bTUB3DWgHYz9BU24mUxsKPhhEezdwJwJNQTdDFRZGXRB2BRAsbhxKUDFHXDVTUDIMbD5jU2oBcTpMFWpFQCxrN19jCnw6Yd8WCngJVG9GOE4BU2_M",
     };
+    const thirdProfile = {
+      userId: "U87dc3cebcbaecb31cf42e2efd55af2cc",
+      displayName: "PINTO🍊",
+      pictureUrl:
+        "https://profile.line-scdn.net/0h33pF1d5RbBxdP30rE1ASYy1vb3Z-TjUOJV4kfWloNihoD35KIVklcmA9YHkwXysZJlogf2xqZShRLBt6Q2mQKFoPMS1hCSlIeFsg8g",
+    };
     const testProfile = {
       userId: "U669f6092308023f227aa435c803b2e74",
       displayName: "Zzz59🧚🏻♀️🌈",
@@ -50,7 +52,7 @@ export function LiffProvider({ children }) {
       if (server === "dev") {
         // Dev mode: mock login/profile, mark as ready
         setIsLoggedIn(true);
-        setLiffProfile(longProfile); // or longProfile
+        setLiffProfile(thirdProfile); // or longProfile
         setLineAccessToken("dev");
         setLiffReady(false); // no real LIFF in dev
         setIsLoading(false);
@@ -97,7 +99,6 @@ export function LiffProvider({ children }) {
         console.error("[LIFF closeWindow error]", e);
       }
     },
-
     openWindow: (url, external = false) => {
       try {
         if (server === "dev") {
@@ -109,7 +110,6 @@ export function LiffProvider({ children }) {
         console.error("[LIFF openWindow error]", e);
       }
     },
-
     text: async (message) => {
       try {
         if (server === "dev") {

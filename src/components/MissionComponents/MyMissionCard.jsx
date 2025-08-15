@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { motion } from "framer-motion";
 import { AiOutlineGift, AiFillCheckCircle } from "react-icons/ai";
@@ -5,14 +6,16 @@ import { GrMoney } from "react-icons/gr";
 import { FaHourglassHalf, FaExclamation } from "react-icons/fa";
 import clsx from "clsx";
 import useCountdown from "@/hooks/useCountdown"; // Import hook ที่เพิ่งสร้าง
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const MyMissionCard = ({
   userMission,
   onDoMission,
   onClaim,
   cardSize,
+  userId,
   type,
+  usedOn = "mainPage",
 }) => {
   const {
     mission,
@@ -22,18 +25,15 @@ const MyMissionCard = ({
     userExpiresAt,
     claimExpiresAt,
   } = userMission;
-
   // คำนวณ % ความคืบหน้า
   const progressPercent =
     completeProgress > 0 ? (currentProgress / completeProgress) * 100 : 0;
-
   const countdownTarget =
     status === "AWAITING_CLAIM" ? claimExpiresAt : userExpiresAt;
   // ดึงค่า timeLeft และ isCounting ออกมาจาก hook
-
   const { timeLeft, isCounting } = useCountdown(countdownTarget);
-
   const showTimer = Boolean(isCounting || timeLeft === "หมดเวลา");
+  const router = useRouter();
 
   // ฟังก์ชันสำหรับแสดงผลปุ่ม CTA และสถานะต่างๆ
   const renderCTA = () => {
@@ -42,7 +42,7 @@ const MyMissionCard = ({
         return (
           <button
             type="button"
-            onClick={() => onDoMission(mission)}
+            onClick={() => onDoMission(mission, usedOn)}
             className="w-full rounded-xl bg-white px-4 py-2 text-base font-bold text-pink-500 shadow-md transition-transform hover:-translate-y-0.5 focus:ring-2 focus:ring-white/70 focus:outline-none"
             aria-label="เริ่มทำภารกิจ"
           >
@@ -54,7 +54,11 @@ const MyMissionCard = ({
           <motion.button
             type="button"
             whileTap={{ scale: 0.95 }}
-            onClick={onClaim}
+            onClick={() => {
+              if (usedOn === "mainPage") {
+                onClaim({ userId: userId, userMissionId: userMission.id });
+              }
+            }}
             className="w-full rounded-xl bg-white px-4 py-2 text-base font-bold text-orange-600 shadow-lg focus:ring-2 focus:ring-white/70 focus:outline-none"
             aria-label="รับรางวัล"
           >
@@ -108,7 +112,7 @@ const MyMissionCard = ({
         <div className="rounded-full bg-black/20 p-2">
           <AiOutlineGift size={24} />
         </div>
-        <h3 className="truncate text-lg font-bold">{mission.title}</h3>
+        <h3 className="truncate text-lg font-bold">{mission?.title}</h3>
       </div>
 
       {/* Progress Bar & Status */}
@@ -156,10 +160,10 @@ const MyMissionCard = ({
           <span className="text-xs text-white/80">รางวัล</span>
           <div className="flex items-baseline gap-1 text-xl font-bold text-amber-300">
             <GrMoney />
-            <span>{mission.rewardAmount}</span>
+            <span>{mission?.rewardAmount}</span>
           </div>
         </div>
-        {/* <div className="w-32">{renderCTA()}</div> */}
+        <div className="w-32">{renderCTA()}</div>
       </div>
     </motion.div>
   );

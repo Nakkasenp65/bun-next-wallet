@@ -10,8 +10,6 @@ import { useUser } from "@/hooks/useUser";
 import { useParams, useRouter } from "next/navigation";
 import { FaChevronLeft } from "react-icons/fa";
 import clsx from "clsx";
-import Loading from "@/components/StatusComponents/Loading";
-import ErrorComponent from "@/components/Ui/ErrorComponent";
 import MyMissionCard from "@/components/MissionComponents/MyMissionCard";
 import AvailableMissionCard from "@/components/Ui/AvailableMissionCard";
 import MissionGridSkeleton from "@/components/MissionComponents/MissionGridSkeleton";
@@ -65,11 +63,11 @@ export default function Page() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {myMissions.map((userMission) => (
             <MyMissionCard
+              type={"missionPage"}
               key={userMission.id}
               userMission={userMission}
-              onDoMission={() =>
-                router.push(`/mission/${userMission.missionId}`)
-              }
+              onDoMission={() => router.push(`/`)}
+              usedOn="missionPage"
               onClaim={() => claim({ userId, userMissionId: userMission.id })}
             />
           ))}

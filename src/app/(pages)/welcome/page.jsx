@@ -19,9 +19,9 @@ import Loading from "@/components/StatusComponents/Loading";
 export default function Page() {
   const router = useRouter();
   const { liffProfile } = useLiff();
-  const { data: mainServerUserProfile, isError } = useMainServerUser(
-    liffProfile?.userId,
-  );
+  // const { data: mainServerUserProfile, isError } = useMainServerUser(
+  //   liffProfile?.userId,
+  // );
   const [isUserChecked, setIsUserChecked] = useState(false);
   const [goal, setGoal] = useState({});
   const [uiStep, setUiStep] = useState("input");
@@ -86,13 +86,13 @@ export default function Page() {
           ? inputData.customOccupation
           : inputData.occupation;
       // ข้อมูลจาก server หลัก
-      const { fullname, phone, pin, chat_url } = mainServerUserProfile;
+      // const { fullname, phone, pin, chat_url } = mainServerUserProfile;
 
       // Test purpose ไม่เช็ค mobi เพราะไม่มีสมาชิก
       let notHavingData = {
         fullname: "test",
         phone: "test",
-        pin: 123456,
+        pin: "123456",
         chat_url: "test",
       };
 
@@ -106,7 +106,7 @@ export default function Page() {
         monthlyPayment: inputData.monthlyPayment,
         fullname: notHavingData.fullname,
         chat_url: notHavingData.chat_url,
-        pin: notHavingData.chat_url,
+        pin: notHavingData.pin,
         phone: notHavingData.phone,
         referToCode: inputData.referToCode,
         planId,
@@ -144,7 +144,7 @@ export default function Page() {
     goal.planId,
     liffProfile,
     inputData,
-    mainServerUserProfile,
+    // mainServerUserProfile,
     createGoalMutate,
   ]);
 

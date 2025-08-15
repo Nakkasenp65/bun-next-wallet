@@ -22,20 +22,15 @@ const claimMissionRewardAPI = async ({ userId, userMissionId }) => {
 
 export const useClaimMission = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: claimMissionRewardAPI,
-
-    onMutate: async (variables) => {
+    onSuccess: async (variables) => {
       const { userId, userMissionId } = variables;
       const myKey = ["myMissions", userId];
-
       // Cancel outgoing fetches so they don't overwrite our optimistic update
       await queryClient.cancelQueries({ queryKey: myKey });
-
       // Snapshot previous cache
       const prevMyMissions = queryClient.getQueryData(myKey);
-
       // Optimistically mark mission as CLAIMED (only if it was AWAITING_CLAIM)
       if (Array.isArray(prevMyMissions)) {
         const next = prevMyMissions.map((um) => {
@@ -144,6 +139,7 @@ export const useGetMyMissions = (userId) => {
     queryKey: ["myMissions", userId],
     queryFn: () => fetchMyMissions(userId),
     enabled: !!userId,
+    refetchInterval: 1000 * 30,
   });
 };
 

@@ -2,42 +2,22 @@
 //REACT HOOKS AND LIBRARY IMPORT
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 
 // PROVIDERS AND HOOKS
 import { useLiff } from "@/components/provider/LiffProvider";
-import { useLockStatus, useUser, useUserStatus } from "@/hooks/useUser";
-import { useGetMyMissions, useGetAvailableMissions } from "@/hooks/useMission";
-import { useSuccessTransactions } from "@/hooks/useTransactions";
+import { useLockStatus } from "@/hooks/useUser";
 
 // UI & PAGE COMPONENTS
 import LockScreen from "@/components/Ui/LockScreen"; // <-- IMPORTANT: Import the lock screen
 import Loading from "@/components/StatusComponents/Loading";
 import ErrorComponent from "@/components/Ui/ErrorComponent";
-import WalletHeader from "@/components/Ui/WalletHeader";
-import SavingsGoalCard from "../components/Ui/SavingGoalCard";
-import ActionGrid from "../components/Ui/ActionGrid";
-import SavingsMission from "../components/Ui/SavingsMission";
-import BottomNav from "../components/Ui/BottomNav";
-import MyMissions from "@/components/Ui/MyMissions";
-import MainTransactionList from "@/components/TransactionComponents/MainTransactionList";
-import RedeemConfirmationModal from "@/components/Ui/RedeemConfirmation";
-import TransferPage from "@/components/pages/TransferPage";
-import WithdrawPage from "@/components/pages/WithdrawPage";
-import DepositPage from "@/components/pages/DepositPage";
-import GoalPage from "@/components/pages/GoalPage";
-import NotificationPage from "@/components/pages/NotificationPage";
-import ContactPage from "@/components/pages/ContactPage";
 
-// SKELETONS
-import WalletHeaderSkeleton from "@/components/SkeletonComponents/WalletHeaderSkeleton";
-import SavingsGoalCardSkeleton from "@/components/SkeletonComponents/SavingGoalCardSkeleton";
+// MAINPAGE COMPONENT
 import MainPage from "@/components/pages/MainPage";
 
 export default function HomePage() {
   const router = useRouter();
   const { liffProfile, isLoggedIn } = useLiff();
-
   const [gateStatus, setGateStatus] = useState("CHECKING"); // CHECKING | REDIRECTING | LOCKED | ALLOWED
   const {
     data: userStatus,

@@ -14,8 +14,8 @@ import {
 } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import MenuItem from "./MenuItem";
+import { useLiff } from "../provider/LiffProvider";
 
-// ... formatJoinDate function (remains the same) ...
 const formatJoinDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString("th-TH", {
@@ -26,6 +26,7 @@ const formatJoinDate = (dateString) => {
 };
 
 export default function Profile({ user }) {
+  const { actions } = useLiff();
   const router = useRouter();
   const [copyButtonText, setCopyButtonText] = useState("คัดลอก");
 
@@ -139,28 +140,18 @@ export default function Profile({ user }) {
             onClick={() => router.push(`/profile/${user.line_user_id}/edit`)}
           />
           <div className="border-t border-gray-100" />
-          <MenuItem
-            icon={<FaBell />}
-            title="การแจ้งเตือน"
-            subtitle="ตั้งค่าการรับข่าวสารและโปรโมชั่น"
-            onClick={() => router.push("/settings/notifications")}
-          />
+
           <div className="border-t border-gray-100" />
           <MenuItem
             icon={<FaQuestionCircle />}
             title="ศูนย์ช่วยเหลือ"
             subtitle="คำถามที่พบบ่อยและติดต่อเจ้าหน้าที่"
-            onClick={() => router.push("/help-center")}
-          />
-          <div className="border-t border-gray-100" />
-          <MenuItem
-            icon={<FaSignOutAlt />}
-            title="ออกจากระบบ"
-            subtitle="ออกจากระบบเพื่อความปลอดภัย"
             onClick={() => {
-              /* Add logout logic here */
+              actions.text("ติดต่อเจ้าหน้าที่");
+              actions.closeWindow();
             }}
           />
+          <div className="border-t border-gray-100" />
         </motion.div>
       </motion.div>
     </div>

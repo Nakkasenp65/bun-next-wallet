@@ -84,9 +84,6 @@ export function useCreateGoal() {
       const { data } = await axios.post(`/user`, goalData);
       return data;
     },
-    // `onSuccess` จะได้รับ (data, variables, context)
-    // data from { data } = await axios.post
-    // variables from goalData ที่เราส่งเข้ามา
     onSuccess: async (data) => {
       toast.success("สร้างเป้าหมายการออมเงินสำเร็จ!");
       setTimeout(() => {

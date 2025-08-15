@@ -5,11 +5,14 @@ import toast from "react-hot-toast";
 
 // PROVIDERS AND HOOKS
 import { useUser } from "@/hooks/useUser";
-import { useGetMyMissions, useGetAvailableMissions } from "@/hooks/useMission";
+import {
+  useGetMyMissions,
+  useGetAvailableMissions,
+  useClaimMission,
+} from "@/hooks/useMission";
 import { useSuccessTransactions } from "@/hooks/useTransactions";
 
 // UI & PAGE COMPONENTS
-import Loading from "../StatusComponents/Loading";
 import ErrorComponent from "../Ui/ErrorComponent";
 import WalletHeader from "../Ui/WalletHeader";
 import SavingsGoalCard from "../Ui/SavingGoalCard";
@@ -29,15 +32,20 @@ import ContactPage from "./ContactPage";
 // SKELETONS
 import WalletHeaderSkeleton from "@/components/SkeletonComponents/WalletHeaderSkeleton";
 import SavingsGoalCardSkeleton from "../SkeletonComponents/SavingGoalCardSkeleton";
+import { useNotification } from "@/hooks/useNotification";
+import { useRouter } from "next/navigation";
 
 export default function MainPage({ liffProfile }) {
   const date = new Date();
-
+  const router = useRouter();
   const {
     data: userData,
     isLoading: isUserDataLoading,
     error: isUserDataError,
   } = useUser(liffProfile?.userId);
+
+  const { data: notificationData, isLoading: notificationLoading } =
+    useNotification(userData?.id);
 
   console.log("userData main page: \n", userData);
 
@@ -86,6 +94,11 @@ export default function MainPage({ liffProfile }) {
     toast("เก็บเงินเพิ่มอีกนิดเพื่อรางวัลที่ใหญ่กว่า!", { icon: "🚀" });
     setShowGoal(true);
   };
+  const claimRewardMutation = useClaimMission();
+
+  const handleClaimMission = ({ userId, userMissionId }) => {
+    claimRewardMutation.mutate({ userId, userMissionId });
+  };
 
   const handleDoMission = (mission, location) => {
     if (!mission || !mission.type) return;
@@ -94,17 +107,21 @@ export default function MainPage({ liffProfile }) {
 
     switch (mission.type) {
       case "ONBOARDING":
+        if (location === "mainPage") setShowDeposit(true);
+        else router.push("/");
       case "ACCUMULATION":
-        setShowDeposit(true);
+        if (location === "mainPage") setShowDeposit(true);
+        else router.push("/");
         break;
       case "STREAK":
         // For these types, we open the deposit page.
-        setShowDeposit(true);
+        if (location === "mainPage") setShowDeposit(true);
+        else router.push("/");
         break;
 
       case "REFERRAL":
         // For this type, we construct a link and copy it to the clipboard.
-        const referralLink = `https://your-app-domain.com/join?ref=${userData.referralCode}`;
+        const referralLink = `https://lin.ee/0ab3Rcl`;
         navigator.clipboard
           .writeText(referralLink)
           .then(() => {
@@ -123,15 +140,6 @@ export default function MainPage({ liffProfile }) {
     }
   };
 
-  // Show a skeleton for the whole page while the main user data is loading.
-  // if (isUserDataLoading) {
-  //   return (
-  //     <div className="gradient-background flex h-dvh w-full items-center justify-center">
-  //       <Loading message={"Loading user data..."} />
-  //     </div>
-  //   );
-  // }
-
   if (isUserDataError || missionError || transactionError)
     return <ErrorComponent />;
 
@@ -148,10 +156,11 @@ export default function MainPage({ liffProfile }) {
             goalProduct={userData?.goal?.product}
           />
           <NotificationPage
-            userData={userData}
-            notificationData={userData?.notifications}
+            userId={userData?.id}
             showNotifications={showNotifications}
             setShowNotifications={setShowNotifications}
+            notificationData={notificationData}
+            notificationLoading={notificationLoading}
           />
           <TransferPage
             userData={userData}
@@ -193,7 +202,7 @@ export default function MainPage({ liffProfile }) {
                   userName={userData.line_display_name}
                   profileUrl={userData.line_profile_url}
                   setShowNotifications={setShowNotifications}
-                  notifications={userData.notifications}
+                  notifications={notificationData}
                   userLineId={userData.line_user_id}
                 />
                 <SavingsGoalCard
@@ -224,6 +233,7 @@ export default function MainPage({ liffProfile }) {
                   missions={myMission}
                   userData={userData}
                   onDoMission={handleDoMission}
+                  onClaim={handleClaimMission}
                 />
                 <SavingsMission
                   missions={availableMission}

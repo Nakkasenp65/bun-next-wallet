@@ -2,16 +2,18 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
 const fetchNotifications = async (userId) => {
+  console.log("fetch notification: ", userId);
   const { data } = await axios.get(`/notification/${userId}`);
   return data.data;
 };
 
-// --- Data Fetching ---
-export function useNotification(userData) {
+export function useNotification(userId) {
+  console.log("useNotification: ", userId);
   return useQuery({
-    queryKey: ["notifications", userData?.id],
-    queryFn: () => fetchNotifications(userData.id),
-    enabled: !!userData, // Fetch only when userData is available
+    queryKey: ["notification", userId],
+    queryFn: () => fetchNotifications(userId),
+    enabled: !!userId,
+    refetchInterval: 1000 * 30,
   });
 }
 
@@ -22,26 +24,22 @@ export function useNotification(userData) {
 export function useMarkNotificationAsRead() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ notificationId }) => {
+    mutationFn: async ({ userId, notificationId }) => {
       const { data } = await axios.patch(
         `/notification/${notificationId}/read`,
       );
       return data;
     },
-    // This is the key change. We manually update the 'user' query cache.
     onSuccess: (data, variables) => {
       // `variables.userId` is the line_user_id we pass from the component
       queryClient.setQueryData(["user", variables.userId], (oldUserData) => {
         if (!oldUserData) return oldUserData;
-
         // Create a new user object to avoid direct mutation
         const newUserData = { ...oldUserData };
-
         // Map over the old notifications to create a new array
         newUserData.notifications = oldUserData.notifications.map((n) =>
           n.id === variables.notificationId ? { ...n, isRead: true } : n,
         );
-
         return newUserData;
       });
     },
