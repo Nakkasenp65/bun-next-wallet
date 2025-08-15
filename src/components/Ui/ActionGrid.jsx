@@ -56,7 +56,7 @@ export default function ActionGrid({
   return (
     <motion.div
       id="actions-grid"
-      className="grid grid-cols-4 gap-2" // Changed to grid-cols-5 for perfect alignment
+      className="flex items-center justify-around gap-2"
       variants={gridVariants}
       initial="hidden"
       animate="visible"
@@ -64,7 +64,7 @@ export default function ActionGrid({
       {actionItems.map((item) => (
         <div
           key={item.key}
-          className={`group flex cursor-pointer flex-col items-center gap-2`}
+          className={`group flex cursor-pointer flex-col items-center justify-evenly gap-2`}
           onClick={item.action}
         >
           <div

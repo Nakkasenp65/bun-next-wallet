@@ -182,8 +182,6 @@ html {
 body {
   font-family: var(--font-main);
   background-color: var(--bg-dark);
-  /* height: 100vh;
-  overflow: hidden; */
   color: var(--light-text);
   touch-action: manipulation;
   font-smooth: always;

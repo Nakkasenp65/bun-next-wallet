@@ -9,7 +9,7 @@ const apiUrl = serverOption === "dev" ? devApiUrl : productionApiUrl;
 console.log("CHECK API URL", apiUrl);
 
 const axiosInstance = axios.create({
-  baseURL: devApiUrl,
+  baseURL: productionApiUrl,
   headers: {
     "Content-Type": "application/json",
   },

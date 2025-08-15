@@ -19,9 +19,9 @@ import Loading from "@/components/StatusComponents/Loading";
 export default function Page() {
   const router = useRouter();
   const { liffProfile } = useLiff();
-  // const { data: mainServerUserProfile, isError } = useMainServerUser(
-  //   liffProfile?.userId,
-  // );
+  const { data: mainServerUserProfile, isError } = useMainServerUser(
+    liffProfile?.userId,
+  );
   const [isUserChecked, setIsUserChecked] = useState(false);
   const [goal, setGoal] = useState({});
   const [uiStep, setUiStep] = useState("input");
@@ -86,52 +86,52 @@ export default function Page() {
           ? inputData.customOccupation
           : inputData.occupation;
       // ข้อมูลจาก server หลัก
-      // const { fullname, phone, pin, chat_url } = mainServerUserProfile;
+      const { fullname, phone, pin, chat_url } = mainServerUserProfile;
 
       // Test purpose ไม่เช็ค mobi เพราะไม่มีสมาชิก
-      let notHavingData = {
-        fullname: "test",
-        phone: "test",
-        pin: "123456",
-        chat_url: "test",
-      };
+      // let notHavingData = {
+      //   fullname: "test",
+      //   phone: "test",
+      //   pin: "123456",
+      //   chat_url: "test",
+      // };
 
       // Test no mobi user data
-      const dataToPost = {
-        line_user_id,
-        line_display_name,
-        line_profile_url,
-        occupation: finalOccupation,
-        ageRange: inputData.age,
-        monthlyPayment: inputData.monthlyPayment,
-        fullname: notHavingData.fullname,
-        chat_url: notHavingData.chat_url,
-        pin: notHavingData.pin,
-        phone: notHavingData.phone,
-        referToCode: inputData.referToCode,
-        planId,
-        mobileId,
-        isLocked: false,
-      };
-      // console.log("TEST PRODUCTION: NO MOBI INFO");
-      // createGoalMutate(dataToPost);
-      // return;
-
       // const dataToPost = {
       //   line_user_id,
       //   line_display_name,
       //   line_profile_url,
-      //   mobileId,
-      //   planId,
-      //   fullname,
-      //   phone,
-      //   pin,
-      //   chat_url,
-      //   referToCode: inputData.referToCode,
       //   occupation: finalOccupation,
       //   ageRange: inputData.age,
       //   monthlyPayment: inputData.monthlyPayment,
+      //   fullname: notHavingData.fullname,
+      //   chat_url: notHavingData.chat_url,
+      //   pin: notHavingData.pin,
+      //   phone: notHavingData.phone,
+      //   referToCode: inputData.referToCode,
+      //   planId,
+      //   mobileId,
+      //   isLocked: false,
       // };
+      // console.log("TEST PRODUCTION: NO MOBI INFO");
+      // createGoalMutate(dataToPost);
+      // return;
+
+      const dataToPost = {
+        line_user_id,
+        line_display_name,
+        line_profile_url,
+        mobileId,
+        planId,
+        fullname,
+        phone,
+        pin,
+        chat_url,
+        referToCode: inputData.referToCode,
+        occupation: finalOccupation,
+        ageRange: inputData.age,
+        monthlyPayment: inputData.monthlyPayment,
+      };
 
       // createGoalMutate = call mutation function -> useCreateGoal inside useUser.js
       createGoalMutate(dataToPost);
@@ -144,7 +144,7 @@ export default function Page() {
     goal.planId,
     liffProfile,
     inputData,
-    // mainServerUserProfile,
+    mainServerUserProfile,
     createGoalMutate,
   ]);
 
@@ -167,10 +167,10 @@ export default function Page() {
       } catch (error) {
         if (error.status === 404) {
           // Not found from api : (not registered user)
-          // router.replace("https://liff.line.me/2006703040-RYAyYAyA");
-          toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
-          setIsUserChecked(true);
-          setIsRegistered(true);
+          router.replace("https://liff.line.me/2006703040-RYAyYAyA");
+          // toast.success("ยินดีต้อนรับสู่บริการออมดาวน์!");
+          // setIsUserChecked(true);
+          // setIsRegistered(true);
         } else if (error.status === 500)
           toast.error("ขออภัย ขณะเกิดข้อผิดพลาดระหว่างการดำเนินการ!");
       }

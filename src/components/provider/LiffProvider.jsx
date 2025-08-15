@@ -52,7 +52,7 @@ export function LiffProvider({ children }) {
       if (server === "dev") {
         // Dev mode: mock login/profile, mark as ready
         setIsLoggedIn(true);
-        setLiffProfile(thirdProfile); // or longProfile
+        setLiffProfile(longProfile); // or longProfile
         setLineAccessToken("dev");
         setLiffReady(false); // no real LIFF in dev
         setIsLoading(false);

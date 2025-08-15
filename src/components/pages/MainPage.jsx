@@ -108,15 +108,15 @@ export default function MainPage({ liffProfile }) {
     switch (mission.type) {
       case "ONBOARDING":
         if (location === "mainPage") setShowDeposit(true);
-        else router.push("/");
+        else router.push("/homePage");
       case "ACCUMULATION":
         if (location === "mainPage") setShowDeposit(true);
-        else router.push("/");
+        else router.push("/homePage");
         break;
       case "STREAK":
         // For these types, we open the deposit page.
         if (location === "mainPage") setShowDeposit(true);
-        else router.push("/");
+        else router.push("/homePage");
         break;
 
       case "REFERRAL":
@@ -189,9 +189,9 @@ export default function MainPage({ liffProfile }) {
         </>
       )}
 
-      <div className="gradient-background font-main relative flex h-dvh w-full flex-col overflow-hidden lg:mx-auto lg:max-w-[450px] lg:shadow-lg">
-        <main className="relative flex-grow overflow-y-auto">
-          <section className="flex flex-col gap-10 px-6 py-4 pb-8">
+      <div className="gradient-background font-main relative flex h-dvh w-full flex-col lg:mx-auto lg:max-w-[450px] lg:shadow-lg">
+        <main className="relative overflow-y-auto">
+          <section className="flex flex-col gap-10 px-4 py-4 pb-8">
             {isUserDataLoading ? (
               <>
                 <WalletHeaderSkeleton /> <SavingsGoalCardSkeleton />{" "}
@@ -223,12 +223,17 @@ export default function MainPage({ liffProfile }) {
               setShowGoal={setShowGoal}
             />
           </section>
-          <section className="relative flex min-h-[400px] flex-col items-center gap-8 rounded-t-3xl bg-white px-6 pt-10 pb-28 shadow-lg">
-            <div className="absolute top-3 flex h-2 w-full items-center justify-center">
+          <section className="relative flex min-h-[400px] flex-col items-center gap-8 rounded-t-3xl bg-white px-4 pt-10 pb-28 shadow-lg">
+            <div className="absolute top-3 flex h-4 w-full items-center justify-center">
               <span className="h-1.5 w-10 rounded-full bg-gray-300" />
             </div>
             {isUserDataLoading ? null : (
               <>
+                <MainTransactionList
+                  transactions={transactions}
+                  transactionLoading={transactionLoading}
+                  transactionError={transactionError}
+                />
                 <MyMissions
                   missions={myMission}
                   userData={userData}
@@ -238,11 +243,6 @@ export default function MainPage({ liffProfile }) {
                 <SavingsMission
                   missions={availableMission}
                   userData={userData}
-                />
-                <MainTransactionList
-                  transactions={transactions}
-                  transactionLoading={transactionLoading}
-                  transactionError={transactionError}
                 />
               </>
             )}

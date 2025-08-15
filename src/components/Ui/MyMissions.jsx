@@ -41,7 +41,7 @@ export default function MyMissions({
       </div>
 
       {/* Horizontal Scroll Container */}
-      <div className="-m-2 flex gap-4 overflow-x-auto p-2">
+      <div className="flex gap-4 overflow-x-auto">
         {missions.map((userMission) => (
           <MyMissionCard
             key={userMission.id}

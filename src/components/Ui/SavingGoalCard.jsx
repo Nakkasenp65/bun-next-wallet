@@ -63,7 +63,7 @@ export default function SavingsGoalCard({
     <div
       id="savings-goal-card"
       className={[
-        "relative flex flex-col gap-3 overflow-hidden rounded-3xl p-6",
+        "relative flex flex-col gap-2 overflow-hidden rounded-3xl p-6",
         "text-light-text shadow-neon-purple inset-shadow-lg inset-shadow-black/36",
         "drop-shadow-primary-pink/50 drop-shadow-lg [background:linear-gradient(45deg,_#230640_0%,_#402E99_100%)]",
         className,

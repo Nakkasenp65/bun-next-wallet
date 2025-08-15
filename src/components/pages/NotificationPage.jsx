@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import FramerDiv from "../framerComponents/FramerDiv";
 import NotificationTab from "../NotificationComponents/NotificationTab";
@@ -27,12 +27,6 @@ export default function NotificationPage({
       markAsReadMutation.mutate({ userId, notificationId: notification.id });
     }
   };
-
-  useEffect(() => {
-    if (showNotifications) {
-      handleClear();
-    }
-  }, [showNotifications, activeTab]);
 
   const handleClear = () => {
     if (notificationData.length > 0) {
@@ -76,9 +70,8 @@ export default function NotificationPage({
             <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
               การแจ้งเตือน
             </h2>
-            <div className="w-6"></div>
           </header>
-          <div className="flex flex-grow flex-col overflow-y-auto rounded-t-[30px] bg-white">
+          <div className="flex flex-grow flex-col overflow-y-auto rounded-t-4xl bg-white">
             <div className="flex flex-shrink-0 items-center justify-between px-4">
               {/* Tabs */}
               <div className="flex flex-shrink-0 grow pr-4">

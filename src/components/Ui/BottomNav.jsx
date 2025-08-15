@@ -22,7 +22,7 @@ export default function BottomNav({ setShowContact, userId }) {
   ];
 
   return (
-    <nav className="absolute bottom-0 z-10 flex w-full items-center justify-around border-t bg-white/95 py-2.5 shadow-md shadow-black/75 backdrop-blur-lg">
+    <nav className="absolute bottom-0 z-10 flex w-full items-center justify-around border-t bg-white/85 py-2.5 shadow-md shadow-black/75 backdrop-blur-sm">
       {/* Left side items */}
       <NavItem
         label={navItems[0].label}
