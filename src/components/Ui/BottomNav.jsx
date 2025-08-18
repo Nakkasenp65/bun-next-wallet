@@ -11,18 +11,23 @@ import {
 import NavItem from "./NavItem";
 import Link from "next/link";
 
-export default function BottomNav({ setShowContact, userId }) {
+export default function BottomNav({ setShowContact, line_user_id }) {
   const [activeNav, setActiveNav] = useState("home");
 
   const navItems = [
     { id: "home", label: "หน้าแรก", icon: faHouse, url: "/" },
-    { id: "my-qr", label: "QR ของฉัน", icon: faIdCard, url: `/myQr/${userId}` },
+    {
+      id: "my-qr",
+      label: "QR ของฉัน",
+      icon: faIdCard,
+      url: `/myQr/${line_user_id}`,
+    },
     { id: "history", label: "ประวัติ", icon: faFileLines, url: "/history" },
     { id: "contact", label: "ติดต่อ", icon: faHeadset, url: "/contact" },
   ];
 
   return (
-    <nav className="absolute bottom-0 z-10 flex w-full items-center justify-around border-t bg-white/85 py-2.5 shadow-md shadow-black/75 backdrop-blur-sm">
+    <nav className="fixed bottom-0 z-10 flex w-full items-center justify-around border-t bg-white/85 py-2.5 shadow-md shadow-black/75 backdrop-blur-sm">
       {/* Left side items */}
       <NavItem
         label={navItems[0].label}
@@ -41,7 +46,7 @@ export default function BottomNav({ setShowContact, userId }) {
 
       {/* Center Scan Button */}
       <Link
-        href={`/scan/${userId}`}
+        href={`/scan/${line_user_id}`}
         id="scan-to-pay-btn"
         className="group -mt-9 cursor-pointer"
         onClick={() => setActiveNav("scan")}

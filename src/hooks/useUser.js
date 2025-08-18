@@ -27,7 +27,7 @@ async function fetchUserFromMainServer(lineUserId) {
   try {
     if (!mainUserApiUrl) throw new Error("mainUserApiUrl is not defined");
     const { data } = await externalLinkAxios.get(
-      `${process.env.NEXT_PUBLIC_MAIN_USER_API}${lineUserId}`,
+      `${mainUserApiUrl}${lineUserId}`,
     );
     mainUser = data;
     console.log(mainUser);

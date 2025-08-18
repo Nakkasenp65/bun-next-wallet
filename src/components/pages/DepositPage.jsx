@@ -13,7 +13,6 @@ import { FaQrcode } from "react-icons/fa6";
 import jsQR from "jsqr";
 import toast from "react-hot-toast";
 import clsx from "clsx";
-import Image from "next/image";
 
 import CtaButton from "../Ui/CtaButton";
 import FramerDiv from "../framerComponents/FramerDiv";
@@ -155,7 +154,7 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
       formData.append("name", "ฝากเงินออม");
       formData.append("type", "INCOME");
       formData.append("status", "PENDING");
-      formData.append("from", userData.username);
+      formData.append("from", userData.line_display_name);
       formData.append("to", "Aom-Down App");
       formData.append("walletId", userData.wallet.id);
       formData.append("userId", userData.id);

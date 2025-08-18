@@ -34,13 +34,10 @@ export default function DropDownComponent({
   // --- NEW: Check if the options are simple strings or objects ---
   // This makes the component backward compatible with your UserInputMonthly.jsx
   const isObjectOptions = options.length > 0 && typeof options[0] === "object";
-  console.log(isObjectOptions);
 
   const getDisplayLabel = () => {
     if (isObjectOptions) {
-      console.log(options);
       const selectedOption = options.find((option) => option.value === value);
-      console.log(selectedOption);
       return selectedOption ? selectedOption.label : placeholder;
     }
     // For simple string arrays
@@ -58,7 +55,6 @@ export default function DropDownComponent({
   }, [isOpen]);
 
   const handleOptionClick = (optionValue) => {
-    console.log("OPTION VLAUE", optionValue);
     // --- NEW: Simulate the event object for backward compatibility ---
     // This is the key to making it work with UserInputMonthly's generic handleChange
     const simulatedEvent = {

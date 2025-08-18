@@ -1,8 +1,9 @@
 import React from "react";
 import Transaction from "./Transaction";
-import { RiExternalLinkFill } from "react-icons/ri";
-import FramerLink from "../Ui/FramerLink";
 import TransactionSkeleton from "../Ui/TransactionSkeleton";
+import { FaArrowRightLong } from "react-icons/fa6";
+import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function MainTransactionList({
   transactions,
@@ -11,11 +12,9 @@ export default function MainTransactionList({
 }) {
   if (!transactions) {
     return (
-      <div className="grid h-56 w-full grid-cols-1 items-center justify-center">
+      <div className="grid h-max w-full grid-cols-1 items-center justify-center">
         {transactionLoading ? (
           <>
-            <TransactionSkeleton />
-            <TransactionSkeleton />
             <TransactionSkeleton />
             <TransactionSkeleton />
           </>
@@ -35,20 +34,21 @@ export default function MainTransactionList({
   if (transactions.length > 0)
     return (
       <div className="flex w-full flex-col gap-2">
-        <header className="flex justify-between">
-          <h2 className="text-bg-dark flex items-center gap-2 text-lg font-bold">
-            <div className="h-6 w-1 rounded-full bg-yellow-500" />
-            รายการล่าสุด
-          </h2>
-
-          <FramerLink
-            link={"/history"}
-            icon={<RiExternalLinkFill size={16} />}
-            backgroundColor={"bg-amber-500"}
-          >
-            ดูทั้งหมด
-          </FramerLink>
-        </header>
+        <Link href={"/history"} className={"flex w-full"}>
+          <header className="flex w-full justify-between">
+            <h2 className="text-bg-dark flex items-center gap-2 text-lg font-bold">
+              <div className="h-10 w-1 rounded-full bg-yellow-500" />
+              รายการล่าสุด
+            </h2>
+            <motion.div
+              whileTap={{ scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 1000, damping: 20 }}
+              className={`rounded-full bg-amber-500/5 p-3`}
+            >
+              <FaArrowRightLong className={`text-amber-500`} size={16} />
+            </motion.div>
+          </header>
+        </Link>
         <ul id="transaction-list-container">
           {transactions.slice(0, 5).map((transaction) => {
             if (transaction.status !== "PENDING")

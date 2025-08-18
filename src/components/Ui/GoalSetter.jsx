@@ -44,11 +44,9 @@ export default function GoalSetter({
   const filteredProducts = useMemo(() => {
     if (!products) return [];
     if (selectedCondition === "มือสอง") {
-      return products
-        .filter((p) => p.model.startsWith("2nd "))
-        .map((p) => ({ ...p, model: p.model.substring(4) }));
+      return products.filter((p) => p.uniqueId && p.uniqueId.includes("2nd"));
     }
-    return products.filter((p) => !p.model.startsWith("2nd "));
+    return products.filter((p) => !p.uniqueId || !p.uniqueId.includes("2nd"));
   }, [products, selectedCondition]);
 
   const groupedData = useMemo(() => {
@@ -86,8 +84,15 @@ export default function GoalSetter({
     [selectedBrand, selectedModel, selectedCapacity, groupedData],
   );
 
+  // --- FIXED LOGIC ---
+  // Use `new Set()` to ensure the `colors` array contains only unique values.
+  // This prevents the "duplicate key" error in React when rendering the color buttons.
   const colors = useMemo(
-    () => availableProductsInVariant.map((p) => p.color),
+    () => [
+      ...new Set(
+        availableProductsInVariant.map((p) => p.color).filter((c) => c),
+      ),
+    ],
     [availableProductsInVariant],
   );
 
@@ -101,10 +106,8 @@ export default function GoalSetter({
     [brands],
   );
 
-  // FIXED: Use useCallback to memoize handlers and prevent cascading updates
   const handleBrandChange = useCallback((newBrand) => {
     setSelectedBrand(newBrand);
-    // Reset dependent selections
     setSelectedModel("");
     setSelectedCapacity("");
     setSelectedProduct(null);
@@ -112,7 +115,6 @@ export default function GoalSetter({
 
   const handleModelChange = useCallback((newModel) => {
     setSelectedModel(newModel);
-    // Reset dependent selections
     setSelectedCapacity("");
     setSelectedProduct(null);
   }, []);
@@ -132,25 +134,20 @@ export default function GoalSetter({
     [availableProductsInVariant],
   );
 
-  // FIXED: Improved auto-selection logic with proper cascading
-
-  // Reset selections when condition changes and auto-select first brand
+  // Auto-selection logic
   useEffect(() => {
     setSelectedBrand("");
     setSelectedModel("");
     setSelectedCapacity("");
     setSelectedProduct(null);
 
-    // Auto-select first brand immediately after reset
     if (brands.length > 0) {
-      // Use setTimeout to ensure state updates are processed
       setTimeout(() => {
         setSelectedBrand(brands[0]);
       }, 0);
     }
   }, [selectedCondition, brands]);
 
-  // Auto-select first model when brand changes and models are available
   useEffect(() => {
     if (selectedBrand && models.length > 0 && !selectedModel) {
       setSelectedModel(models[0]);
@@ -161,7 +158,6 @@ export default function GoalSetter({
     }
   }, [selectedBrand, models, selectedModel]);
 
-  // Auto-select first capacity when model changes and capacities are available
   useEffect(() => {
     if (
       selectedBrand &&
@@ -176,7 +172,6 @@ export default function GoalSetter({
     }
   }, [selectedBrand, selectedModel, capacities, selectedCapacity]);
 
-  // Auto-select first product when capacity changes and products are available
   useEffect(() => {
     if (
       selectedBrand &&
@@ -240,7 +235,6 @@ export default function GoalSetter({
     });
   }, [selectedProduct]);
 
-  // FIXED: Stable goal change effect with primitive dependencies
   useEffect(() => {
     const planData = savingPlans.find((p) => p.id === selectedPlan);
     if (selectedProduct?.id && planData?.planId) {
@@ -249,9 +243,8 @@ export default function GoalSetter({
         planId: planData.planId,
       });
     }
-  }, [selectedProduct?.id, selectedPlan, onGoalChange]);
+  }, [selectedProduct?.id, selectedPlan, onGoalChange, savingPlans]);
 
-  // Debug logging to help identify issues
   useEffect(() => {
     console.log("GoalSetter Debug:", {
       brands: brands.length,
@@ -360,7 +353,7 @@ export default function GoalSetter({
                 optionsContainerClassName="p-2"
                 optionClassName="rounded-lg font-semibold"
               />
-              {colors.length > 1 && colors[0] !== "N/A" && (
+              {colors.length > 1 && (
                 <div className="flex flex-col items-start justify-between gap-2">
                   <span className="font-medium text-slate-600">สี:</span>
                   <div className="flex flex-wrap gap-2">

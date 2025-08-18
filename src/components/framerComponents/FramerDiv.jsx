@@ -6,21 +6,19 @@ import { memo } from "react";
 const FramerDiv = memo(({ isOpen, children, className }) => {
   const variants = {
     hidden: {
-      y: "100%",
-      opacity: 0,
+      x: "100%",
       transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 40,
+        // 👇 ปรับแก้ตรงนี้
+        duration: 0.3, // กำหนดระยะเวลา (หน่วยเป็นวินาที)
+        ease: "easeInOut", // กำหนด easing function
       },
     },
     visible: {
-      y: 0,
-      opacity: 1,
+      x: 0,
       transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 40,
+        // 👇 และตรงนี้
+        duration: 0.3,
+        ease: "easeInOut",
       },
     },
   };

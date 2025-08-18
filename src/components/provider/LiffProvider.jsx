@@ -53,8 +53,10 @@ export function LiffProvider({ children }) {
         // Dev mode: mock login/profile, mark as ready
         setIsLoggedIn(true);
         setLiffProfile(longProfile); // or longProfile
-        setLineAccessToken("dev");
-        setLiffReady(false); // no real LIFF in dev
+        setLineAccessToken(
+          "eyJhbGciOiJIUzI1NiJ9.JP5zfZ9uMOv1iJwwWmwLrQCehGDF_Hn9A7OfykMd0YVjb9Fbr7AEYK3rfIdBecTYptwM3-dlRuVKUttcPMQ-kS_1aCPS0GZAeT9ZUTVBH-vadLr_SZ2ZHzRshtsgu3lc2AohRd9adT17A_yQzc3axckNKbS4nOtwkd7BePvYDpY.ycOHiFI4uHgRrU1zOok0bg6ObFSMUiR-INgDWDglxNE",
+        );
+        setLiffReady(true); // no real LIFF in dev
         setIsLoading(false);
         return;
       }
@@ -69,14 +71,16 @@ export function LiffProvider({ children }) {
           setLiffProfile(profile);
           setIsLoading(false);
           const accessToken = liff.getAccessToken();
+          console.log("Access token liff provider: ", accessToken);
           setLineAccessToken(accessToken || "");
         } else {
-          liff.login(); // redirect into LINE
+          liff.login();
         }
       } catch (e) {
         console.error("[LIFF init error]", e);
       }
     };
+
     init();
   }, []);
 

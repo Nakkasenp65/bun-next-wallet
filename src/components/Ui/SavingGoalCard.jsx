@@ -1,8 +1,10 @@
 "use client";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { IoMdTrophy } from "react-icons/io";
 import Image from "next/image";
 import CtaButton from "./CtaButton";
+import { IoMdRefresh } from "react-icons/io";
+import { MdOutlineStar } from "react-icons/md";
 
 const fmtTHB = (n) =>
   (Number(n) || 0).toLocaleString("th-TH", {
@@ -22,11 +24,22 @@ export default function SavingsGoalCard({
   name,
   target, // downPaymentAmount
   balance = 0,
-  bonusBalance = 0, // <-- เพิ่มเพื่อแสดงและนับรวม
+  bonusBalance = 0,
   imageUrl,
   handleRedeem,
   className = "",
+  isRefreshing,
+  onRefresh,
 }) {
+  const [refreshAnimation, setRefreshAnimation] = useState(false);
+  const handleOnClickRefresh = async () => {
+    setRefreshAnimation(true);
+    onRefresh();
+    setTimeout(() => {
+      // Checking if the userData is still fetching
+      if (!isRefreshing) setRefreshAnimation(false);
+    }, 1945);
+  };
   const {
     pctTotal,
     pctBase,
@@ -63,7 +76,7 @@ export default function SavingsGoalCard({
     <div
       id="savings-goal-card"
       className={[
-        "relative flex flex-col gap-2 overflow-hidden rounded-3xl p-6",
+        "relative flex flex-col gap-2 overflow-hidden rounded-4xl p-6",
         "text-light-text shadow-neon-purple inset-shadow-lg inset-shadow-black/36",
         "drop-shadow-primary-pink/50 drop-shadow-lg [background:linear-gradient(45deg,_#230640_0%,_#402E99_100%)]",
         className,
@@ -76,19 +89,18 @@ export default function SavingsGoalCard({
       />
 
       {/* Angled product visual (robust for any ratio via object-contain) */}
-      <div className="pointer-events-none absolute -right-16 -bottom-18 -rotate-6 sm:-bottom-12 sm:-rotate-10">
+      <div className="pointer-events-none absolute -right-10 -bottom-10">
         <div className="relative aspect-square w-[160px] sm:w-[300px]">
           {imageUrl ? (
             <Image
               fill
               sizes="(min-width: 640px) 300px, 225px"
-              className="animate-floating drop-shadow-primary-pink/50 object-contain drop-shadow-2xl"
+              className="animate-floating drop-shadow-primary-orange/90 object-contain drop-shadow-2xl"
               src={imageUrl}
               alt={`${brand} ${name}`}
               priority
             />
           ) : (
-            // use <img> for animated gif (Next/Image may strip anim on some setups)
             <img
               className="animate-floating drop-shadow-primary-pink/50 object-contain drop-shadow-2xl"
               src="/videos/moneyLoading.gif"
@@ -102,24 +114,35 @@ export default function SavingsGoalCard({
 
       {/* title area */}
       <div className="flex items-start justify-between">
-        <div className="min-w-0">
-          <div className="mb-1 flex items-center gap-1">
-            <IoMdTrophy className="text-accent-gold drop-shadow-accent-gold/50 h-4 w-4" />
-            <span className="text-xs text-white/80">เป้าหมายดาวน์</span>
+        {/* title */}
+        <div className="w-full">
+          <div className="flex w-full items-center justify-between gap-1">
+            <div className="flex gap-1">
+              <IoMdTrophy className="text-accent-gold drop-shadow-accent-gold/50 h-4 w-4" />
+              <span className="text-xs text-white/80">เป้าหมายดาวน์</span>
+            </div>
+            {/* Refresh Button */}
+            <span
+              className="text-xs text-white/50"
+              aria-live="polite"
+              title="เปอร์เซ็นต์ความคืบหน้า (รวมโบนัส)"
+            >
+              <button className="flex items-center gap-0.5">
+                <IoMdRefresh
+                  onClick={handleOnClickRefresh}
+                  className={`${refreshAnimation ? "animate-spin" : null}`}
+                  size={16}
+                />
+                รีเฟรช
+              </button>
+            </span>
           </div>
-          <h3 className="truncate text-base leading-snug font-semibold">
-            {brand} {name}
+          <h3 className="mt-2 truncate text-xl leading-snug font-semibold">
+            {brand === "vivo" ? null : brand} {name}
           </h3>
         </div>
 
         {/* progress pill = % ของ (balance + bonus) */}
-        <span
-          className="rounded-full bg-white/10 px-2 py-1 text-[10px] font-bold text-white/90 ring-1 ring-white/20"
-          aria-live="polite"
-          title="เปอร์เซ็นต์ความคืบหน้า (รวมโบนัส)"
-        >
-          {Math.round(pctTotal)}%
-        </span>
       </div>
 
       {/* balances */}
@@ -132,24 +155,25 @@ export default function SavingsGoalCard({
         </div>
         <div className="rounded-xl bg-black/35 px-3 py-2 ring-1 ring-white/10">
           <div className="text-[10px] text-white/70">โบนัส</div>
-          <div className="bg-gradient-to-r from-green-500 via-lime-500 to-amber-500/70 bg-clip-text text-xl font-extrabold text-transparent drop-shadow">
+          <div className="to-accent-gold via-accent-gold bg-gradient-to-r from-green-500 bg-clip-text text-xl font-extrabold text-transparent drop-shadow">
             {fmtTHB(bonusBalance)}
           </div>
         </div>
       </div>
 
       {/* total and target */}
-      <div className="mt-1 flex max-w-md items-center justify-between">
-        <span className="rounded-full bg-black/40 px-2 py-1 text-[10px] text-white/90 ring-1 ring-white/10">
-          รวมสำหรับแลก: <strong>{fmtTHB(totalForRedeem)}</strong>
+      <div className="mt-1 flex w-4/6 max-w-md items-center justify-between">
+        <span className="flex gap-0.5 rounded-full bg-black/40 px-2 py-1 text-[10px] text-white/90 ring-1 ring-white/10">
+          {remaining > 0 ? `อีก: ${fmtTHB(remaining)}` : "พร้อมแลกแล้ว"}
         </span>
-        <span className="rounded-full bg-black/40 px-2 py-1 text-[10px] text-white/90 ring-1 ring-white/10">
+        <span className="flex items-center gap-0.5 rounded-full bg-black/40 px-2 py-1 text-[10px] text-white/90 ring-1 ring-white/10">
+          <MdOutlineStar className="text-accent-gold mt-0.5" size={12} />
           ดาวน์: <strong>{fmtTHB(target)}</strong>
         </span>
       </div>
 
       {/* stacked progress bar: base + bonus overlay */}
-      <div className="mt-2 w-[70%] max-w-xs">
+      <div className="mt-2 w-4/6 max-w-xs">
         <div
           className="relative h-3 w-full overflow-hidden rounded-full bg-black/45 shadow-inner ring-1 ring-white/10"
           role="progressbar"
@@ -160,12 +184,12 @@ export default function SavingsGoalCard({
         >
           {/* base (เงินสะสม) */}
           <div
-            className="absolute inset-y-0 left-0 rounded-l-full [background:linear-gradient(90deg,_var(--gold-accent)_0%,_var(--primary-pink)_100%)]"
+            className="from-primary-pink to-accent-gold absolute inset-y-0 left-0 rounded-l-full bg-gradient-to-r"
             style={{ width: `${pctBase}%` }}
           />
           {/* bonus (ทับส่วนที่เกินจากฐาน) */}
           <div
-            className="absolute inset-y-0 rounded-r-full [background:repeating-linear-gradient(45deg,rgba(255,255,255,0.7)_0_4px,rgba(255,255,255,0.15)_4px_8px)]"
+            className="from-accent-gold absolute inset-y-0 rounded-r-full bg-gradient-to-r via-green-500 to-green-500"
             style={{
               left: `${pctBase}%`,
               width: `${pctBonusOnly}%`,
@@ -176,16 +200,13 @@ export default function SavingsGoalCard({
         </div>
 
         <div className="mt-2 flex items-center justify-between text-[10px] text-white/90">
-          <span className="rounded-full bg-black/40 px-2 py-1 ring-1 ring-white/10">
-            {remaining > 0 ? `อีก: ${fmtTHB(remaining)}` : "พร้อมแลกแล้ว"}
-          </span>
           <span className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1">
               <span className="inline-block h-2 w-3 rounded-sm [background:linear-gradient(90deg,_var(--gold-accent)_0%,_var(--primary-pink)_100%)]" />
               เงินสะสม
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="inline-block h-2 w-3 rounded-sm [background:repeating-linear-gradient(45deg,rgba(255,255,255,0.7)_0_4px,rgba(255,255,255,0.15)_4px_8px)]" />
+              <span className="inline-block h-2 w-3 rounded-sm bg-gradient-to-r from-green-500 to-lime-500" />
               โบนัส
             </span>
           </span>
@@ -197,7 +218,7 @@ export default function SavingsGoalCard({
         <div className="mt-2">
           <CtaButton
             onClick={handleRedeem}
-            className="z-10 w-48 rounded-xl p-4 text-sm font-bold"
+            className="z-10 w-4/6 rounded-xl p-4 text-sm font-bold"
             aria-label="เริ่มขั้นตอนการดาวน์"
           >
             เริ่มการดาวน์!

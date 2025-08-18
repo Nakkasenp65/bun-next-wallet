@@ -153,7 +153,9 @@ export default function Transaction({ transaction }) {
               {transaction.description && (
                 <div className="flex items-start gap-2 rounded-md bg-blue-50 p-2 text-blue-800">
                   <FaInfoCircle className="mt-0.5 flex-shrink-0" />
-                  <p className="text-xs">{transaction.description}</p>
+                  <p className="text-xs whitespace-pre-wrap">
+                    {transaction.description}
+                  </p>
                 </div>
               )}
 

@@ -50,15 +50,18 @@ export default function WalletHeader({
       </Link>
 
       {/* App Logo (Centered) */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1">
         <Image
           src="/okNumberOne.png"
           alt="1 Wallet Logo"
-          className="h-12 w-12 shadow-sm"
+          className="h-6 w-6 shadow-sm"
           width={200}
           height={200}
           priority
         />
+        <span className="animate-shining drop-shadow-primary-pink/50 bg-gradient-to-l from-pink-100 via-white to-pink-100 bg-[length:200%_100%] bg-clip-text text-xl font-bold whitespace-nowrap text-transparent drop-shadow-md">
+          Wallet
+        </span>
       </div>
 
       {/* Header Actions */}

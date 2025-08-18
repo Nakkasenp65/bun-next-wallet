@@ -9,10 +9,10 @@ export default function WalletHeaderSkeleton() {
     >
       {/* Left: profile */}
       <div className="flex items-center justify-center gap-1.5">
-        <div className="h-10 w-10 animate-pulse rounded-full bg-gray-200" />
+        <div className="h-10 w-10 animate-pulse rounded-full bg-gray-200/25" />
         <div className="flex flex-col gap-1">
-          <div className="h-3 w-10 animate-pulse rounded bg-gray-200" />
-          <div className="h-3 w-20 animate-pulse rounded bg-gray-200" />
+          <div className="h-3 w-10 animate-pulse rounded bg-gray-200/25" />
+          <div className="h-3 w-20 animate-pulse rounded bg-gray-200/25" />
         </div>
       </div>
 
@@ -30,10 +30,10 @@ export default function WalletHeaderSkeleton() {
 
       {/* Right: actions */}
       <div className="flex items-center gap-2">
-        <div className="h-7 w-7 animate-pulse rounded bg-gray-200" />
+        <div className="h-7 w-7 animate-pulse rounded bg-gray-200/25" />
         <div className="relative">
-          <div className="h-7 w-7 animate-pulse rounded bg-gray-200" />
-          <span className="absolute -top-1.5 -right-2 h-5 w-5 animate-pulse rounded-full bg-gray-300" />
+          <div className="h-7 w-7 animate-pulse rounded bg-gray-200/25" />
+          <span className="absolute -top-1.5 -right-2 h-5 w-5 animate-pulse rounded-full bg-gray-300/25" />
         </div>
       </div>
     </header>

@@ -22,6 +22,7 @@ export default function Page() {
   const { data: mainServerUserProfile, isError } = useMainServerUser(
     liffProfile?.userId,
   );
+
   const [isUserChecked, setIsUserChecked] = useState(false);
   const [goal, setGoal] = useState({});
   const [uiStep, setUiStep] = useState("input");

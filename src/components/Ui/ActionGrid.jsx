@@ -3,37 +3,43 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-// For a more modern, cohesive look, using icons from the popular 'react-icons' library
-import { FaPaperPlane, FaBullseye, FaWallet } from "react-icons/fa6";
-import { FaExternalLinkAlt } from "react-icons/fa";
+import {
+  FaBullseye,
+  FaArrowRightFromBracket,
+  FaMoneyBillWave,
+  FaPiggyBank,
+} from "react-icons/fa6";
+import ActionButton from "./ActionButton";
+import { MdManageAccounts } from "react-icons/md";
+import Link from "next/link";
 
 export default function ActionGrid({
   setShowTransfer,
   setShowWithdraw,
   setShowDeposit,
   setShowGoal,
+  role = "USER",
+  line_user_id = "",
 }) {
-  // A more scalable data structure that can handle both functions and links
   const actionItems = [
     {
       label: "ออมเงิน",
-      icon: FaExternalLinkAlt,
+      icon: FaPiggyBank,
       key: "deposit",
       action: () => setShowDeposit(true),
     },
     {
       label: "โอนเงิน",
-      icon: FaPaperPlane,
+      icon: FaArrowRightFromBracket,
       key: "transfer",
       action: () => setShowTransfer(true),
     },
     {
       label: "ถอนเงิน",
-      icon: FaWallet,
+      icon: FaMoneyBillWave,
       key: "withdraw",
       action: () => setShowWithdraw(true),
     },
-
     {
       label: "เป้าหมาย",
       icon: FaBullseye,
@@ -42,13 +48,12 @@ export default function ActionGrid({
     },
   ];
 
-  // Animation variants for the container to orchestrate children animations
   const gridVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.05, // Each child will animate 0.05s after the previous one
+        staggerChildren: 0.1, // ทำให้ปุ่มค่อยๆ ทยอยปรากฏตัว
       },
     },
   };
@@ -60,24 +65,29 @@ export default function ActionGrid({
       variants={gridVariants}
       initial="hidden"
       animate="visible"
+      transition={{ ease: "easeInOut", duration: 0.5, delay: 0.2 }}
     >
       {actionItems.map((item) => (
-        <div
-          key={item.key}
-          className={`group flex cursor-pointer flex-col items-center justify-evenly gap-2`}
-          onClick={item.action}
-        >
-          <div
-            className={`flex h-14 w-14 items-center justify-center rounded-full bg-(--card-bg-dark) text-xl text-white/90 shadow-md transition-colors group-hover:bg-white/20 backdrop:blur-2xl`}
-          >
-            {/* The Icon component is rendered dynamically */}
-            <item.icon size={28} className="text-(--light-text)" />
-          </div>
-          <span className="text-xs font-bold text-(--light-text) transition-colors group-hover:text-white">
-            {item.label}
-          </span>
-        </div>
+        // เรียกใช้ ActionButton สำหรับแต่ละ item
+        <ActionButton key={item.key} item={item} />
       ))}
+      {role === "ADMIN" && (
+        <Link
+          className="group flex cursor-pointer flex-col items-center justify-center gap-2"
+          href={`/admin/${line_user_id}`}
+        >
+          <motion.div
+            initial="initial"
+            whileTap={"tapping"}
+            className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--card-bg-dark)] text-xl text-white/90 drop-shadow-lg drop-shadow-black/50 backdrop-blur-2xl"
+          >
+            <MdManageAccounts size={32} />
+          </motion.div>
+          <span className="text-sm font-bold text-[var(--light-text)] transition-colors group-hover:text-white">
+            แอดมิน
+          </span>
+        </Link>
+      )}
     </motion.div>
   );
 }

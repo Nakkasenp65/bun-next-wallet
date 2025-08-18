@@ -17,7 +17,7 @@ import ErrorComponent from "../Ui/ErrorComponent";
 import WalletHeader from "../Ui/WalletHeader";
 import SavingsGoalCard from "../Ui/SavingGoalCard";
 import ActionGrid from "../Ui/ActionGrid";
-import SavingsMission from "../Ui/SavingsMission";
+import SavingMission from "../Ui/SavingMission";
 import BottomNav from "../Ui/BottomNav";
 import MyMissions from "../Ui/MyMissions";
 import MainTransactionList from "@/components/TransactionComponents/MainTransactionList";
@@ -34,6 +34,12 @@ import WalletHeaderSkeleton from "@/components/SkeletonComponents/WalletHeaderSk
 import SavingsGoalCardSkeleton from "../SkeletonComponents/SavingGoalCardSkeleton";
 import { useNotification } from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
+import { FcQuestions } from "react-icons/fc";
+import Loading from "../StatusComponents/Loading";
+import TransactionSkeleton from "../Ui/TransactionSkeleton";
+import MissionCardSkeleton from "../SkeletonComponents/MissionCardSkeleton";
+import MissionGridSkeleton from "../SkeletonComponents/MissionGridSkeleton";
+import MyMissionCardSkeleton from "../SkeletonComponents/MyMissionCardSkeleton";
 
 export default function MainPage({ liffProfile }) {
   const date = new Date();
@@ -42,12 +48,12 @@ export default function MainPage({ liffProfile }) {
     data: userData,
     isLoading: isUserDataLoading,
     error: isUserDataError,
+    refetch: refetchUserData,
   } = useUser(liffProfile?.userId);
 
   const { data: notificationData, isLoading: notificationLoading } =
     useNotification(userData?.id);
-
-  console.log("userData main page: \n", userData);
+  const claimRewardMutation = useClaimMission();
 
   const {
     data: transactions,
@@ -79,6 +85,10 @@ export default function MainPage({ liffProfile }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showContact, setShowContact] = useState(false);
 
+  console.log("userData main page: \n", userData);
+  // console.log("notifications main page:\n", notificationData);
+
+  // ดาวน์โทรศัพท์เมื่อยอดเงินถึงเป้าหมาย
   const confirmAndProceedToRedeem = () => {
     setShowRedeemModal(false);
     window
@@ -89,17 +99,30 @@ export default function MainPage({ liffProfile }) {
       ?.focus();
   };
 
+  // เปลี่ยนเป้าหมายตอนสถึงยอดดาวน์
   const handleChangeToCloserGoal = () => {
     setShowRedeemModal(false);
     toast("เก็บเงินเพิ่มอีกนิดเพื่อรางวัลที่ใหญ่กว่า!", { icon: "🚀" });
     setShowGoal(true);
   };
-  const claimRewardMutation = useClaimMission();
 
+  // ฟังก์ชันรับภารกิจ
+
+  // รับภารกิจ
   const handleClaimMission = ({ userId, userMissionId }) => {
     claimRewardMutation.mutate({ userId, userMissionId });
   };
 
+  // ปุ่มรีเฟรชหน้า
+  const handleRefresh = async () => {
+    try {
+      await refetchUserData();
+    } catch (error) {
+      toast.error("Failed to refresh data.");
+    }
+  };
+
+  // กดทำภารกิจแบ่งตามประเภท
   const handleDoMission = (mission, location) => {
     if (!mission || !mission.type) return;
 
@@ -189,7 +212,7 @@ export default function MainPage({ liffProfile }) {
         </>
       )}
 
-      <div className="gradient-background font-main relative flex h-dvh w-full flex-col lg:mx-auto lg:max-w-[450px] lg:shadow-lg">
+      <div className="gradient-background font-main relative flex h-max min-h-dvh w-full flex-col overflow-x-hidden overflow-y-auto lg:mx-auto lg:max-w-[450px] lg:shadow-lg">
         <main className="relative overflow-y-auto">
           <section className="flex flex-col gap-10 px-4 py-4 pb-8">
             {isUserDataLoading ? (
@@ -213,6 +236,8 @@ export default function MainPage({ liffProfile }) {
                   bonusBalance={userData?.wallet.bonusBalance}
                   imageUrl={userData?.goal.product.imageUrl}
                   handleRedeem={() => setShowRedeemModal(true)}
+                  isRefreshing={isUserDataLoading}
+                  onRefresh={handleRefresh}
                 />
               </>
             )}
@@ -221,35 +246,54 @@ export default function MainPage({ liffProfile }) {
               setShowWithdraw={setShowWithdraw}
               setShowDeposit={setShowDeposit}
               setShowGoal={setShowGoal}
+              role={userData?.role}
+              line_user_id={userData?.line_user_id}
             />
           </section>
-          <section className="relative flex min-h-[400px] flex-col items-center gap-8 rounded-t-3xl bg-white px-4 pt-10 pb-28 shadow-lg">
+          <section className="relative flex min-h-[500px] flex-col items-center gap-8 rounded-t-3xl bg-white px-4 pt-10 pb-28 shadow-lg">
             <div className="absolute top-3 flex h-4 w-full items-center justify-center">
               <span className="h-1.5 w-10 rounded-full bg-gray-300" />
             </div>
-            {isUserDataLoading ? null : (
+            {isUserDataLoading ? (
+              <div className="grid h-56 w-full grid-cols-1 items-center justify-center">
+                <TransactionSkeleton />
+                <TransactionSkeleton />
+                <TransactionSkeleton />
+                <TransactionSkeleton />
+              </div>
+            ) : (
               <>
                 <MainTransactionList
                   transactions={transactions}
                   transactionLoading={transactionLoading}
                   transactionError={transactionError}
                 />
-                <MyMissions
-                  missions={myMission}
-                  userData={userData}
-                  onDoMission={handleDoMission}
-                  onClaim={handleClaimMission}
-                />
-                <SavingsMission
-                  missions={availableMission}
-                  userData={userData}
-                />
+                {myMissionLoading ? (
+                  <MyMissionCardSkeleton />
+                ) : (
+                  <MyMissions
+                    missions={myMission}
+                    line_user_id={userData?.line_user_id}
+                    userId={userData?.userId}
+                    onDoMission={handleDoMission}
+                    onClaim={handleClaimMission}
+                  />
+                )}
+                {missionLoading ? (
+                  <MyMissionCardSkeleton />
+                ) : (
+                  <SavingMission
+                    userId={userData?.id}
+                    line_user_id={userData?.line_user_id}
+                    missions={availableMission}
+                  />
+                )}
               </>
             )}
           </section>
         </main>
         <BottomNav
-          userId={userData?.line_user_id}
+          line_user_id={userData?.line_user_id}
           setShowContact={setShowContact}
         />
       </div>

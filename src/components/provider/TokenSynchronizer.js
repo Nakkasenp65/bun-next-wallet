@@ -4,16 +4,17 @@ import { useLiff } from "./LiffProvider";
 import { setAuthToken } from "@/lib/tokenManager";
 
 export default function TokenSynchronizer() {
-  const { accessToken } = useLiff();
+  const { lineAccessToken } = useLiff();
+  console.log("access token: ", lineAccessToken);
 
   useEffect(() => {
-    if (accessToken) {
+    if (lineAccessToken) {
       console.log(
         "TokenSynchronizer: New access token received from LIFF. Updating token manager.",
       );
-      setAuthToken(accessToken);
+      setAuthToken(lineAccessToken);
     }
-  }, [accessToken]);
+  }, [lineAccessToken]);
 
   return null;
 }

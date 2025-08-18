@@ -8,8 +8,6 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { LiffProvider } from "@/components/provider/LiffProvider";
 import TokenSynchronizer from "@/components/provider/TokenSynchronizer";
 import { LockProvider } from "@/components/context/LockContext";
-import AppLockController from "@/components/provider/AppLockController";
-import AppGate from "@/components/provider/AppGate";
 
 const toastIconClass = "h-12 w-auto animate-pulse";
 const toastWaiting = "animate-spin text-primary-pink";

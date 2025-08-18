@@ -84,23 +84,11 @@ export default function MyQr() {
           )}
         </div>
 
-        {/* Download button */}
-        {/* <button
-          onClick={handleDownload}
-          disabled={!qrDataUrl}
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-black px-4 py-5 font-medium text-white disabled:opacity-50"
-        >
-          <FontAwesomeIcon icon={faDownload} />
-          บันทึก QR
-        </button> */}
-
-        {/* Close */}
-        {/* <button
-          onClick={handleClose}
-          className="mt-auto w-full rounded-xl border px-4 py-3"
-        >
-          ปิด
-        </button> */}
+        <div>
+          <p className="bg-yellow-200 p-4 text-amber-500">
+            แสกนเพื่อแสกนรับเงินจากบัญชีผู้ใช้อื่น
+          </p>
+        </div>
       </div>
     </div>
   );
