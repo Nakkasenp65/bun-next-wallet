@@ -1,6 +1,6 @@
 import React from "react";
 import Transaction from "./Transaction";
-import { useTransactions } from "@/hooks/useTransactions";
+import { useWalletTransaction } from "@/hooks/useTransactions";
 import Loading from "../StatusComponents/Loading";
 
 // Example data matching the original script
@@ -11,7 +11,7 @@ export default function TransactionList({ walletId }) {
     data: transactions,
     isLoading: transactionLoading,
     error: transactionError,
-  } = useTransactions(date.getFullYear(), date.getMonth(), walletId);
+  } = useWalletTransaction(date.getFullYear(), date.getMonth(), walletId);
 
   console.log("TRANSACTIONS: ", transactions);
   if (transactionLoading || transactionError) {
@@ -29,7 +29,9 @@ export default function TransactionList({ walletId }) {
         <ul id="transaction-list-container">
           {transactions.map((transaction) => {
             if (transaction.status !== "PENDING")
-              return <Transaction key={transaction.id} transaction={transaction} />;
+              return (
+                <Transaction key={transaction.id} transaction={transaction} />
+              );
           })}
         </ul>
       </div>

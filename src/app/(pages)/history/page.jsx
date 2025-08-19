@@ -7,7 +7,7 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
-import { useTransactions } from "@/hooks/useTransactions";
+import { useWalletTransaction } from "@/hooks/useTransactions";
 import CtaButton from "@/components/Ui/CtaButton";
 import Transaction from "@/components/TransactionComponents/Transaction";
 import { useUser } from "@/hooks/useUser";
@@ -50,7 +50,7 @@ export default function HistoryPage() {
     data: transactions,
     isLoading: transactionLoading,
     error,
-  } = useTransactions(currentYear, currentMonth, userData?.wallet?.id, {
+  } = useWalletTransaction(currentYear, currentMonth, userData?.wallet?.id, {
     enabled: !!userData,
   });
 

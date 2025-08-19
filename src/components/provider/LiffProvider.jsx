@@ -54,7 +54,7 @@ export function LiffProvider({ children }) {
         setIsLoggedIn(true);
         setLiffProfile(longProfile); // or longProfile
         setLineAccessToken(
-          "eyJhbGciOiJIUzI1NiJ9.JP5zfZ9uMOv1iJwwWmwLrQCehGDF_Hn9A7OfykMd0YVjb9Fbr7AEYK3rfIdBecTYptwM3-dlRuVKUttcPMQ-kS_1aCPS0GZAeT9ZUTVBH-vadLr_SZ2ZHzRshtsgu3lc2AohRd9adT17A_yQzc3axckNKbS4nOtwkd7BePvYDpY.ycOHiFI4uHgRrU1zOok0bg6ObFSMUiR-INgDWDglxNE",
+          "eyJhbGciOiJIUzI1NiJ9.R31CiSb2yneTNZCSMdG3QNN1_2U2Klfemlqr8tSROwqfsZzrJ6acg789FRQvA9_m3KyY6lAiapYKFKIIlwbEO9WKVWLfAIGSHyb0M4Y3BLnnMpx2QNcPkG9BV9hlJ4wc_ZGKVW_KFexC3Kk_xJe7tkoQ2dieHpw4wusd8sh219M.psic9IagEmmI2252oqr2ofROBwLqcj_hq4W9SXfAixY",
         );
         setLiffReady(true); // no real LIFF in dev
         setIsLoading(false);

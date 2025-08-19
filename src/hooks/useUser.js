@@ -5,6 +5,33 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useLockContext } from "@/components/context/LockContext";
 
+// =========================================================
+//  API Request Functions
+// =========================================================
+
+/**
+ * ดึงข้อมูลผู้ใช้ทั้งหมดแบบแบ่งหน้าสำหรับ Admin
+ * @param {object} filters - ตัวกรอง เช่น page, pageSize, search, role
+ */
+async function fetchAdminUsers(filters) {
+  // เราจะส่ง object filters เข้าไปใน `params` ของ axios
+  // axios จะแปลงเป็น query string ให้เอง (เช่น /api/users?page=1&pageSize=10)
+  const { data } = await axios.get("/admin/users", { params: filters });
+  return data; // คาดว่า backend จะ trả về { data, paging }
+}
+
+/**
+ * ดึงข้อมูลผู้ใช้คนเดียวแบบละเอียดสำหรับ Modal
+ * @param {string} userId - Mongo DB ObjectId ของผู้ใช้
+ */
+async function fetchUserById(line_user_id) {
+  // **สำคัญ:** คุณจะต้องสร้าง API Endpoint นี้ในฝั่ง Backend
+  // ที่รับ Mongo ID และ trả vềข้อมูลผู้ใช้ทั้งหมด
+  // เช่น GET /api/users/:userId
+  const { data } = await axios.get(`/admin/users/${line_user_id}`);
+  return data;
+}
+
 async function fetchUserStatus(userId) {
   const { data } = await axios.get(`/user/status/${userId}`);
   return data;
@@ -42,6 +69,63 @@ async function fetchLockStatus(lineUserId) {
   const { data } = await axios.get(`/user/lock/${lineUserId}`);
   console.log("CHECK LOCK DATA: ", data);
   return data;
+}
+
+async function updateAdminUser({ userId, payload }) {
+  // Endpoint นี้คุณต้องสร้างขึ้นมาเพื่อเรียก service ข้างบน
+  const { data } = await axios.patch(`/admin/users/${userId}`, payload);
+  return data;
+}
+
+// =========================================================
+//  Custom Hooks
+// =========================================================
+
+/**
+ * Hook สำหรับดึงข้อมูลผู้ใช้ทั้งหมดสำหรับหน้า Admin Table
+ * @param {object} filters - State ของตัวกรองจากหน้า Page
+ */
+export function useGetAdminUsers(filters) {
+  return useQuery({
+    // queryKey ต้องขึ้นอยู่กับ filters เพื่อให้ re-fetch อัตโนมัติเมื่อ filter เปลี่ยน
+    queryKey: ["adminUsers", filters],
+    queryFn: () => fetchAdminUsers(filters),
+    // keepPreviousData ช่วยให้ UX ดีขึ้นตอนเปลี่ยนหน้า (ข้อมูลเก่าจะยังแสดงอยู่จนกว่าข้อมูลใหม่จะโหลดเสร็จ)
+    keepPreviousData: true,
+  });
+}
+
+/**
+ * Hook สำหรับดึงข้อมูลผู้ใช้คนเดียวแบบละเอียด (สำหรับใช้ใน Modal)
+ * @param {string} userId - Mongo DB ObjectId ของผู้ใช้
+ */
+
+export function useUpdateAdminUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: updateAdminUser,
+    onSuccess: (updatedUser, variables) => {
+      toast.success("อัปเดตข้อมูลผู้ใช้สำเร็จ!");
+      // 1. Invalidate list เพื่อให้ Table โหลดใหม่
+      queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
+      // 2. (สำคัญ) Invalidate user detail เพื่อให้ข้อมูลใน Modal สดใหม่หากเปิดอีกครั้ง
+      queryClient.invalidateQueries({
+        queryKey: ["adminUserDetail", variables.userId],
+      });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการอัปเดต");
+    },
+  });
+}
+
+export function useGetUserById(line_user_id) {
+  return useQuery({
+    queryKey: ["adminUserDetail", line_user_id],
+    queryFn: () => fetchUserById(line_user_id),
+    // Query นี้จะทำงานก็ต่อเมื่อมี userId เท่านั้น (เช่น เมื่อ Modal เปิด)
+    enabled: !!line_user_id,
+  });
 }
 
 export function useUserStatus(lineUserId) {

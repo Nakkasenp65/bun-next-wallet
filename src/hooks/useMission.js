@@ -20,6 +20,27 @@ const claimMissionRewardAPI = async ({ userId, userMissionId }) => {
   return data; // Updated UserMission object
 };
 
+async function fetchAdminMissions(filters) {
+  const { data } = await axios.get("/admin/missions", { params: filters });
+  return data;
+}
+
+async function createMission(payload) {
+  const { data } = await axios.post("/admin/missions", payload);
+  return data;
+}
+
+async function updateMission({ missionId, payload }) {
+  console.log("payload:", missionId);
+  const { data } = await axios.patch(`/admin/missions/${missionId}`, payload);
+  return data;
+}
+
+async function deleteMission(missionId) {
+  const { data } = await axios.delete(`/admin/missions/${missionId}`);
+  return data;
+}
+
 export const useClaimMission = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -202,3 +223,50 @@ export const useSubmitReferral = ({ onSuccess } = {}) => {
     },
   });
 };
+
+export function useGetAdminMissions(filters) {
+  return useQuery({
+    queryKey: ["adminMissions", filters],
+    queryFn: () => fetchAdminMissions(filters),
+    keepPreviousData: true,
+  });
+}
+
+export function useCreateMission() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createMission,
+    onSuccess: () => {
+      toast.success("สร้างภารกิจใหม่สำเร็จ!");
+      queryClient.invalidateQueries({ queryKey: ["adminMissions"] });
+    },
+    onError: (err) =>
+      toast.error(err.response?.data?.message || "สร้างภารกิจไม่สำเร็จ"),
+  });
+}
+
+export function useUpdateMission() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: updateMission,
+    onSuccess: () => {
+      toast.success("บันทึกการเปลี่ยนแปลงสำเร็จ!");
+      queryClient.invalidateQueries({ queryKey: ["adminMissions"] });
+    },
+    onError: (err) =>
+      toast.error(err.response?.data?.message || "อัปเดตภารกิจไม่สำเร็จ"),
+  });
+}
+
+export function useDeleteMission() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteMission,
+    onSuccess: () => {
+      toast.success("ลบภารกิจสำเร็จ!");
+      queryClient.invalidateQueries({ queryKey: ["adminMissions"] });
+    },
+    onError: (err) =>
+      toast.error(err.response?.data?.message || "ลบภารกิจไม่สำเร็จ"),
+  });
+}
