@@ -1,5 +1,5 @@
 "use client";
-import { useUser, useUpdateUser } from "@/hooks/useUser";
+import { useGetUser, useUpdateUser } from "@/hooks/useUser";
 import { useParams } from "next/navigation";
 import EditProfile from "@/components/profile/EditProfile";
 import Loading from "@/components/StatusComponents/Loading";
@@ -11,7 +11,7 @@ export default function Page() {
     data: userData,
     isLoading: isUserDataLoading,
     isError: isUserDataError,
-  } = useUser(params.userId);
+  } = useGetUser(params.userId);
 
   const { mutate: updateUser, isPending: isSaving } = useUpdateUser();
 

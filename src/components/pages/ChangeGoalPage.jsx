@@ -71,7 +71,12 @@ function ModeSwitch({ mode, onChange }) {
   );
 }
 
-export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
+export default function ChangeGoalPage({
+  isEditing,
+  setIsEditing,
+  userData,
+  balance = 0,
+}) {
   const [uiStep, setUiStep] = useState("input"); // 'input' | 'calculate' | 'main' | 'final'
   const [newGoal, setNewGoal] = useState({});
   const [suggestedPhone, setSuggestedPhone] = useState(null);
@@ -111,7 +116,7 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
   // ---- fetch products only when opened (and when mode changes while open) ----
   const fetchProducts = async () => {
     try {
-      const balance = Number(userData?.wallet?.balance || 0);
+      const potentialPrice = Number(balance || 0);
       if (!Number.isFinite(balance) || balance < 0) {
         toast.error("ไม่สามารถคำนวณงบประมาณได้");
         return;
@@ -127,9 +132,9 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
       // Derive min/max by mode (upgrade shows pricier targets than current balance)
       if (mode === "affordable") {
         minPrice = null;
-        maxPrice = balance;
+        maxPrice = potentialPrice;
       } else if (mode === "upgrade") {
-        minPrice = balance;
+        minPrice = potentialPrice;
         maxPrice = null;
       } else {
         // all
@@ -204,8 +209,8 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
     );
   };
 
-  // ---- RENDER ----
-  // Only render the overlay when asked to show
+  console.log("Suggested Phone: \n", suggestedPhone);
+
   if (!isEditing) return null;
 
   const hasProducts =
@@ -235,7 +240,7 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData }) {
         ยอดเงินที่ใช้ได้
         <span className="text-bg-dark ml-2 font-bold">
           ฿
-          {userData?.wallet.balance.toLocaleString("en-US", {
+          {balance.toLocaleString("en-US", {
             minimumFractionDigits: 2,
           })}
         </span>

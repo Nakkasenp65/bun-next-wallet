@@ -1,5 +1,5 @@
 "use client";
-import { useUser } from "@/hooks/useUser";
+import { useGetUser } from "@/hooks/useUser";
 import { useParams } from "next/navigation";
 import Profile from "@/components/profile/Profile"; // Import the new UI component
 import Loading from "@/components/StatusComponents/Loading"; // Assuming you have a Loading component
@@ -11,7 +11,7 @@ export default function Page() {
     data: userData,
     isLoading: isUserDataLoading,
     isError: isUserDataError, // Use isError for clarity
-  } = useUser(params.userId);
+  } = useGetUser(params.userId);
 
   if (isUserDataLoading) {
     return (

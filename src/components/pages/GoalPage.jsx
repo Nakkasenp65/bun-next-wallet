@@ -14,13 +14,18 @@ import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 import Image from "next/image";
 
-export default function GoalPage({ userData, showGoal, setShowGoal }) {
+export default function GoalPage({
+  userData,
+  showGoal,
+  setShowGoal,
+  balance,
+  product = {},
+  plan = {},
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  const savedAmount = Number(userData?.wallet?.balance || 0);
-  const product = userData?.goal?.product || {};
-  const plan = userData?.goal?.plan || {};
+  const savedAmount = Number(balance);
   const targetPrice = Number(product?.downPaymentAmount || 0); // keeping your existing target
   const progressRaw = targetPrice > 0 ? (savedAmount / targetPrice) * 100 : 0;
   const progressPercentage = Math.max(0, Math.min(100, progressRaw));
@@ -53,6 +58,7 @@ export default function GoalPage({ userData, showGoal, setShowGoal }) {
     <>
       <ChangeGoalPage
         userData={userData}
+        balance={balance}
         isEditing={isEditing}
         setIsEditing={setIsEditing}
       />

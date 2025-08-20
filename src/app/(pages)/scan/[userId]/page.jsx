@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import jsQR from "jsqr";
-import { useUser } from "@/hooks/useUser";
+import { useGetUser } from "@/hooks/useUser";
 import dynamic from "next/dynamic";
 import { FaImages } from "react-icons/fa";
 import Link from "next/link";
@@ -24,11 +24,11 @@ export default function Page() {
   const myUserId = Array.isArray(params?.userId)
     ? params.userId[0]
     : params?.userId || "";
-  const { data: myUserData } = useUser?.(myUserId || "") ?? { data: null };
+  const { data: myUserData } = useGetUser?.(myUserId || "") ?? { data: null };
 
   // Recipient (scanned from QR)
   const [scannedUserId, setScannedUserId] = useState("");
-  const { data: scannedUser } = useUser?.(scannedUserId || "") ?? {
+  const { data: scannedUser } = useGetUser?.(scannedUserId || "") ?? {
     data: null,
   };
 

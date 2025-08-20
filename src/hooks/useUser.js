@@ -133,14 +133,16 @@ export function useUserStatus(lineUserId) {
     queryKey: ["userStatus", lineUserId],
     queryFn: () => fetchUserStatus(lineUserId),
     enabled: !!lineUserId,
+    staleTime: 1000 * 60 * 30,
   });
 }
 
-export function useUser(lineUserId) {
+export function useGetUser(lineUserId) {
   return useQuery({
     queryKey: ["user", lineUserId],
     queryFn: () => fetchUser(lineUserId),
     enabled: !!lineUserId,
+    staleTime: 1000 * 60 * 30,
   });
 }
 
@@ -149,6 +151,7 @@ export function useLockStatus(lineUserId) {
     queryKey: ["lockStatus", lineUserId],
     queryFn: () => fetchLockStatus(lineUserId),
     enabled: !!lineUserId,
+    staleTime: 1000 * 60 * 30,
   });
 }
 

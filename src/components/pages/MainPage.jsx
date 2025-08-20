@@ -4,7 +4,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 // PROVIDERS AND HOOKS
-import { useUser } from "@/hooks/useUser";
+import { useGetUser } from "@/hooks/useUser";
 import {
   useGetMyMissions,
   useGetAvailableMissions,
@@ -40,37 +40,58 @@ import TransactionSkeleton from "../Ui/TransactionSkeleton";
 import MissionCardSkeleton from "../SkeletonComponents/MissionCardSkeleton";
 import MissionGridSkeleton from "../SkeletonComponents/MissionGridSkeleton";
 import MyMissionCardSkeleton from "../SkeletonComponents/MyMissionCardSkeleton";
+import { useGetWallet } from "@/hooks/useWallet";
+import { useGetGoal } from "@/hooks/useGoal";
 
 export default function MainPage({ liffProfile }) {
   const date = new Date();
   const router = useRouter();
+
+  // ดึงข้อมูล user ทั้งหมด
   const {
     data: userData,
     isLoading: isUserDataLoading,
     error: isUserDataError,
     refetch: refetchUserData,
-  } = useUser(liffProfile?.userId);
+  } = useGetUser(liffProfile?.userId);
 
+  // ดึงข้อมูล wallet ของ user
+  const {
+    data: wallet,
+    isLoading: walletLoading,
+    error: walletError,
+    refetch: refetchWallet,
+  } = useGetWallet(userData?.id);
+
+  // ดึงข้อมูล goal ของ user
+  const {
+    data: goal,
+    isLoading: goalLoading,
+    error: goalError,
+  } = useGetGoal(userData?.id);
+  // console.log("Goal in main page: \n", goal);
+
+  // ดึงข้อมูลการแจ้งเตือนของ user
   const { data: notificationData, isLoading: notificationLoading } =
     useNotification(userData?.id);
+
   const claimRewardMutation = useClaimMission();
 
+  // ดึงข้อมูลเส้นทางการเงิน (เฉพาะ success)
   const {
     data: transactions,
     isLoading: transactionLoading,
     error: transactionError,
-  } = useSuccessTransactions(
-    date.getFullYear(),
-    date.getMonth(),
-    userData?.wallet.id,
-  );
+  } = useSuccessTransactions(date.getFullYear(), date.getMonth(), wallet?.id);
 
+  // ดึงข้อมูลภารกิจที่สามารถลงทะเบียนได้
   const {
     data: availableMission,
     isLoading: missionLoading,
     error: missionError,
   } = useGetAvailableMissions(userData?.id);
 
+  // ดึงข้อมูลภารกิจที่ลงทะเบียนแล้ว
   const {
     data: myMission,
     isLoading: myMissionLoading,
@@ -86,7 +107,6 @@ export default function MainPage({ liffProfile }) {
   const [showContact, setShowContact] = useState(false);
 
   console.log("userData main page: \n", userData);
-  // console.log("notifications main page:\n", notificationData);
 
   // ดาวน์โทรศัพท์เมื่อยอดเงินถึงเป้าหมาย
   const confirmAndProceedToRedeem = () => {
@@ -116,7 +136,7 @@ export default function MainPage({ liffProfile }) {
   // ปุ่มรีเฟรชหน้า
   const handleRefresh = async () => {
     try {
-      await refetchUserData();
+      await refetchWallet();
     } catch (error) {
       toast.error("Failed to refresh data.");
     }
@@ -175,8 +195,8 @@ export default function MainPage({ liffProfile }) {
             onClose={() => setShowRedeemModal(false)}
             onConfirmRedeem={confirmAndProceedToRedeem}
             onChangeGoal={handleChangeToCloserGoal}
-            currentBalance={userData?.wallet?.balance || 0}
-            goalProduct={userData?.goal?.product}
+            currentBalance={wallet?.balance || 0}
+            goalProduct={goal?.product}
           />
           <NotificationPage
             userId={userData?.id}
@@ -186,22 +206,28 @@ export default function MainPage({ liffProfile }) {
             notificationLoading={notificationLoading}
           />
           <TransferPage
+            balance={wallet?.balance}
             userData={userData}
             showTransfer={showTransfer}
             setShowTransfer={setShowTransfer}
           />
           <WithdrawPage
             userData={userData}
+            balance={wallet?.balance}
             showWithdraw={showWithdraw}
             setShowWithdraw={setShowWithdraw}
           />
           <DepositPage
             userData={userData}
+            balance={wallet?.balance}
             showDeposit={showDeposit}
             setShowDeposit={setShowDeposit}
           />
           <GoalPage
             userData={userData}
+            balance={wallet?.balance}
+            plan={goal?.plan}
+            product={goal?.product}
             showGoal={showGoal}
             setShowGoal={setShowGoal}
           />
@@ -215,7 +241,7 @@ export default function MainPage({ liffProfile }) {
       <div className="gradient-background font-main relative flex h-max min-h-dvh w-full flex-col overflow-x-hidden overflow-y-auto lg:mx-auto lg:max-w-[450px] lg:shadow-lg">
         <main className="relative overflow-y-auto">
           <section className="flex flex-col gap-10 px-4 py-4 pb-8">
-            {isUserDataLoading ? (
+            {isUserDataLoading || walletLoading || goalLoading ? (
               <>
                 <WalletHeaderSkeleton /> <SavingsGoalCardSkeleton />{" "}
               </>
@@ -229,12 +255,12 @@ export default function MainPage({ liffProfile }) {
                   userLineId={userData.line_user_id}
                 />
                 <SavingsGoalCard
-                  brand={userData?.goal.product.brand}
-                  name={userData?.goal.product.model}
-                  target={userData?.goal.product.downPaymentAmount}
-                  balance={userData?.wallet.balance}
-                  bonusBalance={userData?.wallet.bonusBalance}
-                  imageUrl={userData?.goal.product.imageUrl}
+                  brand={goal?.product.brand}
+                  name={goal?.product.model}
+                  target={goal?.product.downPaymentAmount}
+                  balance={wallet?.balance}
+                  bonusBalance={wallet?.bonusBalance}
+                  imageUrl={goal?.product.imageUrl}
                   handleRedeem={() => setShowRedeemModal(true)}
                   isRefreshing={isUserDataLoading}
                   onRefresh={handleRefresh}
@@ -293,6 +319,7 @@ export default function MainPage({ liffProfile }) {
           </section>
         </main>
         <BottomNav
+          // useLiff() ใช้แค่ useLiff ก็ได้
           line_user_id={userData?.line_user_id}
           setShowContact={setShowContact}
         />

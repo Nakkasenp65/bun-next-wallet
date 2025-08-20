@@ -44,7 +44,7 @@ export default function WalletHeader({
           />
           <div className="flex flex-col">
             <div className="text-secondary-text text-xs">สวัสดี</div>
-            <div className="text-[10px]">{userName}</div>
+            <div className="text-[10px] text-white">{userName}</div>
           </div>
         </div>
       </Link>

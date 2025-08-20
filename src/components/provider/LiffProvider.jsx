@@ -47,15 +47,13 @@ export function LiffProvider({ children }) {
       pictureUrl:
         "https://lh3.googleusercontent.com/d/1eXgDln7TvPQGiMpzaUdo7l2hKmsh8Kvc",
     };
-
+    const lineAccessTokenDev = process.env.NEXT_PUBLIC_ACCESS_TOKEN;
     const init = async () => {
       if (server === "dev") {
         // Dev mode: mock login/profile, mark as ready
         setIsLoggedIn(true);
         setLiffProfile(longProfile); // or longProfile
-        setLineAccessToken(
-          "eyJhbGciOiJIUzI1NiJ9.R31CiSb2yneTNZCSMdG3QNN1_2U2Klfemlqr8tSROwqfsZzrJ6acg789FRQvA9_m3KyY6lAiapYKFKIIlwbEO9WKVWLfAIGSHyb0M4Y3BLnnMpx2QNcPkG9BV9hlJ4wc_ZGKVW_KFexC3Kk_xJe7tkoQ2dieHpw4wusd8sh219M.psic9IagEmmI2252oqr2ofROBwLqcj_hq4W9SXfAixY",
-        );
+        setLineAccessToken(lineAccessTokenDev);
         setLiffReady(true); // no real LIFF in dev
         setIsLoading(false);
         return;
@@ -69,10 +67,10 @@ export function LiffProvider({ children }) {
           setIsLoggedIn(true);
           const profile = await liff.getProfile();
           setLiffProfile(profile);
-          setIsLoading(false);
           const accessToken = liff.getAccessToken();
           console.log("Access token liff provider: ", accessToken);
           setLineAccessToken(accessToken || "");
+          setIsLoading(false);
         } else {
           liff.login();
         }

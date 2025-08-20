@@ -22,7 +22,12 @@ import QrContent from "../Payment/QrContent";
 import OtherMethodsContent from "../Payment/OtherMethodsContent";
 import { useCreateSavingTransaction } from "@/hooks/useTransactions";
 
-export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
+export default function DepositPage({
+  balance = 0,
+  userData,
+  showDeposit,
+  setShowDeposit,
+}) {
   const [activeTab, setActiveTab] = useState("transfer");
   const [selectedFile, setSelectedFile] = useState(null);
   // previewUrl will now store a Data URL (base64 string) instead of a blob URL
@@ -199,7 +204,7 @@ export default function DepositPage({ userData, showDeposit, setShowDeposit }) {
                 ยอดเงินปัจจุบัน
                 <span className="text-bg-dark ml-2 font-bold">
                   ฿
-                  {userData?.wallet.balance.toLocaleString("en-US", {
+                  {balance.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}

@@ -15,17 +15,14 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
-  useGetAdminTransactions,
   useUpdateTransaction,
   useCreateTransaction,
 } from "@/hooks/useTransactions";
+import { useGetAdminTransactions } from "@/hooks/useAdmin";
 import VerificationModal from "./components/VerificationModal";
 import DropDownComponent from "@/components/Ui/DropDownComponent"; // Import the reusable DropDownComponent
 import CreateTransactionModal from "./components/CreateTransactionModal";
 
-/* =========================================================
-   UI Sub-components
-========================================================= */
 const StatusTag = ({ status }) => {
   const styles =
     {
@@ -165,9 +162,6 @@ const Toolbar = ({ filters, onFilterChange }) => {
   );
 };
 
-/* =========================================================
-   Main Page Component
-========================================================= */
 export default function AdminTransactionsPage() {
   const [filters, setFilters] = useState({
     page: 1,

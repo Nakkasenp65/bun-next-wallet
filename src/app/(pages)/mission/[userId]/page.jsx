@@ -11,7 +11,7 @@ import {
   useEnrollMission,
   useClaimMission,
 } from "@/hooks/useMission";
-import { useUser } from "@/hooks/useUser";
+import { useGetUser } from "@/hooks/useUser";
 
 import MyMissionCard from "@/components/MissionComponents/MyMissionCard";
 import AvailableMissionCard from "@/components/Ui/AvailableMissionCard";
@@ -107,7 +107,9 @@ export default function Page() {
   const [availableMissionTypeFilter, setAvailableMissionTypeFilter] =
     useState("ALL");
 
-  const { data: userData, isLoading: isUserLoading } = useUser(params.userId);
+  const { data: userData, isLoading: isUserLoading } = useGetUser(
+    params.userId,
+  );
   const userId = userData?.id;
 
   const { data: myMissions, isLoading: myMissionsLoading } =

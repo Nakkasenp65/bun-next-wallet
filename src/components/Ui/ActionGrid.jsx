@@ -79,7 +79,7 @@ export default function ActionGrid({
           <motion.div
             initial="initial"
             whileTap={"tapping"}
-            className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--card-bg-dark)] text-xl text-white/90 drop-shadow-lg drop-shadow-black/50 backdrop-blur-2xl"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--card-bg-dark)] text-xl text-white/90 drop-shadow-lg drop-shadow-black/50 backdrop-blur-2xl"
           >
             <MdManageAccounts size={32} />
           </motion.div>

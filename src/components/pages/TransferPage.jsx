@@ -17,6 +17,7 @@ import { useDebounce } from "use-debounce";
 
 export default function TransferPage({
   userData, // sender
+  balance = 0,
   setShowTransfer,
   showTransfer,
   receiverData = null,
@@ -141,7 +142,7 @@ export default function TransferPage({
             ยอดเงินที่ใช้ได้
             <span className="text-bg-dark ml-2 font-bold">
               ฿
-              {userData?.wallet.balance.toLocaleString("en-US", {
+              {balance.toLocaleString("en-US", {
                 minimumFractionDigits: 2,
               })}
             </span>

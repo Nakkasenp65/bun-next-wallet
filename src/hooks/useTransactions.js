@@ -2,14 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import toast from "react-hot-toast";
 
-// GET: ดึงรายการธุรกรรมทั้งหมด (พร้อม filter และ pagination)
-const fetchTransactions = async (filters) => {
-  // แปลง object filters เป็น query string, เช่น { page: 1, status: 'PENDING' } -> '?page=1&status=PENDING'
-  const params = new URLSearchParams(filters).toString();
-  const { data } = await axios.get(`/admin/transactions?${params}`);
-  return data;
-};
-
 // PATCH: อนุมัติธุรกรรม
 const approveTransaction = async ({ transactionId, amount }) => {
   const { data } = await axios.patch(`/admin/transactions/${transactionId}`, {
@@ -72,12 +64,6 @@ async function createTransactionRequest(payload) {
   return data;
 }
 
-/**
- * ฟังก์ชันสำหรับส่ง request อัปเดตข้อมูลธุรกรรม
- * @param {object} data - ข้อมูล
- * @param {string} data.transactionId - ID ของธุรกรรม
- * @param {object} data.payload - ข้อมูลที่ต้องการอัปเดต (เช่น from, description, status, type)
- */
 async function updateTransactionRequest({ transactionId, payload }) {
   const { data } = await axios.patch(
     `/admin/transactions/${transactionId}`,
@@ -100,13 +86,6 @@ export function useCreateTransaction() {
         error.response?.data?.message || "เกิดข้อผิดพลาดในการสร้างรายการ",
       );
     },
-  });
-}
-
-export function useGetTransactions() {
-  return useQuery({
-    queryKey: ["adminTransactions"],
-    queryFn: () => fetchTransactions(),
   });
 }
 
@@ -156,11 +135,6 @@ export function useSuccessTransactions(year, month, walletId) {
   });
 }
 
-/**
- * Custom Hook สำหรับจัดการการสร้างรายการถอนเงิน
- * @param {object} options - Options
- * @param {Function} options.onSuccessCallback - ฟังก์ชันที่จะเรียกใช้เมื่อสำเร็จ
- */
 export function useWithdrawTransaction({ onSuccessCallback }) {
   const queryClient = useQueryClient();
 
@@ -180,23 +154,11 @@ export function useWithdrawTransaction({ onSuccessCallback }) {
   });
 }
 
-/**
- * ฟังก์ชันสำหรับส่ง request ไปยัง backend เพื่อสร้าง Transaction ใหม่
- * ฟังก์ชันนี้จะถูกเรียกใช้โดย useMutation และจะได้รับ FormData เป็น argument โดยตรง
- * @param {FormData} formData - FormData object ที่มีข้อมูลทั้งหมดจาก DepositPage
- * @returns {Promise<any>} - ข้อมูลที่ได้กลับมาจาก API หลังสร้าง Transaction สำเร็จ
- */
 const createSavingTransactionRequest = async (formData) => {
   const { data } = await axios.post(`/transaction/`, formData);
   return data;
 };
 
-/**
- * Custom Hook สำหรับจัดการการสร้าง Saving Transaction
- * @param {object} options - Options object
- * @param {Function} options.onSuccessCallback - ฟังก์ชันที่จะเรียกใช้เมื่อ mutation สำเร็จ (เช่น ปิดหน้าจอ)
- * @returns {object} - The mutation object from useMutation
- */
 export function useCreateSavingTransaction({ onSuccessCallback }) {
   const queryClient = useQueryClient();
 
@@ -220,22 +182,6 @@ export function useCreateSavingTransaction({ onSuccessCallback }) {
   });
 }
 
-/**
- * Hook สำหรับดึงข้อมูลธุรกรรมสำหรับหน้า Admin
- * @param {object} filters - State ของ filter ที่ใช้ (page, pageSize, status)
- */
-export function useGetAdminTransactions(filters) {
-  return useQuery({
-    // queryKey จะเปลี่ยนตาม filters เพื่อให้ React Query ดึงข้อมูลใหม่เมื่อ filter เปลี่ยน
-    queryKey: ["adminTransactions", filters],
-    queryFn: () => fetchTransactions(filters),
-    keepPreviousData: true, // ทำให้ข้อมูลเก่าแสดงอยู่ขณะโหลดข้อมูลหน้าใหม่ (UX ที่ดีสำหรับ Pagination)
-  });
-}
-
-/**
- * Hook สำหรับจัดการการอนุมัติธุรกรรม
- */
 export function useApproveTransaction() {
   const queryClient = useQueryClient();
   return useMutation({

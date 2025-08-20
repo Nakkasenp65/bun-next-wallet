@@ -20,19 +20,8 @@ const claimMissionRewardAPI = async ({ userId, userMissionId }) => {
   return data; // Updated UserMission object
 };
 
-async function fetchAdminMissions(filters) {
-  const { data } = await axios.get("/admin/missions", { params: filters });
-  return data;
-}
-
 async function createMission(payload) {
   const { data } = await axios.post("/admin/missions", payload);
-  return data;
-}
-
-async function updateMission({ missionId, payload }) {
-  console.log("payload:", missionId);
-  const { data } = await axios.patch(`/admin/missions/${missionId}`, payload);
   return data;
 }
 
@@ -224,14 +213,6 @@ export const useSubmitReferral = ({ onSuccess } = {}) => {
   });
 };
 
-export function useGetAdminMissions(filters) {
-  return useQuery({
-    queryKey: ["adminMissions", filters],
-    queryFn: () => fetchAdminMissions(filters),
-    keepPreviousData: true,
-  });
-}
-
 export function useCreateMission() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -242,19 +223,6 @@ export function useCreateMission() {
     },
     onError: (err) =>
       toast.error(err.response?.data?.message || "สร้างภารกิจไม่สำเร็จ"),
-  });
-}
-
-export function useUpdateMission() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: updateMission,
-    onSuccess: () => {
-      toast.success("บันทึกการเปลี่ยนแปลงสำเร็จ!");
-      queryClient.invalidateQueries({ queryKey: ["adminMissions"] });
-    },
-    onError: (err) =>
-      toast.error(err.response?.data?.message || "อัปเดตภารกิจไม่สำเร็จ"),
   });
 }
 

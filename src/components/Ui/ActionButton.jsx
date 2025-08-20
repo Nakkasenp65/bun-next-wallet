@@ -28,15 +28,8 @@ export default function ActionButton({ item }) {
 
   // ฟังก์ชันที่จะทำงานเมื่อมีการคลิก
   const handleClick = async () => {
-    // 1. สั่งให้ animation 'gradientAnimate' เริ่มทำงาน
-    //    ใช้ await เพื่อรอให้ animation นี้เล่นจนจบ (ถ้าต้องการ)
     controls.start("gradientAnimate");
-
-    // 2. เรียกใช้ฟังก์ชันหลักของปุ่ม (เช่น เปิดหน้าฝากเงิน)
     item.action();
-
-    // 3. (ทางเลือก) สั่งให้ animation กลับไปสถานะเริ่มต้นหลังจากเล่นจบ
-    //    เราสามารถทำได้โดยรอสักครู่ หรือรอให้ animation จบแล้วค่อยสั่งกลับ
     await new Promise((resolve) => setTimeout(resolve, 600)); // รอ 0.6 วินาที
     controls.start("initial");
   };
@@ -51,9 +44,9 @@ export default function ActionButton({ item }) {
         animate={controls} // เชื่อมต่อตัวควบคุมเข้ากับ component
         variants={buttonVariants}
         whileTap={"tapping"}
-        className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--card-bg-dark)] text-xl text-white/90 drop-shadow-lg drop-shadow-black/50 backdrop-blur-2xl"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--card-bg-dark)] text-xl text-white/90 drop-shadow-lg drop-shadow-black/50 backdrop-blur-2xl"
       >
-        <item.icon size={32} className="text-[var(--light-text)]" />
+        <item.icon size={28} className="text-[var(--light-text)]" />
       </motion.div>
       <span className="text-sm font-bold text-[var(--light-text)] transition-colors group-hover:text-white">
         {item.label}

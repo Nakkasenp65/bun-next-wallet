@@ -89,9 +89,9 @@ export default function SavingsGoalCard({
       />
 
       {/* Angled product visual (robust for any ratio via object-contain) */}
-      <div className="pointer-events-none absolute -right-10 -bottom-10">
+      <div className="pointer-events-none absolute -right-10 -bottom-14">
         <div className="relative aspect-square w-[160px] sm:w-[300px]">
-          {imageUrl ? (
+          {imageUrl && (
             <Image
               fill
               sizes="(min-width: 640px) 300px, 225px"
@@ -99,14 +99,6 @@ export default function SavingsGoalCard({
               src={imageUrl}
               alt={`${brand} ${name}`}
               priority
-            />
-          ) : (
-            <img
-              className="animate-floating drop-shadow-primary-pink/50 object-contain drop-shadow-2xl"
-              src="/videos/moneyLoading.gif"
-              alt="กำลังโหลดรูปสินค้า"
-              width={300}
-              height={300}
             />
           )}
         </div>

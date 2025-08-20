@@ -23,6 +23,7 @@ export default function WithdrawPage({
   userData,
   showWithdraw,
   setShowWithdraw,
+  balance = 0,
 }) {
   const [showBankModal, setShowBankModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -65,10 +66,10 @@ export default function WithdrawPage({
     setShowBankModal(false);
   };
 
-  const balance = Number(userData?.wallet?.balance ?? 0);
+  const displayBalance = Number(balance);
   const amountNum = Number(formData.amount || 0);
   const belowMin = amountNum > 0 && amountNum < MIN_WITHDRAW;
-  const exceedsBalance = amountNum > balance;
+  const exceedsBalance = amountNum > displayBalance;
   const fee = amountNum * FEE_RATE;
   const net = Math.max(0, amountNum - fee);
 
@@ -144,7 +145,7 @@ export default function WithdrawPage({
           <div className="rounded-lg bg-gray-100 p-3 text-center text-sm text-gray-600">
             ยอดเงินที่ใช้ได้
             <span className="text-bg-dark ml-2 font-bold">
-              {fmtTHB(balance)}
+              {fmtTHB(displayBalance)}
             </span>
           </div>
 

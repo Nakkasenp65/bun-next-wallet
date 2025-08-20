@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { useWalletTransaction } from "@/hooks/useTransactions";
 import CtaButton from "@/components/Ui/CtaButton";
 import Transaction from "@/components/TransactionComponents/Transaction";
-import { useUser } from "@/hooks/useUser";
+import { useGetUser } from "@/hooks/useUser";
 import { useLiff } from "@/components/provider/LiffProvider";
 import TransactionSkeleton from "@/components/Ui/TransactionSkeleton";
 import DownloadModal from "@/components/modal/DownloadModal";
@@ -42,7 +42,7 @@ export default function HistoryPage() {
     currentYear === new Date().getFullYear() &&
     currentMonth === new Date().getMonth();
 
-  const { data: userData, isLoading: userLoading } = useUser(
+  const { data: userData, isLoading: userLoading } = useGetUser(
     liffProfile?.userId,
   );
 
