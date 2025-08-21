@@ -40,7 +40,6 @@ export default function DropDownComponent({
       const selectedOption = options.find((option) => option.value === value);
       return selectedOption ? selectedOption.label : placeholder;
     }
-    // For simple string arrays
     return value || placeholder;
   };
 
@@ -55,8 +54,6 @@ export default function DropDownComponent({
   }, [isOpen]);
 
   const handleOptionClick = (optionValue) => {
-    // --- NEW: Simulate the event object for backward compatibility ---
-    // This is the key to making it work with UserInputMonthly's generic handleChange
     const simulatedEvent = {
       target: {
         name: name,
