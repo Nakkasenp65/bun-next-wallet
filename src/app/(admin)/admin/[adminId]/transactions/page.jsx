@@ -183,6 +183,8 @@ export default function AdminTransactionsPage() {
   const { mutate: createTransaction, isLoading: isCreating } =
     useCreateTransaction();
 
+  console.log("Transaction: ", apiResponse);
+
   const transactions = apiResponse?.data || [];
   const paging = apiResponse?.paging || {};
 

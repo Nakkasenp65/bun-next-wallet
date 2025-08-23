@@ -57,7 +57,7 @@ export function useGetAdminTransactions(filters) {
   return useQuery({
     // queryKey จะเปลี่ยนตาม filters เพื่อให้ React Query ดึงข้อมูลใหม่เมื่อ filter เปลี่ยน
     queryKey: ["adminTransactions", filters],
-    queryFn: () => async (filters) => {
+    queryFn: async (filters) => {
       // แปลง object filters เป็น query string, เช่น { page: 1, status: 'PENDING' } -> '?page=1&status=PENDING'
       const params = new URLSearchParams(filters).toString();
       const { data } = await axios.get(`/admin/transactions?${params}`);

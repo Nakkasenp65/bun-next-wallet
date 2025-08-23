@@ -1,6 +1,6 @@
 export default function StatCard({ title, value, icon, color, note }) {
   return (
-    <div className="flex flex-col justify-between rounded-2xl bg-white p-6 shadow-sm transition-transform hover:-translate-y-1">
+    <div className="flex flex-col justify-between rounded-2xl bg-white p-4 shadow-sm transition-transform hover:-translate-y-1">
       <div>
         <div
           className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full ${color}`}
