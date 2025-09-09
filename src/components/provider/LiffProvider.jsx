@@ -8,9 +8,7 @@ const LiffContext = createContext({
   isLoggedIn: false,
   isLoading: true,
   lineAccessToken: "",
-  // expose the raw liff (may be null in dev or before init)
   liff: null,
-  // safe wrappers so your app won’t crash outside LIFF
   actions: {
     closeWindow: () => {},
     openWindow: (_url, _external) => {},

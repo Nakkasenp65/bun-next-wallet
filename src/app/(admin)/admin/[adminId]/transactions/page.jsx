@@ -12,17 +12,21 @@ import {
   ChevronsRight,
   Loader2,
   PlusCircle,
+  DeleteIcon,
+  Trash,
+  Edit3,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useCreateTransaction } from "@/hooks/useTransactions";
 import {
+  useGetAdminTransactions,
   useUpdateTransaction,
-  useCreateTransaction,
-} from "@/hooks/useTransactions";
-import { useGetAdminTransactions } from "@/hooks/useAdmin";
+  useDeleteTransaction,
+} from "@/hooks/useAdmin";
 import VerificationModal from "./components/VerificationModal";
 import DropDownComponent from "@/components/Ui/DropDownComponent"; // Import the reusable DropDownComponent
 import CreateTransactionModal from "./components/CreateTransactionModal";
-
+import { motion } from "framer-motion";
 const StatusTag = ({ status }) => {
   const styles =
     {
@@ -178,25 +182,32 @@ export default function AdminTransactionsPage() {
     isError,
     error,
   } = useGetAdminTransactions(filters);
+
+  const { mutate: deleteTransaction, isLoading: isDeleting } =
+    useDeleteTransaction();
+
   const { mutate: updateTransaction, isLoading: isProcessing } =
     useUpdateTransaction();
+
   const { mutate: createTransaction, isLoading: isCreating } =
     useCreateTransaction();
-
-  console.log("Transaction: ", apiResponse);
 
   const transactions = apiResponse?.data || [];
   const paging = apiResponse?.paging || {};
 
-  const handleUpdate = ({ transactionId, payload }) => {
+  const handleUpdate = (transactionId, formData) => {
     updateTransaction(
-      { transactionId, payload },
+      { transactionId, formData },
       {
         onSuccess: () => {
           setSelectedTx(null); // Close modal on success
         },
       },
     );
+  };
+
+  const handleDelete = (transactionId) => {
+    deleteTransaction(transactionId);
   };
 
   const handleFilterChange = (key, value) => {
@@ -272,8 +283,8 @@ export default function AdminTransactionsPage() {
             </ul>
             <div className="hidden overflow-hidden rounded-xl bg-white shadow-sm md:block">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-gray-500">
-                  <thead className="bg-gray-50 text-xs text-gray-700 uppercase">
+                <table className="w-full text-left text-sm">
+                  <thead className="border-b border-slate-100 bg-slate-50/50 text-xs font-medium text-slate-500">
                     <tr>
                       <th scope="col" className="px-6 py-3">
                         วันที่
@@ -284,24 +295,37 @@ export default function AdminTransactionsPage() {
                       <th scope="col" className="px-6 py-3">
                         ประเภท
                       </th>
-                      <th scope="col" className="px-6 py-3">
+                      <th scope="col" className="px-6 py-3 text-right">
                         จำนวนเงิน
                       </th>
                       <th scope="col" className="px-6 py-3">
                         สถานะ
                       </th>
-                      <th scope="col" className="px-6 py-3">
+                      <th scope="col" className="px-6 py-3 text-center">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody>
+
+                  {/* --- Interaction Choreographer: Animating rows on load --- */}
+                  <motion.tbody
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                      visible: { transition: { staggerChildren: 0.05 } },
+                    }}
+                    className="divide-y divide-slate-100"
+                  >
                     {transactions.map((tx) => (
-                      <tr
+                      <motion.tr
                         key={tx.id}
-                        className="border-b bg-white hover:bg-gray-50"
+                        variants={{
+                          hidden: { opacity: 0, y: 10 },
+                          visible: { opacity: 1, y: 0 },
+                        }}
+                        className="bg-white text-slate-700 transition-colors hover:bg-slate-50"
                       >
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">
+                        <td className="px-6 py-4 font-medium whitespace-nowrap text-slate-900">
                           {new Date(tx.createdAt).toLocaleString("th-TH", {
                             dateStyle: "short",
                             timeStyle: "short",
@@ -311,7 +335,7 @@ export default function AdminTransactionsPage() {
                         <td className="px-6 py-4">
                           <TypeTag type={tx.type} />
                         </td>
-                        <td className="px-6 py-4 font-semibold text-gray-900">
+                        <td className="px-6 py-4 text-right font-semibold text-slate-900">
                           {tx.amount != null
                             ? `฿${tx.amount.toLocaleString()}`
                             : "-"}
@@ -320,16 +344,29 @@ export default function AdminTransactionsPage() {
                           <StatusTag status={tx.status} />
                         </td>
                         <td className="px-6 py-4">
-                          <button
-                            onClick={() => setSelectedTx(tx)}
-                            className="font-medium text-blue-600 hover:underline"
-                          >
-                            {tx.status === "PENDING" ? "ตรวจสอบ" : "แก้ไข / ดู"}
-                          </button>
+                          {/* --- Aesthetics meets Code: Redesigned action buttons --- */}
+                          <div className="flex items-center justify-center gap-2">
+                            <motion.button
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => setSelectedTx(tx)}
+                              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                              aria-label="Edit"
+                            >
+                              <Edit3 size={16} />
+                            </motion.button>
+                            <motion.button
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => handleDelete(tx.id)}
+                              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                              aria-label="Delete"
+                            >
+                              <Trash size={16} />
+                            </motion.button>
+                          </div>
                         </td>
-                      </tr>
+                      </motion.tr>
                     ))}
-                  </tbody>
+                  </motion.tbody>
                 </table>
               </div>
             </div>

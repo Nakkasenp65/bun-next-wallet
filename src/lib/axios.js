@@ -60,32 +60,20 @@ axiosInstance.interceptors.response.use(
           "Access Token expired or invalid. Attempting to re-login with LIFF...",
         );
 
-        // เรียก liff.login() เพื่อบังคับให้ LIFF ทำการยืนยันตัวตนใหม่
-        // LIFF จะจัดการ redirect ไปหน้า login แล้วกลับมาที่หน้าเดิม
-        // ซึ่งจะทำให้หน้าเว็บของเรา reload ใหม่ทั้งหมด
         await liff.login({
           redirectUri: window.location.href, // กลับมาที่หน้าเดิมหลัง login สำเร็จ
         });
 
-        // หลังจาก login และหน้าเว็บ reload แล้ว, LIFF จะมี Access Token ใหม่
-        // การยิง request เดิมจะเกิดขึ้นอีกครั้งโดยอัตโนมัติหลังจากที่หน้าเว็บโหลดเสร็จ
-        // ดังนั้น เราไม่จำเป็นต้องยิง request ซ้ำตรงนี้
-
-        // เราคืน Promise ที่ว่างเปล่าเพื่อหยุดการทำงานของ request เดิมที่ล้มเหลว
         return new Promise(() => {});
       } catch (loginError) {
         console.error("LIFF login failed:", loginError);
 
-        // ถ้าการ login ใหม่ล้มเหลว (เช่น ผู้ใช้กดยกเลิก)
-        // อาจจะให้ logout ออกจากระบบ หรือ reload หน้าเพื่อเริ่มใหม่
         liff.logout();
         window.location.reload();
         return Promise.reject(loginError);
       }
     }
 
-    // ถ้าไม่ใช่ Error 401 หรือเป็นครั้งที่ retry แล้วล้มเหลวอีก
-    // ก็ให้ reject error ไปตามปกติเพื่อให้ส่วนอื่นของแอปจัดการต่อไป
     return Promise.reject(error);
   },
 );

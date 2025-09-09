@@ -1,8 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { X, Loader2, Calendar, Edit3, Save, LinkIcon } from "lucide-react";
+import {
+  X,
+  Loader2,
+  Calendar,
+  Edit3,
+  Save,
+  LinkIcon,
+  UploadCloud,
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 // --- Helper Components ---
@@ -53,6 +61,9 @@ export default function VerificationModal({
 }) {
   const [formState, setFormState] = useState({});
   const [isEditing, setIsEditing] = useState(false);
+  const fileInputRef = useRef(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
     if (transaction) {
@@ -65,14 +76,37 @@ export default function VerificationModal({
         type: transaction.type || "INCOME",
       });
       setIsEditing(false);
+      setSelectedFile(null);
+      setPreviewUrl(null);
     }
   }, [transaction]);
+
+  useEffect(() => {
+    if (!selectedFile) {
+      setPreviewUrl(null);
+      return;
+    }
+    // สร้าง URL ชั่วคราวสำหรับแสดงภาพตัวอย่าง
+    const objectUrl = URL.createObjectURL(selectedFile);
+    setPreviewUrl(objectUrl);
+
+    // Cleanup: สำคัญมากในการป้องกัน memory leaks
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [selectedFile]);
 
   if (!transaction) return null;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormState((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setIsEditing(true);
+    }
   };
 
   const handleApproveClick = () => {
@@ -86,7 +120,7 @@ export default function VerificationModal({
       amount: amount,
       description: `รายการได้รับการอนุมัติยอดเงิน ${amount} บาทโดยผู้ดูแล`,
     };
-    onUpdate({ transactionId: transaction.id, payload });
+    onUpdate(transaction.id, payload);
   };
 
   const handleRejectClick = () => {
@@ -94,10 +128,9 @@ export default function VerificationModal({
       status: "REJECTED",
       description: "รายการถูกปฏิเสธโดยผู้ดูแลระบบ",
     };
-    onUpdate({ transactionId: transaction.id, payload });
+    onUpdate(transaction.id, payload);
   };
 
-  // [MODIFIED] เพิ่ม 'amount' เข้าไปใน payload ของการอัปเดตทั่วไป
   const handleUpdateClick = () => {
     const payload = {
       from: formState.from,
@@ -105,9 +138,24 @@ export default function VerificationModal({
       description: formState.description,
       status: formState.status,
       type: formState.type,
-      amount: Number(formState.amount) || 0, // แปลงค่ากลับเป็น Number
+      amount: Number(formState.amount) || 0,
     };
-    onUpdate({ transactionId: transaction.id, payload });
+
+    const formData = new FormData();
+    formData.append("from", payload.from);
+    formData.append("to", payload.to);
+    formData.append("description", payload.description);
+    formData.append("status", payload.status);
+    formData.append("type", payload.type);
+    formData.append("amount", payload.amount);
+    formData.append("slipImage", selectedFile);
+
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+
+    // ส่ง transactionId และ formData ที่ประกอบเสร็จแล้วขึ้นไป
+    onUpdate(transaction.id, formData);
     setIsEditing(false);
   };
 
@@ -119,6 +167,8 @@ export default function VerificationModal({
       hour: "2-digit",
       minute: "2-digit",
     });
+
+  const currentImageUrl = previewUrl || transaction.slipImageUrl;
 
   return (
     <div
@@ -144,29 +194,38 @@ export default function VerificationModal({
 
         <div className="grid flex-grow overflow-hidden md:grid-cols-2">
           {/* Left Side: Slip Image */}
-          <div className="relative flex h-full min-h-[300px] items-center justify-center bg-slate-100 p-4 md:min-h-0">
-            {transaction.slipImageUrl ? (
-              <a
-                href={transaction.slipImageUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex flex-col items-center justify-center gap-2"
-              >
+          <div
+            className="relative flex h-full min-h-[300px] items-center justify-center bg-slate-100 p-4 md:min-h-0"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+              accept="image/png, image/jpeg, image/webp"
+            />
+            {currentImageUrl ? (
+              <>
                 <Image
-                  src={transaction.slipImageUrl}
-                  alt="Slip Thumbnail"
+                  src={currentImageUrl}
+                  alt={previewUrl ? "New slip preview" : "Slip Thumbnail"}
                   width={200}
                   height={300}
                   style={{ objectFit: "contain" }}
                   className="max-h-[80%] rounded-lg border shadow-sm"
                 />
-                <span className="mt-2 inline-flex items-center gap-1.5 font-semibold text-blue-600 transition-colors group-hover:text-blue-800">
-                  <LinkIcon size={16} />
-                  คลิกเพื่อดูภาพเต็ม
+                <span className="absolute bottom-4 mt-2 inline-flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1 font-semibold text-white backdrop-blur-sm">
+                  <Edit3 size={14} />
+                  {previewUrl ? "ไฟล์ใหม่พร้อมอัปโหลด" : "เปลี่ยนรูปภาพสลิป"}
                 </span>
-              </a>
+              </>
             ) : (
-              <p className="text-slate-500">ไม่มีรูปภาพสลิป</p>
+              <div className="flex flex-col items-center gap-2 text-slate-500">
+                <UploadCloud size={40} />
+                <p className="font-semibold">แนบรูปภาพสลิป</p>
+                <p className="text-sm">คลิกที่นี่เพื่อเลือกไฟล์</p>
+              </div>
             )}
           </div>
 

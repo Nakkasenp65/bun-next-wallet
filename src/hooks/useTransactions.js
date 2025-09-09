@@ -221,22 +221,5 @@ export function useRejectTransaction() {
 /**
  * Custom Hook สำหรับจัดการการแก้ไขข้อมูลธุรกรรม
  */
-export function useUpdateTransaction() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: updateTransactionRequest,
-    onSuccess: (data) => {
-      // รับ data ที่ return กลับมา
-      toast.success("อัปเดตข้อมูลสำเร็จ!");
-      // Invalidate query เพื่อให้ refetch ข้อมูลใหม่
-      queryClient.invalidateQueries({ queryKey: ["adminTransactions"] });
-      // (Optional) คุณสามารถอัปเดต cache โดยตรงเพื่อ UX ที่ดีขึ้นได้
-      // queryClient.setQueryData(['adminTransactions', ...], (oldData) => ...);
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการอัปเดต");
-    },
-  });
-}
 
 export function useCreateWithdrawTransaction({ onSuccessCallback }) {}

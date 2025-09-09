@@ -276,6 +276,7 @@ export default function WithdrawPage({
                 type="text"
                 id="withdraw-account-number"
                 name="accountNumber"
+                inputMode="numeric"
                 value={formData.accountNumber}
                 onChange={handleInputChange}
                 placeholder="กรอกเลขบัญชีปลายทาง"
@@ -320,7 +321,7 @@ export default function WithdrawPage({
               disabled={disableCTA}
               className="z-10 w-48 rounded-xl p-4 text-base font-bold disabled:opacity-60"
             >
-              {isPending ? "กำลังดำเนินการ..." : "ต่อไป"}
+              {isPending ? "กำลังดำเนินการ..." : "ยืนยันการถอนเงิน"}
             </CtaButton>
           </div>
         </div>

@@ -1,17 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
-const fetchNotifications = async (userId) => {
-  const { data } = await axios.get(`/notification/${userId}`);
-  return data.data;
-};
-
 export function useNotification(userId) {
   return useQuery({
     queryKey: ["notification", userId],
-    queryFn: () => fetchNotifications(userId),
+    queryFn: async () => {
+      const { data } = await axios.get(`/notification/${userId}`);
+      return data.data;
+    },
     enabled: !!userId,
-    refetchInterval: 1000 * 60,
+    refetchOnMount: "always",
   });
 }
 

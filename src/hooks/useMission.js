@@ -141,6 +141,7 @@ export const useGetAvailableMissions = (userId) => {
     queryFn: () => fetchAvailableMissions(userId),
     staleTime: 5_000, // don’t refetch immediately after our optimistic write
     refetchOnWindowFocus: false, // avoid surprise refetch restoring stale server data
+    enabled: !!userId,
   });
 };
 
@@ -149,7 +150,6 @@ export const useGetMyMissions = (userId) => {
     queryKey: ["myMissions", userId],
     queryFn: () => fetchMyMissions(userId),
     enabled: !!userId,
-    refetchInterval: 1000 * 30,
   });
 };
 

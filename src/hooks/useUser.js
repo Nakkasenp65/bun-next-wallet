@@ -65,12 +65,6 @@ async function fetchUserFromMainServer(lineUserId) {
   }
 }
 
-async function fetchLockStatus(lineUserId) {
-  const { data } = await axios.get(`/user/lock/${lineUserId}`);
-  console.log("CHECK LOCK DATA: ", data);
-  return data;
-}
-
 async function updateAdminUser({ userId, payload }) {
   // Endpoint นี้คุณต้องสร้างขึ้นมาเพื่อเรียก service ข้างบน
   const { data } = await axios.patch(`/admin/users/${userId}`, payload);
@@ -133,7 +127,6 @@ export function useUserStatus(lineUserId) {
     queryKey: ["userStatus", lineUserId],
     queryFn: () => fetchUserStatus(lineUserId),
     enabled: !!lineUserId,
-    staleTime: 1000 * 60 * 30,
   });
 }
 
@@ -149,7 +142,11 @@ export function useGetUser(lineUserId) {
 export function useLockStatus(lineUserId) {
   return useQuery({
     queryKey: ["lockStatus", lineUserId],
-    queryFn: () => fetchLockStatus(lineUserId),
+    queryFn: async () => {
+      const { data } = await axios.get(`/user/lock/${lineUserId}`);
+      console.log("CHECK LOCK DATA: ", data);
+      return data;
+    },
     enabled: !!lineUserId,
     staleTime: 1000 * 60 * 30,
   });
@@ -158,7 +155,23 @@ export function useLockStatus(lineUserId) {
 export function useMainServerUser(lineUserId) {
   return useQuery({
     queryKey: ["mainServerUser", lineUserId],
-    queryFn: () => fetchUserFromMainServer(lineUserId),
+    queryFn: async () => {
+      const mainUserApiUrl = process.env.NEXT_PUBLIC_MAIN_USER_API;
+
+      let mainUser = {};
+      try {
+        if (!mainUserApiUrl) throw new Error("mainUserApiUrl is not defined");
+        const { data } = await externalLinkAxios.get(
+          `${mainUserApiUrl}${lineUserId}`,
+        );
+        mainUser = data;
+        console.log(mainUser);
+        return mainUser;
+      } catch (error) {
+        console.log("Error fetchUserfromMainServer", error);
+        return null;
+      }
+    },
     enabled: !!lineUserId,
   });
 }

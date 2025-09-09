@@ -2,6 +2,8 @@ import axios from "@/lib/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
+// MISSION
+
 async function updateMission({ missionId, payload }) {
   console.log("payload:", missionId);
   const { data } = await axios.patch(`/admin/missions/${missionId}`, payload);
@@ -53,6 +55,8 @@ export function useUpdateAdminMission() {
   });
 }
 
+// TRANSACTION
+
 export function useGetAdminTransactions(filters) {
   return useQuery({
     // queryKey จะเปลี่ยนตาม filters เพื่อให้ React Query ดึงข้อมูลใหม่เมื่อ filter เปลี่ยน
@@ -78,6 +82,50 @@ export function useGetAdminDashboardData() {
     staleTime: 1000 * 120,
   });
 }
+
+export function useDeleteTransaction() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    // mutationFn จะรับ transactionId ที่ต้องการลบ
+    mutationFn: async (transactionId) => {
+      const { data } = await axios.delete(
+        `/admin/transactions/${transactionId}`,
+      );
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("ลบรายการธุรกรรมสำเร็จ");
+      // สำคัญมาก: ต้อง invalidate query เพื่อให้ UI อัปเดตและนำรายการที่ถูกลบออกไป
+      queryClient.invalidateQueries({ queryKey: ["adminTransactions"] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการลบ");
+    },
+  });
+}
+
+export function useUpdateTransaction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ transactionId, formData }) => {
+      const { data } = await axios.patch(
+        `/admin/transactions/${transactionId}`,
+        formData,
+      );
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success("อัปเดตข้อมูลสำเร็จ!");
+      queryClient.invalidateQueries({ queryKey: ["adminTransactions"] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการอัปเดต");
+    },
+  });
+}
+
+// NOTIFICATION
 
 export function useAdminGetSystemNotifications(filters) {
   return useQuery({
@@ -162,6 +210,7 @@ export function useAdminDeleteNotification() {
   });
 }
 
+// BROADCAST
 export function useAdminGetBroadcasts(filters) {
   return useQuery({
     queryKey: ["adminBroadcasts"],

@@ -24,7 +24,7 @@
     "googleapis": "^154.1.0",
     "jsqr": "^1.4.0",
     "lightningcss": "^1.22.1",
-    "lucide-react": "^0.539.0",
+    "lucide-react": "^0.543.0",
     "multer": "^2.0.2",
     "next": "15.4.4",
     "qrcode": "^1.5.4",
@@ -50,6 +50,6 @@
     "tailwindcss": "^4"
   },
   "engines": {
-    "node": "18.x"
+    "node": "22.x"
   }
 }
