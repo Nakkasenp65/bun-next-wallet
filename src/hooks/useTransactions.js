@@ -123,7 +123,14 @@ export function useSearchRecipient() {
 export function useWalletTransaction(year, month, walletId) {
   return useQuery({
     queryKey: ["transactions", year, month, walletId],
-    queryFn: () => fetchWalletTransactions(year, month, walletId),
+    queryFn: async () => {
+      const response = await axios.get(
+        `/transaction/${walletId}?year=${year}&month=${month}`,
+      );
+      return response.data;
+    },
+    enabled: !!walletId,
+    staleTime: 10 * 60 * 1000,
   });
 }
 
@@ -154,16 +161,14 @@ export function useWithdrawTransaction({ onSuccessCallback }) {
   });
 }
 
-const createSavingTransactionRequest = async (formData) => {
-  const { data } = await axios.post(`/transaction/`, formData);
-  return data;
-};
-
 export function useCreateSavingTransaction({ onSuccessCallback }) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: createSavingTransactionRequest,
+    mutationFn: async (formData) => {
+      const { data } = await axios.post(`/transaction/`, formData);
+      return data;
+    },
     onSuccess: async (data) => {
       toast.success("ส่งสลิปสำเร็จ! รอการตรวจสอบสักครู่");
       await queryClient.invalidateQueries({ queryKey: ["user"] }); // สำหรับอัปเดตยอดเงินใน Wallet

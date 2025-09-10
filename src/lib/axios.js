@@ -36,44 +36,7 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     // ถ้าเกิด error ก่อนจะส่ง request ก็ให้ reject ไป
-    return Promise.reject(error);
-  },
-);
-
-// --- 2. Response Interceptor ---
-// ทำงานหลังจากที่ได้รับ response กลับมาจาก server แล้ว
-// หน้าที่: ดักจับ error ที่มีสถานะ 401 (Unauthorized) ซึ่งมักหมายถึง Token หมดอายุ
-axiosInstance.interceptors.response.use(
-  (response) => {
-    // ถ้า request สำเร็จ (status 2xx) ก็ return response ไปเลย
-    return response;
-  },
-  async (error) => {
-    const originalRequest = error.config;
-
-    // เช็คว่าเป็น Error 401 และยังไม่ได้ลอง retry (ป้องกันการวนลูป)
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true; // ตั้งค่า flag ว่ากำลังจะ retry แล้ว
-
-      try {
-        console.log(
-          "Access Token expired or invalid. Attempting to re-login with LIFF...",
-        );
-
-        await liff.login({
-          redirectUri: window.location.href, // กลับมาที่หน้าเดิมหลัง login สำเร็จ
-        });
-
-        return new Promise(() => {});
-      } catch (loginError) {
-        console.error("LIFF login failed:", loginError);
-
-        liff.logout();
-        window.location.reload();
-        return Promise.reject(loginError);
-      }
-    }
-
+    console.error(error);
     return Promise.reject(error);
   },
 );

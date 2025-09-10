@@ -1,5 +1,5 @@
 "use client";
-
+import { motion } from "framer-motion";
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -73,9 +73,41 @@ export default function HistoryPage() {
   // Show header + page chrome even when loading transactions
   if (userLoading) {
     return (
-      <div className="bg-bg-dark/80 fixed inset-0 z-40 flex items-center justify-center backdrop-blur-sm">
-        <TransactionSkeleton />
-      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
+      >
+        {/* Skeleton Header: จำลองโครงสร้าง Header จริง */}
+        <header className="flex flex-shrink-0 items-center px-5 pt-10 pb-4">
+          <div className="h-7 w-7 rounded-full bg-white/10" />
+          <div className="mx-auto h-5 w-40 rounded-md bg-white/10" />
+          <div className="h-6 w-6" />
+        </header>
+
+        {/* Skeleton Content: ใช้ animate-pulse เพื่อสร้างความรู้สึกว่าระบบกำลังทำงาน */}
+        <div className="flex flex-grow flex-col overflow-y-auto rounded-t-[30px] bg-white/90 p-6">
+          <div className="h-12 w-full animate-pulse rounded-lg bg-gray-200" />
+
+          <div className="mt-4 space-y-3">
+            {/* สร้าง Skeleton Items หลายๆ อันเพื่อจำลองลิสต์รายการ */}
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="flex animate-pulse items-center gap-4 rounded-lg p-2"
+              >
+                <div className="h-10 w-10 rounded-full bg-gray-200" />
+                <div className="flex-grow space-y-2">
+                  <div className="h-4 w-3/4 rounded-md bg-gray-200" />
+                  <div className="h-3 w-1/2 rounded-md bg-gray-200" />
+                </div>
+                <div className="h-4 w-1/4 rounded-md bg-gray-200" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
     );
   }
 

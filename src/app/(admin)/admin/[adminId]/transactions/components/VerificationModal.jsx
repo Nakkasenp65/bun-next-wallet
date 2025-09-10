@@ -148,7 +148,8 @@ export default function VerificationModal({
     formData.append("status", payload.status);
     formData.append("type", payload.type);
     formData.append("amount", payload.amount);
-    formData.append("slipImage", selectedFile);
+
+    if (selectedFile) formData.append("slipImage", selectedFile);
 
     for (const [key, value] of formData.entries()) {
       console.log(`${key}: ${value}`);
@@ -326,7 +327,7 @@ export default function VerificationModal({
                     onClick={handleUpdateClick}
                     disabled={isProcessing}
                   >
-                    <Save size={16} /> บันทึก
+                    <Save size={16} /> บันทึกข้อมูลพร้อมภาพ
                   </button>
                 ) : (
                   <button

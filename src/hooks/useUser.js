@@ -42,29 +42,6 @@ async function updateUserData({ mongoId, updateData }) {
   return data;
 }
 
-async function fetchUser(userId) {
-  const { data } = await axios.get(`/user/${userId}`);
-  return data;
-}
-
-async function fetchUserFromMainServer(lineUserId) {
-  const mainUserApiUrl = process.env.NEXT_PUBLIC_MAIN_USER_API;
-
-  let mainUser = {};
-  try {
-    if (!mainUserApiUrl) throw new Error("mainUserApiUrl is not defined");
-    const { data } = await externalLinkAxios.get(
-      `${mainUserApiUrl}${lineUserId}`,
-    );
-    mainUser = data;
-    console.log(mainUser);
-    return mainUser;
-  } catch (error) {
-    console.log("Error fetchUserfromMainServer", error);
-    return null;
-  }
-}
-
 async function updateAdminUser({ userId, payload }) {
   // Endpoint นี้คุณต้องสร้างขึ้นมาเพื่อเรียก service ข้างบน
   const { data } = await axios.patch(`/admin/users/${userId}`, payload);
@@ -116,7 +93,10 @@ export function useUpdateAdminUser() {
 export function useGetUserById(line_user_id) {
   return useQuery({
     queryKey: ["adminUserDetail", line_user_id],
-    queryFn: () => fetchUserById(line_user_id),
+    queryFn: async () => {
+      const { data } = await axios.get(`/admin/users/${line_user_id}`);
+      return data;
+    },
     // Query นี้จะทำงานก็ต่อเมื่อมี userId เท่านั้น (เช่น เมื่อ Modal เปิด)
     enabled: !!line_user_id,
   });
@@ -133,7 +113,10 @@ export function useUserStatus(lineUserId) {
 export function useGetUser(lineUserId) {
   return useQuery({
     queryKey: ["user", lineUserId],
-    queryFn: () => fetchUser(lineUserId),
+    queryFn: async () => {
+      const { data } = await axios.get(`/user/${lineUserId}`);
+      return data;
+    },
     enabled: !!lineUserId,
     staleTime: 1000 * 60 * 30,
   });

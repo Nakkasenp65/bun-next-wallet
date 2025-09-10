@@ -27,17 +27,7 @@ export function useMarkNotificationAsRead() {
       return data;
     },
     onSuccess: (data, variables) => {
-      // `variables.userId` is the line_user_id we pass from the component
-      queryClient.setQueryData(["user", variables.userId], (oldUserData) => {
-        if (!oldUserData) return oldUserData;
-        // Create a new user object to avoid direct mutation
-        const newUserData = { ...oldUserData };
-        // Map over the old notifications to create a new array
-        newUserData.notifications = oldUserData.notifications.map((n) =>
-          n.id === variables.notificationId ? { ...n, isRead: true } : n,
-        );
-        return newUserData;
-      });
+      queryClient.invalidateQueries(["notification", variables.userId]);
     },
     onError: () => {
       toast.error("Failed to mark as read.");

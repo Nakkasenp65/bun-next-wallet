@@ -162,6 +162,7 @@ export default function DepositPage({
       formData.append("from", userData.line_display_name);
       formData.append("to", "Aom-Down App");
       formData.append("walletId", userData.wallet.id);
+      formData.append("walletUniqueId", userData.wallet.walletUniqueId);
       formData.append("userId", userData.id);
 
       createTransactionMutation.mutate(formData);

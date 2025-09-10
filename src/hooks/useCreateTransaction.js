@@ -2,13 +2,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import toast from "react-hot-toast";
 
-const createSavingTransactionRequest = async (walletId, username, formData) => {
-  // Endpoint ของ backend ที่จะรับ multipart/form-data
-  // Axios จะตั้งค่า Content-Type ให้โดยอัตโนมัติ
-  const { data } = await axios.post(`/transaction/${walletId}`, formData);
-  return data;
-};
-
 /**
  * The function that makes the actual API call to the backend to perform the transfer.
  * This function will be called by the useMutation hook.
@@ -70,7 +63,10 @@ export function useCreateSavingTransaction({ onSuccessCallback }) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: createSavingTransactionRequest(walletId, username, formData),
+    mutationFn: async (walletId, username, formData) => {
+      const { data } = await axios.post(`/transaction/${walletId}`, formData);
+      return data;
+    },
     onSuccess: async (data) => {
       toast.success("ส่งสลิปสำเร็จ! รอการตรวจสอบสักครู่");
       // Invalidate queries เพื่อดึงข้อมูลใหม่

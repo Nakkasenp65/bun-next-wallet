@@ -68,12 +68,22 @@ const TypeTag = ({ type }) => {
         text: "รายรับ",
         color: "text-green-700",
       },
+      DEPOSIT: {
+        icon: <ArrowDownCircle className="h-3 w-3" />,
+        text: "รายรับ",
+        color: "text-green-700",
+      },
       REWARD: {
         icon: <Gift className="h-3 w-3" />,
         text: "รางวัล",
         color: "text-violet-700",
       },
       OUTCOME: {
+        icon: <ArrowDownCircle className="h-3 w-3 rotate-180" />,
+        text: "รายจ่าย",
+        color: "text-red-700",
+      },
+      WITHDRAW: {
         icon: <ArrowDownCircle className="h-3 w-3 rotate-180" />,
         text: "รายจ่าย",
         color: "text-red-700",
