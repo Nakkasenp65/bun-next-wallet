@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 // PROVIDERS AND HOOKS
 import { useLiff } from "@/components/provider/LiffProvider";
-import { useLockStatus } from "@/hooks/useUser";
+import { useUserStatus } from "@/hooks/useUser";
 
 // UI & PAGE COMPONENTS
 import LockScreen from "@/components/Ui/LockScreen"; // <-- IMPORTANT: Import the lock screen
@@ -23,7 +23,7 @@ export default function HomePage() {
     data: userStatus,
     isLoading: isStatusLoading,
     error: statusError,
-  } = useLockStatus(liffProfile?.userId);
+  } = useUserStatus(liffProfile?.userId);
 
   useEffect(() => {
     if (!isLoggedIn || isStatusLoading) {

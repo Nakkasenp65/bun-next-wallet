@@ -27,7 +27,7 @@ export default function BottomNav({ setShowContact, line_user_id }) {
   ];
 
   return (
-    <nav className="fixed bottom-0 z-10 flex w-full items-center justify-around bg-white py-2.5 shadow-md shadow-black/75 backdrop-blur-sm">
+    <nav className="fixed bottom-0 z-10 flex w-full items-center justify-around bg-white py-2.5 shadow-md shadow-black/75 backdrop-blur-sm lg:max-w-[450px]">
       {/* Left side items */}
       <NavItem
         label={navItems[0].label}

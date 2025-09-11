@@ -15,6 +15,36 @@ import {
 import { useRouter } from "next/navigation";
 import MenuItem from "./MenuItem";
 import { useLiff } from "../provider/LiffProvider";
+import { PhoneCallIcon } from "lucide-react";
+import DropDownComponent from "../Ui/DropDownComponent";
+import CtaButton from "../Ui/CtaButton";
+import { useGetUser, useUpdateUser } from "../../hooks/useUser";
+
+const OCCUPATION_OPTIONS = [
+  { value: "นักศึกษา", label: "นักศึกษา" },
+  { value: "ข้าราชการ / เจ้าหน้าที่รัฐ", label: "ข้าราชการ / เจ้าหน้าที่รัฐ" },
+  { value: "พนักงานบริษัท", label: "พนักงานบริษัท" },
+  {
+    value: "ธุรกิจส่วนตัว / ค้าขาย",
+    label: "ธุรกิจส่ธุรกิจส่วนตัว / ค้าขายวนตัว",
+  },
+  { value: "ฟรีแลนซ์", label: "ฟรีแลนซ์" },
+  { value: "แพทย์ / พยาบาล", label: "แพทย์ / พยาบาล" },
+  { value: "สถาปนิก / วิศวกร", label: "สถาปนิก / วิศวกร" },
+  { value: "นักการตลาด / PR", label: "นักการตลาด / PR" },
+  { value: "ศิลปิน / นักออกแบบ", label: "ศิลปิน / นักออกแบบ" },
+  { value: "เกษตรกร", label: "เกษตรกร" },
+  { value: "อื่นๆ", label: "อื่นๆ" },
+];
+
+const AGE_RANGE_OPTIONS = [
+  { value: "ต่ำกว่า 15 ปี", label: "ต่ำกว่า 15 ปี" },
+  { value: "15-20", label: "15-20 ปี" },
+  { value: "21-30", label: "21-30 ปี" },
+  { value: "31-40", label: "31-40 ปี" },
+  { value: "41-50", label: "41-50" },
+  { value: "51-60", label: "51-60" },
+];
 
 const formatJoinDate = (dateString) => {
   const date = new Date(dateString);
@@ -27,6 +57,14 @@ const formatJoinDate = (dateString) => {
 
 export default function Profile({ user }) {
   const { actions } = useLiff();
+  const { mutate: updateUser, isPending: isSaving } = useUpdateUser();
+  const [formData, setFormData] = useState({
+    fullname: "",
+    phone: "",
+    occupation: "",
+    ageRange: "",
+  });
+
   const router = useRouter();
   const [copyButtonText, setCopyButtonText] = useState("คัดลอก");
 
@@ -38,6 +76,15 @@ export default function Profile({ user }) {
     setTimeout(() => {
       setCopyButtonText("คัดลอก");
     }, 2000);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = () => {
+    handleSave(formData);
   };
 
   const containerVariants = {
@@ -133,25 +180,67 @@ export default function Profile({ user }) {
           variants={itemVariants}
           className="overflow-hidden rounded-xl bg-white shadow-sm"
         >
-          <MenuItem
-            icon={<FaUserEdit />}
-            title="ข้อมูลส่วนตัว"
-            subtitle="ดูและแก้ไขข้อมูลของคุณ"
-            onClick={() => router.push(`/profile/${user.line_user_id}/edit`)}
-          />
-          <div className="border-t border-gray-100" />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-grow flex-col gap-6 p-6"
+          >
+            {/* Input: Phone */}
+            <div>
+              <label className="text-bg-dark mb-2 block text-sm font-bold">
+                เบอร์โทรศัพท์
+              </label>
+              <div className="relative">
+                <PhoneCallIcon className="text-bg-dark absolute top-1/2 left-4 -translate-y-1/2" />
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className="text-bg-dark w-full rounded-xl border border-gray-300 p-4 pl-12 outline-none focus:ring-2 focus:ring-pink-400"
+                />
+              </div>
+            </div>
 
-          <div className="border-t border-gray-100" />
-          <MenuItem
-            icon={<FaQuestionCircle />}
-            title="ศูนย์ช่วยเหลือ"
-            subtitle="คำถามที่พบบ่อยและติดต่อเจ้าหน้าที่"
-            onClick={() => {
-              actions.text("ติดต่อเจ้าหน้าที่");
-              actions.closeWindow();
-            }}
-          />
-          <div className="border-t border-gray-100" />
+            {/* --- 3. Replace the native select with your Dropdown component --- */}
+            <DropDownComponent
+              buttonClassName="text-bg-dark w-full rounded-xl border border-gray-300 p-4  outline-none focus:ring-2 focus:ring-pink-400"
+              labelClassName="text-bg-dark mb-2 block text-sm font-bold"
+              label="อาชีพ"
+              placeholder="เลือกอาชีพของคุณ"
+              options={OCCUPATION_OPTIONS}
+              value={formData.occupation}
+              onChange={(selectedValue) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  occupation: selectedValue,
+                }))
+              }
+            />
+
+            <DropDownComponent
+              label="ช่วงอายุ"
+              buttonClassName="text-bg-dark w-full rounded-xl border border-gray-300 p-4  outline-none focus:ring-2 focus:ring-pink-400"
+              labelClassName="text-bg-dark mb-2 block text-sm font-bold"
+              placeholder="เลือกช่วงอายุของคุณ"
+              options={AGE_RANGE_OPTIONS}
+              value={formData.ageRange}
+              onChange={(selectedValue) =>
+                setFormData((prev) => ({ ...prev, ageRange: selectedValue }))
+              }
+            />
+
+            {/* CTA Button */}
+            <div className="mt-auto flex justify-center pt-4">
+              <CtaButton
+                onClick={handleSave}
+                disabled={isSaving}
+                className={"z-10 w-48 rounded-xl p-4 text-base font-bold"}
+              >
+                {isSaving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+              </CtaButton>
+            </div>
+          </motion.div>
         </motion.div>
       </motion.div>
     </div>

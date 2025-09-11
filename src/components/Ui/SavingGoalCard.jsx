@@ -90,7 +90,7 @@ export default function SavingsGoalCard({
 
       {/* Angled product visual (robust for any ratio via object-contain) */}
       <div className="pointer-events-none absolute -right-10 -bottom-14">
-        <div className="relative aspect-square w-[160px] sm:w-[300px]">
+        <div className="relative aspect-square w-[160px]">
           {imageUrl && (
             <Image
               fill

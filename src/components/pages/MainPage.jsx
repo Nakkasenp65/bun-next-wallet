@@ -68,7 +68,7 @@ export default function MainPage({ liffProfile }) {
     data: goal,
     isLoading: goalLoading,
     error: goalError,
-  } = useGetGoal(userData?.id);
+  } = useGetGoal(liffProfile?.userId);
   // console.log("Goal in main page: \n", goal);
 
   // ดึงข้อมูลการแจ้งเตือนของ user
@@ -293,6 +293,7 @@ export default function MainPage({ liffProfile }) {
                   transactions={transactions}
                   transactionLoading={transactionLoading}
                   transactionError={transactionError}
+                  currentWalletId={userData?.wallet.id}
                 />
                 {myMissionLoading ? (
                   <MyMissionCardSkeleton />

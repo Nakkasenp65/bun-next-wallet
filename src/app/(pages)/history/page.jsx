@@ -173,7 +173,11 @@ export default function HistoryPage() {
               </p>
             ) : transactions && transactions.length > 0 ? (
               transactions.map((t) => (
-                <Transaction key={t.id} transaction={t} />
+                <Transaction
+                  key={t.id}
+                  transaction={t}
+                  currentWalletId={userData?.wallet.id}
+                />
               ))
             ) : (
               <p className="p-8 text-center text-gray-500">

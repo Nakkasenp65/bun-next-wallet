@@ -1,7 +1,8 @@
 "use client";
 import React, { useState } from "react";
-import { IoIosArrowBack } from "react-icons/io";
-import FramerDiv from "../framerComponents/FramerDiv";
+import { ChevronLeft, Trash2 } from "lucide-react";
+import { motion } from "framer-motion";
+import FramerDiv from "../framerComponents/FramerDiv"; // --- Restoring your custom component ---
 import NotificationTab from "../NotificationComponents/NotificationTab";
 import {
   useMarkNotificationAsRead,
@@ -17,8 +18,6 @@ export default function NotificationPage({
 }) {
   const [activeTab, setActiveTab] = useState("transactions");
 
-  // The notification data is derived directly from the userData prop
-
   const clearNotificationsMutation = useClearNotifications();
   const markAsReadMutation = useMarkNotificationAsRead();
 
@@ -29,85 +28,115 @@ export default function NotificationPage({
   };
 
   const handleClear = () => {
-    if (notificationData.length > 0) {
-      const typeToClear = activeTab === "transactions" ? "WALLET" : "PROMO"; // e.g., PROMO could clear SYSTEM and REWARD
-      console.log("Current tab: ", activeTab);
+    // Note: Updated the logic to pass an array of types for 'promos'
+    if (filteredNotifications.length > 0 && userId) {
+      const typesToClear =
+        activeTab === "transactions" ? ["WALLET"] : ["SYSTEM", "REWARD"];
       clearNotificationsMutation.mutate({
-        type: typeToClear,
-        userId, // Pass line_user_id for the onSuccess callback
+        types: typesToClear,
+        userId,
       });
     }
   };
 
-  // Your filtering logic is correct based on your schema
   const filteredNotifications = React.useMemo(() => {
+    if (!notificationData) return [];
     if (activeTab === "transactions") {
-      return notificationData?.filter((n) => n.type === "WALLET");
+      return notificationData.filter((n) => n.type === "WALLET");
     }
     if (activeTab === "promos") {
-      return notificationData?.filter(
+      return notificationData.filter(
         (n) => n.type === "SYSTEM" || n.type === "REWARD",
       );
     }
     return [];
   }, [notificationData, activeTab]);
 
+  if (notificationLoading) {
+    return null; // Render nothing while loading initial data
+  }
+
   return (
-    <>
-      {notificationLoading ? null : (
-        <FramerDiv
-          isOpen={showNotifications}
-          id="notifications-overlay"
-          className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
+    // --- Using FramerDiv as the main animated container ---
+    <FramerDiv
+      isOpen={showNotifications}
+      className="bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
+    >
+      {/* All content is now a child of your FramerDiv */}
+      <header className="flex flex-shrink-0 items-center px-4 pt-10 pb-4">
+        <button
+          onClick={() => setShowNotifications(false)}
+          className="p-2 text-white/80 transition-colors hover:text-white"
+          aria-label="Close notifications"
         >
-          <header className="flex flex-shrink-0 items-center px-5 pt-10 pb-4">
+          <ChevronLeft size={28} />
+        </button>
+        <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
+          การแจ้งเตือน
+        </h2>
+        <div className="w-10" /> {/* Spacer */}
+      </header>
+
+      <div className="flex flex-grow flex-col overflow-y-auto rounded-t-3xl bg-white">
+        <div className="flex flex-shrink-0 items-center justify-between border-b border-slate-100 px-4">
+          {/* Tabs with motion underline */}
+          <div className="flex flex-shrink-0 grow">
             <button
-              onClick={() => setShowNotifications(false)}
-              className="text-secondary-text text-2xl transition-colors hover:text-white"
+              className={`relative flex-1 py-4 text-center font-bold transition-colors ${
+                activeTab === "transactions"
+                  ? "text-primary-pink"
+                  : "hover:text-primary-pink text-gray-500"
+              }`}
+              onClick={() => setActiveTab("transactions")}
             >
-              <IoIosArrowBack className="text-3xl" />
+              ธุรกรรม
+              {activeTab === "transactions" && (
+                <motion.div
+                  className="bg-primary-pink absolute right-0 bottom-0 left-0 h-0.5"
+                  layoutId="underline"
+                />
+              )}
             </button>
-            <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
-              การแจ้งเตือน
-            </h2>
-          </header>
-          <div className="flex flex-grow flex-col overflow-y-auto rounded-t-4xl bg-white">
-            <div className="flex flex-shrink-0 items-center justify-between px-4">
-              {/* Tabs */}
-              <div className="flex flex-shrink-0 grow pr-4">
-                <button
-                  className={`flex-1 py-4 text-center font-bold transition-colors ${
-                    activeTab === "transactions"
-                      ? "border-primary-pink text-primary-pink border-b-2"
-                      : "hover:text-primary-pink text-gray-500"
-                  }`}
-                  onClick={() => setActiveTab("transactions")}
-                >
-                  ธุรกรรม
-                </button>
-                <button
-                  className={`flex-1 py-4 text-center font-bold transition-colors ${
-                    activeTab === "promos"
-                      ? "border-primary-pink text-primary-pink border-b-2"
-                      : "hover:text-primary-pink text-gray-500"
-                  }`}
-                  onClick={() => setActiveTab("promos")}
-                >
-                  โปรโมชั่นและข่าวสาร
-                </button>
-              </div>
-              {/* Clear Button */}
-            </div>
-            <div className="p-4">
-              {/* The NotificationTab component doesn't need to change */}
-              <NotificationTab
-                notifications={filteredNotifications}
-                onNotificationClick={handleNotificationClick}
-              />
-            </div>
+            <button
+              className={`relative flex-1 py-4 text-center font-bold transition-colors ${
+                activeTab === "promos"
+                  ? "text-primary-pink"
+                  : "hover:text-primary-pink text-gray-500"
+              }`}
+              onClick={() => setActiveTab("promos")}
+            >
+              โปรโมชั่น
+              {activeTab === "promos" && (
+                <motion.div
+                  className="bg-primary-pink absolute right-0 bottom-0 left-0 h-0.5"
+                  layoutId="underline"
+                />
+              )}
+            </button>
           </div>
-        </FramerDiv>
-      )}
-    </>
+
+          {/* The enhanced "Clear All" button remains */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={handleClear}
+            disabled={
+              filteredNotifications.length === 0 ||
+              clearNotificationsMutation.isPending
+            }
+            className="ml-4 flex-shrink-0 rounded-full p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Clear notifications"
+          >
+            <Trash2 size={20} />
+          </motion.button>
+        </div>
+
+        <div className="p-4">
+          <NotificationTab
+            notifications={filteredNotifications}
+            onNotificationClick={handleNotificationClick}
+          />
+        </div>
+      </div>
+    </FramerDiv>
   );
 }

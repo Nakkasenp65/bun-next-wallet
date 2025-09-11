@@ -3,11 +3,6 @@ import axios from "@/lib/axios";
 import externalLinkAxios from "axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { useLockContext } from "@/components/context/LockContext";
-
-// =========================================================
-//  API Request Functions
-// =========================================================
 
 /**
  * ดึงข้อมูลผู้ใช้ทั้งหมดแบบแบ่งหน้าสำหรับ Admin
@@ -20,23 +15,6 @@ async function fetchAdminUsers(filters) {
   return data; // คาดว่า backend จะ trả về { data, paging }
 }
 
-/**
- * ดึงข้อมูลผู้ใช้คนเดียวแบบละเอียดสำหรับ Modal
- * @param {string} userId - Mongo DB ObjectId ของผู้ใช้
- */
-async function fetchUserById(line_user_id) {
-  // **สำคัญ:** คุณจะต้องสร้าง API Endpoint นี้ในฝั่ง Backend
-  // ที่รับ Mongo ID และ trả vềข้อมูลผู้ใช้ทั้งหมด
-  // เช่น GET /api/users/:userId
-  const { data } = await axios.get(`/admin/users/${line_user_id}`);
-  return data;
-}
-
-async function fetchUserStatus(userId) {
-  const { data } = await axios.get(`/user/status/${userId}`);
-  return data;
-}
-
 async function updateUserData({ mongoId, updateData }) {
   const { data } = await axios.patch(`/user/${mongoId}`, updateData);
   return data;
@@ -47,10 +25,6 @@ async function updateAdminUser({ userId, payload }) {
   const { data } = await axios.patch(`/admin/users/${userId}`, payload);
   return data;
 }
-
-// =========================================================
-//  Custom Hooks
-// =========================================================
 
 /**
  * Hook สำหรับดึงข้อมูลผู้ใช้ทั้งหมดสำหรับหน้า Admin Table
@@ -65,11 +39,6 @@ export function useGetAdminUsers(filters) {
     keepPreviousData: true,
   });
 }
-
-/**
- * Hook สำหรับดึงข้อมูลผู้ใช้คนเดียวแบบละเอียด (สำหรับใช้ใน Modal)
- * @param {string} userId - Mongo DB ObjectId ของผู้ใช้
- */
 
 export function useUpdateAdminUser() {
   const queryClient = useQueryClient();
@@ -105,7 +74,12 @@ export function useGetUserById(line_user_id) {
 export function useUserStatus(lineUserId) {
   return useQuery({
     queryKey: ["userStatus", lineUserId],
-    queryFn: () => fetchUserStatus(lineUserId),
+    queryFn: async () => {
+      {
+        const { data } = await axios.get(`/user/status/${lineUserId}`);
+        return data;
+      }
+    },
     enabled: !!lineUserId,
   });
 }
@@ -240,7 +214,6 @@ export function useUpdateUser() {
 
 export function useLockApp() {
   const queryClient = useQueryClient();
-  const { lockApp } = useLockContext(); // Get the function to update the UI immediately
 
   return useMutation({
     mutationFn: async (lineUserId) => {
@@ -250,9 +223,8 @@ export function useLockApp() {
     onSuccess: (data, lineUserId) => {
       toast.success("แอปถูกล็อคแล้ว");
       // Immediately update the UI to show the lock screen
-      lockApp();
       // Invalidate the user status query to ensure the backend state is refetched
-      queryClient.invalidateQueries({ queryKey: ["lockStatus", lineUserId] });
+      queryClient.invalidateQueries({ queryKey: ["userStatus", lineUserId] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || "ไม่สามารถล็อคแอปได้");
@@ -262,7 +234,6 @@ export function useLockApp() {
 
 export function useUnlockApp() {
   const queryClient = useQueryClient();
-  const { unlockApp } = useLockContext(); // Get the function to hide the lock screen
 
   return useMutation({
     mutationFn: async (unlockData) => {
@@ -271,13 +242,9 @@ export function useUnlockApp() {
       return data;
     },
     onSuccess: (data, variables) => {
-      // variables contains the { line_user_id, pin } we sent
       toast.success("ปลดล็อคสำเร็จ!");
-      // Immediately hide the lock screen
-      unlockApp();
-      // Invalidate the user status to reflect the new unlocked state
       queryClient.invalidateQueries({
-        queryKey: ["lockStatus", variables.line_user_id],
+        queryKey: ["userStatus", variables.line_user_id],
       });
     },
     onError: (error) => {

@@ -44,9 +44,11 @@ export function useClearNotifications() {
   return useMutation({
     mutationFn: async ({ type, userId }) => {
       // userId is not needed in the API call itself
-      const { data } = await axios.delete(
-        `/notification/clear/${userId}?type=${type}`,
-      );
+      const { data } = await axios.delete(`/notification/clear/${userId}`, {
+        params: {
+          type,
+        },
+      });
       return data;
     },
     onSuccess: async (data, variables) => {

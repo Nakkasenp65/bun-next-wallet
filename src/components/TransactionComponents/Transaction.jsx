@@ -1,26 +1,23 @@
 "use client";
+
 import React, { useState } from "react";
-import { IoIosArrowForward } from "react-icons/io";
-import { MdArrowUpward, MdArrowDownward } from "react-icons/md";
 import { AnimatePresence, motion } from "framer-motion";
-import StatusBadge from "./StatusBadge";
-import { FaBan, FaReceipt } from "react-icons/fa6";
-import { FaInfoCircle } from "react-icons/fa";
 import {
   ArrowDownCircle,
   ArrowUpCircle,
   Ban,
   ChevronDown,
+  Gift,
   Info,
   Receipt,
 } from "lucide-react";
+import StatusBadge from "./StatusBadge"; // Make sure this path is correct
 
+// --- UTILITY: Formats date string into a relative time like "5 นาทีที่แล้ว" ---
 const formatRelativeTime = (dateString) => {
+  if (!dateString) return "";
   const timestamp = new Date(dateString).getTime();
-
-  if (isNaN(timestamp)) {
-    return "";
-  }
+  if (isNaN(timestamp)) return "";
 
   const diff = Date.now() - timestamp;
   const minutes = Math.floor(diff / (1000 * 60));
@@ -32,35 +29,103 @@ const formatRelativeTime = (dateString) => {
   return `${days} วันที่แล้ว`;
 };
 
-const getTransactionAppearance = (transaction) => {
-  const baseStyles = {
-    INCOME: {
-      icon: <ArrowDownCircle size={20} />,
-      bg: "bg-green-50",
-      text: "text-green-600",
-    },
-    REWARD: {
-      icon: <ArrowDownCircle size={20} />,
-      bg: "bg-green-50",
-      text: "text-green-600",
-    },
-    DEPOSIT: {
-      icon: <ArrowDownCircle size={20} />,
-      bg: "bg-green-50",
-      text: "text-green-600",
-    },
-    OUTCOME: {
-      icon: <ArrowUpCircle size={20} />,
-      bg: "bg-red-50",
-      text: "text-red-600",
-    },
-    WITHDRAW: {
-      icon: <ArrowUpCircle size={20} />,
-      bg: "bg-red-50",
-      text: "text-red-600",
-    },
+// --- UTILITY: Masks sensitive bank account numbers in a specific format ---
+const getMaskedDisplayValue = (transaction, field) => {
+  const { type, status, fromWallet } = transaction;
+  const rawValue = transaction[field];
+
+  const applyMask = (accountNumber) => {
+    const digitsOnly = String(accountNumber).replace(/\D/g, "");
+    if (digitsOnly.length < 5) return "xxxx";
+    const revealedPart = digitsOnly.slice(-5, -1);
+    const prefixLength = Math.max(0, digitsOnly.length - 5);
+    const maskedPrefix = "x".repeat(prefixLength);
+    return `${maskedPrefix}(${revealedPart}-)x`;
   };
 
+  if (type === "WITHDRAW" && field === "to") {
+    if (!rawValue || !rawValue.includes(" - ")) return rawValue;
+    const [bankName, accountNumber] = rawValue.split(" - ", 2);
+    return `${bankName} - ${applyMask(accountNumber)}`;
+  }
+
+  if (type === "DEPOSIT" && field === "from") {
+    if (status === "SUCCESS") {
+      if (!rawValue || !rawValue.includes(" - ")) return rawValue;
+      const [bankName, accountNumber] = rawValue.split(" - ", 2);
+      return `${bankName} - ${applyMask(accountNumber)}`;
+    }
+    return fromWallet?.user?.line_display_name || rawValue || "ไม่ระบุ";
+  }
+
+  return rawValue;
+};
+
+// --- CORE LOGIC: The Contextual Transaction Storyteller ---
+// Determines the display context (income/outcome, name, appearance) from the user's perspective.
+const getTransactionContext = (transaction, currentWalletId) => {
+  const { type, status, fromWalletId, toWalletId, name, from, to } =
+    transaction;
+
+  let isIncome = false;
+  let displayName = name;
+  let baseAppearance;
+
+  // Handle TRANSFER type first, as it's the most contextual
+  if (type === "TRANSFER") {
+    if (toWalletId === currentWalletId) {
+      isIncome = true;
+      displayName = `จาก: ${from}`;
+      baseAppearance = {
+        icon: <ArrowDownCircle size={20} />,
+        bg: "bg-green-50",
+        text: "text-green-600",
+      };
+    } else {
+      isIncome = false;
+      displayName = `ถึง: ${to}`;
+      baseAppearance = {
+        icon: <ArrowUpCircle size={20} />,
+        bg: "bg-red-50",
+        text: "text-red-600",
+      };
+    }
+  } else {
+    // Handle all other standard types
+    const standardIncomeTypes = ["INCOME", "REWARD", "DEPOSIT"];
+    isIncome = standardIncomeTypes.includes(type);
+
+    const appearanceMap = {
+      INCOME: {
+        icon: <ArrowDownCircle size={20} />,
+        bg: "bg-green-50",
+        text: "text-green-600",
+      },
+      REWARD: {
+        icon: <Gift size={20} />,
+        bg: "bg-violet-50",
+        text: "text-violet-600",
+      },
+      DEPOSIT: {
+        icon: <ArrowDownCircle size={20} />,
+        bg: "bg-green-50",
+        text: "text-green-600",
+      },
+      OUTCOME: {
+        icon: <ArrowUpCircle size={20} />,
+        bg: "bg-red-50",
+        text: "text-red-600",
+      },
+      WITHDRAW: {
+        icon: <ArrowUpCircle size={20} />,
+        bg: "bg-red-50",
+        text: "text-red-600",
+      },
+    };
+    baseAppearance = appearanceMap[type] || appearanceMap.OUTCOME;
+  }
+
+  // Apply status overrides at the end
   const statusOverrides = {
     REJECTED: {
       icon: <Ban size={20} />,
@@ -74,101 +139,25 @@ const getTransactionAppearance = (transaction) => {
     },
   };
 
-  // ถ้ามี override สำหรับ status ปัจจุบัน, ให้ใช้ค่านั้น
-  if (statusOverrides[transaction.status]) {
-    return statusOverrides[transaction.status];
-  }
+  const finalAppearance = statusOverrides[status] || baseAppearance;
 
-  // มิเช่นนั้น, ใช้ style ตาม type ของ transaction
-  return baseStyles[transaction.type] || baseStyles.OUTCOME;
+  return { isIncome, displayName, appearance: finalAppearance };
 };
 
-const getMaskedAccountDisplay = (accountString) => {
-  if (!accountString || !accountString.includes(" - ")) return accountString;
-  const parts = accountString.split(" - ");
-  const bankName = parts[0];
-  const accountNumber = parts[1].trim();
-  if (accountNumber.length <= 4) return accountString;
-  const lastFourDigits = accountNumber.slice(-4);
-  const maskedPart = "x".repeat(accountNumber.length - 4);
-  return `${bankName} - ${maskedPart}${lastFourDigits}`;
-};
-
-export default function Transaction({ transaction }) {
+// --- COMPONENT: The main Transaction item UI ---
+export default function Transaction({ transaction, currentWalletId }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const isIncome = ["INCOME", "REWARD", "DEPOSIT"].includes(transaction.type);
-  const appearance = getTransactionAppearance(transaction);
+  // All display logic is now derived from our new "brain"
+  const { isIncome, displayName, appearance } = getTransactionContext(
+    transaction,
+    currentWalletId,
+  );
 
-  const toDisplay = getMaskedAccountDisplay(transaction.to);
-  const fromDisplay =
-    transaction.fromWallet?.user?.line_display_name || transaction.from;
+  // Masking is still needed for the detail view
+  const toDisplay = getMaskedDisplayValue(transaction, "to");
+  const fromDisplay = getMaskedDisplayValue(transaction, "from");
 
-  const isPending = transaction.status === "PENDING";
-  const isRejected = transaction.status === "REJECTED"; // <-- 2. เพิ่มตัวแปร isRejected
-
-  const amount = isPending ? transaction.verifiedAmount : transaction.amount;
-  const amountDisplay = amount ?? transaction.verifiedAmount;
-
-  const getTransactionDisplayValue = (transaction) => {
-    const formatableTypes = ["WITHDRAW", "DEPOSIT"];
-
-    if (!formatableTypes.includes(transaction.type)) {
-      return transaction.to;
-    }
-
-    const accountString = transaction.to;
-
-    if (!accountString || !accountString.includes(" - ")) {
-      return accountString;
-    }
-
-    const parts = accountString.split(" - ");
-    const bankName = parts[0];
-    const accountNumber = parts[1].trim();
-
-    if (accountNumber.length <= 4) {
-      return accountString;
-    }
-
-    const lastFourDigits = accountNumber.slice(-4);
-    const maskedPart = "x".repeat(accountNumber.length - 4);
-
-    return `${bankName} - ${maskedPart}${lastFourDigits}`;
-  };
-
-  const iconConfig = {
-    INCOME: {
-      icon: <MdArrowDownward />,
-      bg: "bg-green-100",
-      text: "text-green-600",
-    },
-    REWARD: {
-      icon: <MdArrowDownward />,
-      bg: "bg-green-100",
-      text: "text-green-600",
-    },
-    OUTCOME: {
-      icon: <MdArrowUpward />,
-      bg: "bg-red-100",
-      text: "text-red-600",
-    },
-  };
-
-  // --- 3. สร้าง displayConfig เพื่อจัดการสถานะ REJECTED ---
-  // เริ่มต้นด้วย config ปกติตามประเภท
-  let displayConfig = iconConfig[transaction.type] || iconConfig.OUTCOME;
-
-  // ถ้าสถานะเป็น REJECTED, ให้ override ค่า icon และสี
-  if (isRejected) {
-    displayConfig = {
-      icon: <FaBan />, // ใช้ไอคอนกากบาท/แบน
-      bg: "bg-gray-200", // ทำให้สีพื้นหลังดูจืดลง
-      text: "text-gray-500", // ทำให้สีไอคอนดูจืดลง
-    };
-  }
-
-  // --- 4. อัปเดตฟังก์ชันสำหรับแสดงผลจำนวนเงิน ---
   const renderAmount = () => {
     const amount =
       transaction.status === "PENDING"
@@ -176,8 +165,10 @@ export default function Transaction({ transaction }) {
         : transaction.amount;
     const amountToDisplay = amount ?? transaction.verifiedAmount;
 
-    if (transaction.status === "REJECTED") {
-      return <span className="text-sm font-bold text-red-500">ถูกปฏิเสธ</span>;
+    if (["REJECTED", "CANCELLED"].includes(transaction.status)) {
+      return (
+        <span className="text-sm font-bold text-red-500">ถูกปฏิเสธ/ยกเลิก</span>
+      );
     }
     if (transaction.status === "PENDING") {
       return (
@@ -213,9 +204,7 @@ export default function Transaction({ transaction }) {
           {appearance.icon}
         </div>
         <div className="flex-grow">
-          <p className="text-sm font-semibold text-gray-800">
-            {transaction.name}
-          </p>
+          <p className="text-sm font-semibold text-gray-800">{displayName}</p>
           <p className="text-xs text-gray-500">
             {formatRelativeTime(transaction.createdAt)}
           </p>
@@ -239,6 +228,10 @@ export default function Transaction({ transaction }) {
             className="overflow-hidden px-4 pb-4"
           >
             <div className="space-y-3 rounded-lg bg-slate-50 p-4 text-sm ring-1 ring-slate-200/50">
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-600">ประเภท</span>
+                <span className="font-semibold">{transaction.name}</span>
+              </div>
               <div className="flex justify-between">
                 <span className="font-medium text-gray-600">สถานะ</span>
                 <StatusBadge status={transaction.status} />

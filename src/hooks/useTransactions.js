@@ -137,8 +137,15 @@ export function useWalletTransaction(year, month, walletId) {
 export function useSuccessTransactions(year, month, walletId) {
   return useQuery({
     queryKey: ["successTransactions", year, month, walletId],
-    queryFn: () => fetchSuccessTransactions(year, month, walletId),
+    queryFn: async () => {
+      const response = await axios.get(
+        `/transaction/success/${walletId}?year=${year}&month=${month}`,
+      );
+      return response.data;
+    },
     enabled: !!walletId,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
   });
 }
 

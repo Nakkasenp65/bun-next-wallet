@@ -9,6 +9,7 @@ export default function MainTransactionList({
   transactions,
   transactionLoading,
   transactionError,
+  currentWalletId,
 }) {
   if (!transactions) {
     return (
@@ -23,7 +24,13 @@ export default function MainTransactionList({
             เกิดข้อผิดพลาดในการโหลดข้อมูล
           </p>
         ) : transactions && transactions.length > 0 ? (
-          transactions.map((t) => <Transaction key={t.id} transaction={t} />)
+          transactions.map((t) => (
+            <Transaction
+              key={t.id}
+              transaction={t}
+              currentWalletId={currentWalletId}
+            />
+          ))
         ) : (
           <p className="p-8 text-center text-gray-500">ไม่พบรายการในเดือนนี้</p>
         )}
@@ -53,7 +60,11 @@ export default function MainTransactionList({
           {transactions.slice(0, 5).map((transaction) => {
             if (transaction.status !== "PENDING")
               return (
-                <Transaction key={transaction.id} transaction={transaction} />
+                <Transaction
+                  key={transaction.id}
+                  transaction={transaction}
+                  currentWalletId={currentWalletId}
+                />
               );
           })}
         </ul>

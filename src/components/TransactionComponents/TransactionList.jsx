@@ -30,7 +30,11 @@ export default function TransactionList({ walletId }) {
           {transactions.map((transaction) => {
             if (transaction.status !== "PENDING")
               return (
-                <Transaction key={transaction.id} transaction={transaction} />
+                <Transaction
+                  key={transaction.id}
+                  transaction={transaction}
+                  currentWalletId={walletId}
+                />
               );
           })}
         </ul>
