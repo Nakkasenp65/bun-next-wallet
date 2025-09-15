@@ -2,10 +2,7 @@
 import { motion } from "framer-motion";
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faChevronLeft,
-  faChevronRight,
-} from "@fortawesome/free-solid-svg-icons";
+import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { useWalletTransaction } from "@/hooks/useTransactions";
 import CtaButton from "@/components/Ui/CtaButton";
@@ -39,12 +36,9 @@ export default function HistoryPage() {
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
   const isCurrentMonth =
-    currentYear === new Date().getFullYear() &&
-    currentMonth === new Date().getMonth();
+    currentYear === new Date().getFullYear() && currentMonth === new Date().getMonth();
 
-  const { data: userData, isLoading: userLoading } = useGetUser(
-    liffProfile?.userId,
-  );
+  const { data: userData, isLoading: userLoading } = useGetUser(liffProfile?.userId);
 
   const {
     data: transactions,
@@ -93,10 +87,7 @@ export default function HistoryPage() {
           <div className="mt-4 space-y-3">
             {/* สร้าง Skeleton Items หลายๆ อันเพื่อจำลองลิสต์รายการ */}
             {[...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                className="flex animate-pulse items-center gap-4 rounded-lg p-2"
-              >
+              <div key={i} className="flex animate-pulse items-center gap-4 rounded-lg p-2">
                 <div className="h-10 w-10 rounded-full bg-gray-200" />
                 <div className="flex-grow space-y-2">
                   <div className="h-4 w-3/4 rounded-md bg-gray-200" />
@@ -137,13 +128,10 @@ export default function HistoryPage() {
 
       {/* Content */}
       <div className="flex flex-grow flex-col overflow-y-auto rounded-t-[30px] bg-white">
-        <div className="p-6">
+        <div className="p-4">
           {/* Period + top download */}
           <div className="flex items-center justify-between rounded-lg bg-gray-100 p-3">
-            <button
-              onClick={handlePrevMonth}
-              className="text-gray-500 hover:text-black"
-            >
+            <button onClick={handlePrevMonth} className="text-gray-500 hover:text-black">
               <FontAwesomeIcon icon={faChevronLeft} />
             </button>
             <span className="text-bg-dark font-bold">
@@ -168,28 +156,20 @@ export default function HistoryPage() {
                 <TransactionSkeleton />
               </>
             ) : error ? (
-              <p className="p-8 text-center text-red-500">
-                เกิดข้อผิดพลาดในการโหลดข้อมูล
-              </p>
+              <p className="p-8 text-center text-red-500">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
             ) : transactions && transactions.length > 0 ? (
               transactions.map((t) => (
-                <Transaction
-                  key={t.id}
-                  transaction={t}
-                  currentWalletId={userData?.wallet.id}
-                />
+                <Transaction key={t.id} transaction={t} currentWalletId={userData?.wallet.id} />
               ))
             ) : (
-              <p className="p-8 text-center text-gray-500">
-                ไม่พบรายการในเดือนนี้
-              </p>
+              <p className="p-8 text-center text-gray-500">ไม่พบรายการในเดือนนี้</p>
             )}
           </ul>
         </div>
       </div>
 
       {/* Footer download */}
-      <footer className="flex justify-center bg-white p-6 pt-4">
+      <footer className="flex justify-center bg-white p-4 pt-4">
         <CtaButton
           onClick={() => setOpenModal(true)}
           className="z-10 w-48 rounded-xl p-4 text-lg font-bold"

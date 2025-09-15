@@ -15,11 +15,6 @@ async function fetchAdminUsers(filters) {
   return data; // คาดว่า backend จะ trả về { data, paging }
 }
 
-async function updateUserData({ mongoId, updateData }) {
-  const { data } = await axios.patch(`/user/${mongoId}`, updateData);
-  return data;
-}
-
 async function updateAdminUser({ userId, payload }) {
   // Endpoint นี้คุณต้องสร้างขึ้นมาเพื่อเรียก service ข้างบน
   const { data } = await axios.patch(`/admin/users/${userId}`, payload);
@@ -109,27 +104,40 @@ export function useLockStatus(lineUserId) {
   });
 }
 
-export function useMainServerUser(lineUserId) {
+export function useCheckOkMobileUser(line_user_id) {
+  const router = useRouter();
   return useQuery({
-    queryKey: ["mainServerUser", lineUserId],
+    queryKey: ["isOkMobileUser", line_user_id],
+    queryFn: async () => {
+      try {
+        const { data } = await externalLinkAxios.get(
+          `https://checkuserdb.vercel.app/api/check-user/${line_user_id}`,
+        );
+        return data;
+      } catch (error) {
+        if (error.status === 404) router.replace("https://liff.line.me/2006703040-RYAyYAyA");
+        return null;
+      }
+    },
+    enabled: !!line_user_id,
+  });
+}
+
+export function useMainServerUser(line_user_id) {
+  return useQuery({
+    queryKey: ["mainServerUser", line_user_id],
     queryFn: async () => {
       const mainUserApiUrl = process.env.NEXT_PUBLIC_MAIN_USER_API;
-
-      let mainUser = {};
       try {
         if (!mainUserApiUrl) throw new Error("mainUserApiUrl is not defined");
-        const { data } = await externalLinkAxios.get(
-          `${mainUserApiUrl}${lineUserId}`,
-        );
-        mainUser = data;
-        console.log(mainUser);
-        return mainUser;
+        const { data } = await externalLinkAxios.get(`${mainUserApiUrl}${line_user_id}`);
+        return data;
       } catch (error) {
         console.log("Error fetchUserfromMainServer", error);
         return null;
       }
     },
-    enabled: !!lineUserId,
+    enabled: !!line_user_id,
   });
 }
 
@@ -155,8 +163,7 @@ export function useCreateGoal() {
     },
     onError: (error) => {
       console.error("Error creating goal:", error);
-      const errorMessage =
-        error.response?.data?.message || "สร้างเป้าหมายการออมเงินไม่สำเร็จ";
+      const errorMessage = error.response?.data?.message || "สร้างเป้าหมายการออมเงินไม่สำเร็จ";
       toast.error(errorMessage);
     },
   });
@@ -178,12 +185,10 @@ export function useUpdateGoal() {
       setTimeout(() => {
         console.log("wait for 0.5 second (race condition)");
       }, 500);
-      queryClient.invalidateQueries({ queryKey: ["user", variables.userId] });
+      queryClient.invalidateQueries({ queryKey: ["goal", variables.line_user_id] });
     },
     onError: (error) => {
-      toast.error(
-        error.response?.data?.message || "ไม่สามารถเปลี่ยนเป้าหมายได้",
-      );
+      toast.error(error.response?.data?.message || "ไม่สามารถเปลี่ยนเป้าหมายได้");
     },
   });
 }
@@ -193,21 +198,19 @@ export function useUpdateUser() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: updateUserData,
+    mutationFn: async ({ line_user_id, updateData }) => {
+      console.log(line_user_id);
+      const { data } = await axios.patch(`/user/${line_user_id}`, updateData);
+      return data;
+    },
     onSuccess: (data) => {
       // 'data' คือ user object ที่อัปเดตแล้ว
       toast.success("บันทึกข้อมูลสำเร็จ!");
-
-      // (สำคัญ) อัปเดต cache ของ 'user' ด้วยข้อมูลใหม่ทันที
-      queryClient.setQueryData(["user", data.line_user_id], data);
-
-      // กลับไปหน้าโปรไฟล์
+      queryClient.invalidateQueries("user");
       router.back();
     },
     onError: (error) => {
-      toast.error(
-        error.response?.data?.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
-      );
+      toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล");
     },
   });
 }

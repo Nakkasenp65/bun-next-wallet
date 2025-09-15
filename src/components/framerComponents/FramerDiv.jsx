@@ -16,7 +16,6 @@ const FramerDiv = memo(({ isOpen, children, className }) => {
     visible: {
       x: 0,
       transition: {
-        // 👇 และตรงนี้
         duration: 0.3,
         ease: "easeInOut",
       },

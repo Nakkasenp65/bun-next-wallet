@@ -1,18 +1,17 @@
 "use client";
+
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import CtaButton from "../Ui/CtaButton";
 import FramerDiv from "../framerComponents/FramerDiv";
-import GoalSetter from "../Ui/GoalSetter";
-import Loading from "../StatusComponents/Loading";
-import UserInputMonthly from "../pages/UserInputMonthly"; // 1. Import UserInputMonthly
-import { useUpdateGoal } from "@/hooks/useUser"; // 2. Import the correct hook
-import axios from "@/lib/axios";
+import GoalSetter from "../../app/(pages)/welcome/components/GoalSetter";
+import { useUpdateGoal } from "@/hooks/useUser";
+import { useGetProducts } from "@/hooks/useProduct"; // <-- 1. Import Hook ที่ถูกต้อง
 import toast from "react-hot-toast";
 
 /* ---------------- Skeletons ---------------- */
-
+// ส่วนนี้ไม่มีการเปลี่ยนแปลง
 function ProductCardSkeleton() {
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
@@ -35,32 +34,27 @@ function ProductGridSkeleton({ count = 6 }) {
 }
 
 /* ---------------- Segmented Mode Switch ---------------- */
-
-function ModeSwitch({ mode, onChange }) {
+// ส่วนนี้ไม่มีการเปลี่ยนแปลง
+const ModeSwitch = ({ mode, onChange }) => {
   const items = useMemo(
     () => [
       { key: "all", label: "ทั้งหมด" },
-      { key: "upgrade", label: "อัปเกรด" },
-      { key: "affordable", label: "ตามงบ" },
+      { key: "upgrade", label: "เปลี่ยนรุ่น" },
+      { key: "affordable", label: "ตามยอดการออม" },
     ],
     [],
   );
 
   return (
     <div className="my-2">
-      <div className="grid grid-cols-3 rounded-full bg-gray-100 p-1">
+      <div className="grid grid-cols-3 rounded-full bg-gray-100">
         {items.map((it) => {
           const active = mode === it.key;
           return (
             <button
               key={it.key}
               onClick={() => onChange(it.key)}
-              className={
-                "rounded-full px-3 py-2 text-sm font-semibold transition-colors " +
-                (active
-                  ? "bg-black text-white"
-                  : "text-gray-700 hover:bg-white")
-              }
+              className={`"rounded-full font-semibold" py-2 text-sm ${active ? "rounded-full bg-black text-white" : "text-gray-700"}`}
             >
               {it.label}
             </button>
@@ -69,131 +63,66 @@ function ModeSwitch({ mode, onChange }) {
       </div>
     </div>
   );
-}
+};
 
-export default function ChangeGoalPage({
-  isEditing,
-  setIsEditing,
-  userData,
-  balance = 0,
-}) {
-  const [uiStep, setUiStep] = useState("input"); // 'input' | 'calculate' | 'main' | 'final'
+/* ---------------- Main Controller Component ---------------- */
+export default function ChangeGoalPage({ isEditing, setIsEditing, userData, balance = 0 }) {
   const [newGoal, setNewGoal] = useState({});
-  const [suggestedPhone, setSuggestedPhone] = useState(null);
-  const [facets, setFacets] = useState(null);
-  const [isFetching, setIsFetching] = useState(false);
 
-  // keep for future; only monthlyPayment is relevant to your “capacity” math
-  const [inputData] = useState({
-    monthlyPayment: userData?.monthlyPayment || "",
-    age: userData?.ageRange || "",
-    occupation: userData?.occupation || "",
-    customOccupation: "",
-  });
-
-  // Query config for backend
+  // --- STAGE 1: การกำหนดนโยบายการ Query (Query Policy Definition) ---
   const [productQuery, setProductQuery] = useState({
-    mode: "upgrade", // all | upgrade | affordable
-    minPrice: null,
+    mode: "upgrade",
+    minPrice: balance,
     maxPrice: null,
-    topPerBrand: false, // best model per brand (nicer grid)
-    sort: "asc",
-    take: 400,
-    skip: 0,
   });
 
+  // --- STAGE 2: การมอบหมายภารกิจ (Task Delegation) ---
+  // มอบหมายภารกิจการดึงข้อมูลทั้งหมดให้กับ Hook ที่เชี่ยวชาญ
+  const {
+    data: productsData,
+    isLoading: isFetching,
+    isError,
+    error,
+  } = useGetProducts(productQuery.mode, productQuery.minPrice, productQuery.maxPrice); // เปิดใช้งาน Hook นี้ก็ต่อเมื่อ Component นี้กำลังถูกแสดงผล
+
+  console.log(productsData);
+
+  // --- STAGE 3: การปรับเปลี่ยนนโยบาย (Policy Adjustment) ---
+  // useEffect นี้จะทำงานเมื่อผู้ใช้เปลี่ยน 'mode' หรือ 'balance' เปลี่ยนแปลง
+  useEffect(() => {
+    // ไม่ทำงานถ้า component ไม่ได้ถูกเปิดใช้งาน
+    if (!isEditing) return;
+
+    const potentialPrice = Number(balance || 0);
+
+    setProductQuery((prevQuery) => {
+      let newMinPrice = null;
+      let newMaxPrice = null;
+
+      if (prevQuery.mode === "affordable") {
+        newMaxPrice = potentialPrice;
+      } else if (prevQuery.mode === "upgrade") {
+        newMinPrice = potentialPrice;
+      }
+
+      // คืนค่า query object ใหม่ ซึ่งจะทำให้ useGetProducts refetch โดยอัตโนมัติ
+      return { ...prevQuery, minPrice: newMinPrice, maxPrice: newMaxPrice };
+    });
+  }, [productQuery.mode, balance, isEditing]);
+
+  // --- STAGE 4: การจัดการ UI และ Logic ที่เหลือ ---
   const closePage = () => {
     setIsEditing(false);
-    // reset after exit animation
     setTimeout(() => {
-      setUiStep("input");
       setNewGoal({});
-      setSuggestedPhone(null);
-      setFacets(null);
+      // ไม่จำเป็นต้อง reset state อื่นๆ เพราะมันจะถูก re-initialize เมื่อเปิดใหม่
     }, 300);
   };
 
-  // ---- fetch products only when opened (and when mode changes while open) ----
-  const fetchProducts = async () => {
-    try {
-      const potentialPrice = Number(balance || 0);
-      if (!Number.isFinite(balance) || balance < 0) {
-        toast.error("ไม่สามารถคำนวณงบประมาณได้");
-        return;
-      }
-
-      setIsFetching(true);
-      setUiStep("calculate");
-      const toastId = toast.loading("กำลังค้นหาสินค้าที่เหมาะสม…");
-
-      let { mode, minPrice, maxPrice, topPerBrand, take, skip, sort } =
-        productQuery;
-
-      // Derive min/max by mode (upgrade shows pricier targets than current balance)
-      if (mode === "affordable") {
-        minPrice = null;
-        maxPrice = potentialPrice;
-      } else if (mode === "upgrade") {
-        minPrice = potentialPrice;
-        maxPrice = null;
-      } else {
-        // all
-        minPrice = null;
-        maxPrice = null;
-      }
-
-      const { data } = await axios.get("/product", {
-        params: {
-          mode,
-          minPrice,
-          maxPrice,
-          topPerBrand,
-          take,
-          skip,
-          sort,
-        },
-      });
-
-      const items = Array.isArray(data?.items) ? data.items : [];
-      setSuggestedPhone(items);
-      setFacets(data?.facets ?? null);
-
-      if (!items.length) {
-        toast("ยังไม่พบสินค้าที่ตรงเงื่อนไข ลองเปลี่ยนโหมดหรือช่วงราคา");
-        setUiStep("input");
-      } else {
-        toast.success("คัดสินค้าที่เหมาะสมให้แล้ว ✨");
-        setUiStep("main");
-      }
-
-      toast.dismiss(toastId);
-    } catch (err) {
-      console.error(err);
-      toast.error("เกิดข้อผิดพลาดในการค้นหาสินค้า");
-      setUiStep("input");
-    } finally {
-      setIsFetching(false);
-    }
-  };
-
-  // Only fire when showing; refetch when mode changes (while open)
-  useEffect(() => {
-    if (isEditing) fetchProducts();
-  }, [isEditing]);
-
-  useEffect(() => {
-    if (isEditing && uiStep !== "calculate") {
-      // Re-query on mode change while the modal is open
-      fetchProducts();
-    }
-  }, [productQuery.mode]);
-
-  // Receive goal from GoalSetter
   const handleGoalUpdate = useCallback((goal) => {
     setNewGoal(goal);
   }, []);
 
-  // Save changes
   const { mutate: updateGoal, isPending: isUpdatingGoal } = useUpdateGoal();
   const handleSaveChanges = () => {
     if (!newGoal.mobileId || !newGoal.planId) {
@@ -202,6 +131,7 @@ export default function ChangeGoalPage({
     updateGoal(
       {
         userId: userData.id,
+        line_user_id: userData.line_user_id,
         productId: newGoal.mobileId,
         planId: newGoal.planId,
       },
@@ -209,12 +139,17 @@ export default function ChangeGoalPage({
     );
   };
 
-  console.log("Suggested Phone: \n", suggestedPhone);
+  // แสดงข้อผิดพลาดจาก Hook
+  useEffect(() => {
+    if (isError) {
+      toast.error(error.message || "เกิดข้อผิดพลาดในการค้นหาสินค้า");
+    }
+  }, [isError, error]);
 
   if (!isEditing) return null;
 
-  const hasProducts =
-    Array.isArray(suggestedPhone) && suggestedPhone.length > 0;
+  const suggestedPhone = productsData || [];
+  const hasProducts = !isFetching && Array.isArray(suggestedPhone) && suggestedPhone.length > 0;
 
   return (
     <FramerDiv
@@ -230,13 +165,11 @@ export default function ChangeGoalPage({
         >
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
-        <h2 className="flex-grow text-center text-xl font-bold text-gray-800">
-          แก้ไขเป้าหมาย
-        </h2>
+        <h2 className="flex-grow text-center text-xl font-bold text-gray-800">แก้ไขเป้าหมาย</h2>
         <div className="w-6"></div>
       </header>
 
-      <div className="rounded-lg bg-gray-100 p-2 text-center text-sm text-gray-600">
+      <div className="rounded-lg py-2 text-center text-sm text-gray-600">
         ยอดเงินที่ใช้ได้
         <span className="text-bg-dark ml-2 font-bold">
           ฿
@@ -254,17 +187,15 @@ export default function ChangeGoalPage({
 
       {/* Content */}
       <div className="relative flex-grow overflow-y-auto">
-        {/* Skeleton while fetching */}
         {isFetching && <ProductGridSkeleton count={6} />}
 
-        {/* Main content once loaded */}
         {!isFetching && hasProducts && (
           <>
             <GoalSetter
               showBack={false}
               products={suggestedPhone}
               onGoalChange={handleGoalUpdate}
-              onBack={() => setUiStep("input")}
+              onBack={closePage} // สามารถใช้ closePage ได้โดยตรง
             />
             <footer className="sticky bottom-0 flex w-full items-center justify-center bg-white p-4 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
               <CtaButton
@@ -278,13 +209,10 @@ export default function ChangeGoalPage({
           </>
         )}
 
-        {/* Empty state if loaded but no products */}
         {!isFetching && !hasProducts && (
           <div className="flex flex-col items-center justify-center p-10 text-center text-gray-600">
             <p className="text-base">ยังไม่พบสินค้าที่ตรงเงื่อนไข</p>
-            <p className="mt-1 text-sm">
-              ลองเปลี่ยนโหมดการค้นหา หรือกลับไปแก้ยอดออม
-            </p>
+            <p className="mt-1 text-sm">ลองเปลี่ยนโหมดการค้นหา</p>
           </div>
         )}
       </div>

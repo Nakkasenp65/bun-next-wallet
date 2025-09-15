@@ -84,19 +84,16 @@ const AvailableMissionCard = ({ mission, onEnroll, isEnrolling }) => {
       </p>
 
       {/* Countdown Timer */}
-      <div className="my-2 flex items-center self-center text-center text-xs font-medium text-white/90">
+      <div className="my-2 flex items-center justify-center gap-1 text-center text-base font-medium text-white/90">
         <Image
           width={40}
           height={40}
           className="h-6 w-6"
-          src={
-            "https://lh3.googleusercontent.com/d/1laqwMVmQG02RSn0iyFLQg2WnVxhsFHmf"
-          }
+          src={"/assets/images/animatedClock.gif"}
           alt="clock ticking logo"
           priority
         />
-        หมดเวลาเข้าร่วมใน{" "}
-        <span className="font-bold text-amber-300">{timeLeft}</span>
+        เหลืออีก <span className="font-bold text-amber-300">{timeLeft}</span>
       </div>
 
       {/* Footer: Reward & CTA */}

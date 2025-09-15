@@ -139,7 +139,7 @@ export const useGetAvailableMissions = (userId) => {
   return useQuery({
     queryKey: ["availableMissions", userId],
     queryFn: () => fetchAvailableMissions(userId),
-    staleTime: 5_000, // don’t refetch immediately after our optimistic write
+    staleTime: 15 * 1000,
     refetchOnWindowFocus: false, // avoid surprise refetch restoring stale server data
     enabled: !!userId,
   });
@@ -150,6 +150,7 @@ export const useGetMyMissions = (userId) => {
     queryKey: ["myMissions", userId],
     queryFn: () => fetchMyMissions(userId),
     enabled: !!userId,
+    staleTime: 15 * 1000,
   });
 };
 

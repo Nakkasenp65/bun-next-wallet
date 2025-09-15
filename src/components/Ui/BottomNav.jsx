@@ -27,7 +27,7 @@ export default function BottomNav({ setShowContact, line_user_id }) {
   ];
 
   return (
-    <nav className="fixed bottom-0 z-10 flex w-full items-center justify-around bg-white py-2.5 shadow-md shadow-black/75 backdrop-blur-sm lg:max-w-[450px]">
+    <nav className="fixed bottom-0 z-10 flex w-full items-center justify-around bg-white py-2 pb-6 shadow-md shadow-black/75 backdrop-blur-sm lg:max-w-[450px]">
       {/* Left side items */}
       <NavItem
         label={navItems[0].label}
@@ -51,7 +51,7 @@ export default function BottomNav({ setShowContact, line_user_id }) {
         className="group -mt-9 cursor-pointer"
         onClick={() => setActiveNav("scan")}
       >
-        <div className="from-primary-pink to-primary-orange shadow-primary-pink/40 flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-gradient-to-r text-3xl text-white shadow-lg transition-transform group-hover:scale-110 group-hover:rotate-6">
+        <div className="from-primary-pink to-primary-orange drop-shadow-primary-pink/20 flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-gradient-to-r text-3xl text-white drop-shadow-xl transition-transform group-hover:scale-110 group-hover:rotate-6">
           <FontAwesomeIcon icon={faQrcode} />
         </div>
       </Link>

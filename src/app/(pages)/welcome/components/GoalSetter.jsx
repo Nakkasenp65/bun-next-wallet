@@ -1,16 +1,16 @@
 "use client";
-import Image from "next/image";
-import DropDownComponent from "@/components/Ui/DropDownComponent";
-import FramerButton from "../framerComponents/FramerButton";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { FaApple } from "react-icons/fa6";
 import { SiSamsung, SiOppo, SiVivo, SiXiaomi } from "react-icons/si";
 import { HiOutlineViewfinderCircle } from "react-icons/hi2";
 import { MdAutoAwesome } from "react-icons/md";
 import { FaExchangeAlt } from "react-icons/fa";
+import Image from "next/image";
+import DropDownComponent from "../../../../components/Ui/DropDownComponent";
+import FramerButton from "../../../../components/framerComponents/FramerButton";
 import GridSelectorComponent from "./GridSelectorComponent";
-import Poco from "../logos/Poco";
-import Realme from "../logos/Realme";
+import Poco from "../../../../components/logos/Poco";
+import Realme from "../../../../components/logos/Realme";
 
 const brandLogos = {
   Apple: <FaApple />,
@@ -28,12 +28,7 @@ const conditionOptions = [
   { id: "มือสอง", name: "มือสอง", icon: <FaExchangeAlt /> },
 ];
 
-export default function GoalSetter({
-  products,
-  onGoalChange = () => {},
-  onBack,
-  showBack = true,
-}) {
+export default function GoalSetter({ products, onGoalChange = () => {}, onBack, showBack = true }) {
   const [selectedCondition, setSelectedCondition] = useState("มือหนึ่ง");
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedModel, setSelectedModel] = useState("");
@@ -88,11 +83,7 @@ export default function GoalSetter({
   // Use `new Set()` to ensure the `colors` array contains only unique values.
   // This prevents the "duplicate key" error in React when rendering the color buttons.
   const colors = useMemo(
-    () => [
-      ...new Set(
-        availableProductsInVariant.map((p) => p.color).filter((c) => c),
-      ),
-    ],
+    () => [...new Set(availableProductsInVariant.map((p) => p.color).filter((c) => c))],
     [availableProductsInVariant],
   );
 
@@ -126,9 +117,7 @@ export default function GoalSetter({
 
   const handleColorChange = useCallback(
     (newColor) => {
-      const product = availableProductsInVariant.find(
-        (p) => p.color === newColor,
-      );
+      const product = availableProductsInVariant.find((p) => p.color === newColor);
       if (product) setSelectedProduct(product);
     },
     [availableProductsInVariant],
@@ -159,12 +148,7 @@ export default function GoalSetter({
   }, [selectedBrand, models, selectedModel]);
 
   useEffect(() => {
-    if (
-      selectedBrand &&
-      selectedModel &&
-      capacities.length > 0 &&
-      !selectedCapacity
-    ) {
+    if (selectedBrand && selectedModel && capacities.length > 0 && !selectedCapacity) {
       setSelectedCapacity(capacities[0]);
     } else if (!selectedModel || capacities.length === 0) {
       setSelectedCapacity("");
@@ -184,13 +168,9 @@ export default function GoalSetter({
     } else if (!selectedCapacity || availableProductsInVariant.length === 0) {
       setSelectedProduct(null);
     }
-  }, [
-    selectedBrand,
-    selectedModel,
-    selectedCapacity,
-    availableProductsInVariant,
-    selectedProduct,
-  ]);
+  }, [selectedBrand, selectedModel, selectedCapacity, availableProductsInVariant, selectedProduct]);
+
+  console.log(selectedPlan);
 
   const savingPlans = useMemo(() => {
     if (!selectedProduct) return [];
@@ -225,9 +205,7 @@ export default function GoalSetter({
       },
     ];
     return plansConfig.map((plan) => {
-      const calculatedAmount = Math.ceil(
-        selectedProduct.downPaymentAmount / plan.divisor,
-      );
+      const calculatedAmount = Math.ceil(selectedProduct.downPaymentAmount / plan.divisor);
       return {
         ...plan,
         displayValue: calculatedAmount.toLocaleString("en-US"),
@@ -237,13 +215,14 @@ export default function GoalSetter({
 
   useEffect(() => {
     const planData = savingPlans.find((p) => p.id === selectedPlan);
+    console.log(planData?.planId);
     if (selectedProduct?.id && planData?.planId) {
       onGoalChange({
         mobileId: selectedProduct.id,
         planId: planData.planId,
       });
     }
-  }, [selectedProduct?.id, selectedPlan, onGoalChange, savingPlans]);
+  }, [selectedProduct?.id, selectedPlan]);
 
   useEffect(() => {
     console.log("GoalSetter Debug:", {
@@ -292,9 +271,7 @@ export default function GoalSetter({
 
         {!selectedProduct && brands.length > 0 ? (
           <div className="flex h-96 items-center justify-center">
-            <p className="animate-pulse text-center text-slate-500">
-              กำลังโหลดข้อมูลสินค้า...
-            </p>
+            <p className="animate-pulse text-center text-slate-500">กำลังโหลดข้อมูลสินค้า...</p>
           </div>
         ) : !selectedProduct && brands.length === 0 ? (
           <div className="flex h-96 items-center justify-center">
@@ -302,9 +279,7 @@ export default function GoalSetter({
           </div>
         ) : selectedProduct ? (
           <>
-            <h1 className="text-bg-dark mt-5 mb-2 font-bold">
-              เลือกแบรนด์ที่ต้องการดาวน์
-            </h1>
+            <h1 className="text-bg-dark mt-5 mb-2 font-bold">เลือกแบรนด์ที่ต้องการดาวน์</h1>
             <GridSelectorComponent
               labelClassName="text-bg-dark mb-2 block font-bold"
               name="brand"
@@ -332,9 +307,7 @@ export default function GoalSetter({
               )}
             </div>
             <div className="space-y-4 rounded-xl">
-              <h1 className="text-bg-dark font-black">
-                เลือกรุ่นที่ต้องการดาวน์
-              </h1>
+              <h1 className="text-bg-dark font-black">เลือกรุ่นที่ต้องการดาวน์</h1>
               <DropDownComponent
                 name="model"
                 value={selectedModel}
@@ -381,9 +354,7 @@ export default function GoalSetter({
       </div>
       {selectedProduct && (
         <div className="mt-6">
-          <h3 className="mb-3 text-lg font-bold text-slate-800">
-            เลือกเป้าหมายการออมของคุณ
-          </h3>
+          <h3 className="mb-3 text-lg font-bold text-slate-800">เลือกเป้าหมายการออมของคุณ</h3>
           <div className="grid w-full grid-cols-2 gap-3 overflow-x-auto px-2 pb-4">
             {savingPlans.map((plan) => (
               <button

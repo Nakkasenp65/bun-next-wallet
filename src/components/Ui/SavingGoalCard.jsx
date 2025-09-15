@@ -40,14 +40,7 @@ export default function SavingsGoalCard({
       if (!isRefreshing) setRefreshAnimation(false);
     }, 1945);
   };
-  const {
-    pctTotal,
-    pctBase,
-    pctBonusOnly,
-    remaining,
-    totalForRedeem,
-    achieved,
-  } = useMemo(() => {
+  const { pctTotal, pctBase, pctBonusOnly, remaining, totalForRedeem, achieved } = useMemo(() => {
     const t = Math.max(0, Number(target) || 0);
     const b = Math.max(0, Number(balance) || 0);
     const bonus = Math.max(0, Number(bonusBalance) || 0);
@@ -130,7 +123,7 @@ export default function SavingsGoalCard({
             </span>
           </div>
           <h3 className="mt-2 truncate text-xl leading-snug font-semibold">
-            {brand === "vivo" ? null : brand} {name}
+            {brand === "Vivo" ? null : brand} {name}
           </h3>
         </div>
 

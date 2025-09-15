@@ -23,7 +23,7 @@ export default function GridSelectorComponent({
             type="button"
             onClick={() => handleSelect(option.id)}
             className={`flex flex-col items-center justify-center rounded-xl border p-3 transition-all duration-200 focus:ring-2 focus:ring-pink-400 focus:ring-offset-2 focus:outline-none ${itemClassName} ${
-              value === option.id ? activeItemClassName : "bg-white"
+              value === option.id ? activeItemClassName : "border-stone-200 bg-white"
             }`}
           >
             {/* เปลี่ยนจาก Image มาเป็น div ที่แสดงผลไอคอน */}

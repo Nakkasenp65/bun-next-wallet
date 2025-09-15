@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
+import toast from "react-hot-toast";
 
 export function useNotification(userId) {
   return useQuery({
@@ -52,10 +53,12 @@ export function useClearNotifications() {
       return data;
     },
     onSuccess: async (data, variables) => {
-      toast.success("Notifications cleared!");
+      toast.success("ล้างการแจ้งเตือนทั้งหมดสำเร็จ!");
       // The key change is here: we invalidate the 'user' query,
       // which will cause the useUser hook to refetch everything, including the updated notifications list.
-      queryClient.invalidateQueries({ queryKey: ["user", variables.userId] });
+      await queryClient.invalidateQueries({
+        queryKey: ["notification", variables.userId],
+      });
     },
     onError: () => {
       toast.error("Failed to clear notifications.");

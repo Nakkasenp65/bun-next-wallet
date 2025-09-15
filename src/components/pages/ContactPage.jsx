@@ -6,6 +6,7 @@ import { MdEmail } from "react-icons/md";
 import { BsLine } from "react-icons/bs";
 import FramerDiv from "../framerComponents/FramerDiv";
 import { useLiff } from "../provider/LiffProvider";
+import DisposeFramerDiv from "../framerComponents/DisposeFramerDiv";
 
 const ContactItem = ({ icon: IconComponent, title, value, href }) => (
   <a
@@ -49,7 +50,7 @@ export default function ContactPage({ showContact, setShowContact }) {
   }, [showContact]);
 
   return (
-    <FramerDiv
+    <DisposeFramerDiv
       isOpen={showContact}
       className="fixed inset-0 z-50 flex items-end justify-center"
     >
@@ -68,7 +69,7 @@ export default function ContactPage({ showContact, setShowContact }) {
         <div className="mt-6 space-y-3 border-t pt-4">
           <div className="flex items-center gap-4 rounded-lg p-3 transition-colors hover:bg-gray-100">
             <BsLine className="text-primary-pink w-5 text-xl" />
-            <div className="flex items-center justify-around gap-2">
+            <div className="flex w-full items-center justify-between gap-2">
               <p className="font-semibold text-gray-800">LINE Official</p>
               <button
                 onClick={handleLineAction}
@@ -85,9 +86,9 @@ export default function ContactPage({ showContact, setShowContact }) {
             className="flex items-center gap-4 rounded-lg p-3 transition-colors hover:bg-gray-100"
           >
             <FaPhone className="text-primary-pink w-5 text-xl" />
-            <div className="flex items-center gap-2">
+            <div className="flex w-full items-center justify-between gap-2">
               <p className="font-semibold text-gray-800">โทรศัพท์: </p>
-              <p className="text-sm text-gray-500">02-123-4567</p>
+              <p className="text-md text-black">02-123-4567</p>
             </div>
           </a>
         </div>
@@ -101,6 +102,6 @@ export default function ContactPage({ showContact, setShowContact }) {
           </button>
         </div>
       </div>
-    </FramerDiv>
+    </DisposeFramerDiv>
   );
 }

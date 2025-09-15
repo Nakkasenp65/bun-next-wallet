@@ -1,33 +1,31 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import toast from "react-hot-toast";
-import {
-  FaUserEdit,
-  FaBell,
-  FaQuestionCircle,
-  FaSignOutAlt,
-  FaShareAlt,
-  FaCopy,
-  FaChevronLeft, // 1. Import the back icon
-} from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import MenuItem from "./MenuItem";
-import { useLiff } from "../provider/LiffProvider";
-import { PhoneCallIcon } from "lucide-react";
-import DropDownComponent from "../Ui/DropDownComponent";
+import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
+import { useUpdateUser } from "../../hooks/useUser";
 import CtaButton from "../Ui/CtaButton";
-import { useGetUser, useUpdateUser } from "../../hooks/useUser";
 
+// --- UI Library Imports ---
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+
+// --- Icon Imports ---
+import { ChevronLeft, Copy, Share2, Phone, Briefcase, CalendarDays, Pencil } from "lucide-react";
+
+// --- Data Constants ---
 const OCCUPATION_OPTIONS = [
   { value: "นักศึกษา", label: "นักศึกษา" },
   { value: "ข้าราชการ / เจ้าหน้าที่รัฐ", label: "ข้าราชการ / เจ้าหน้าที่รัฐ" },
   { value: "พนักงานบริษัท", label: "พนักงานบริษัท" },
-  {
-    value: "ธุรกิจส่วนตัว / ค้าขาย",
-    label: "ธุรกิจส่ธุรกิจส่วนตัว / ค้าขายวนตัว",
-  },
+  { value: "ธุรกิจส่วนตัว / ค้าขาย", label: "ธุรกิจส่วนตัว / ค้าขาย" },
   { value: "ฟรีแลนซ์", label: "ฟรีแลนซ์" },
   { value: "แพทย์ / พยาบาล", label: "แพทย์ / พยาบาล" },
   { value: "สถาปนิก / วิศวกร", label: "สถาปนิก / วิศวกร" },
@@ -42,11 +40,14 @@ const AGE_RANGE_OPTIONS = [
   { value: "15-20", label: "15-20 ปี" },
   { value: "21-30", label: "21-30 ปี" },
   { value: "31-40", label: "31-40 ปี" },
-  { value: "41-50", label: "41-50" },
-  { value: "51-60", label: "51-60" },
+  { value: "41-50", label: "41-50 ปี" },
+  { value: "51-60", label: "51-60 ปี" },
+  { value: "มากกว่า 60 ปี", label: "มากกว่า 60 ปี" },
 ];
 
+// --- Helper Functions ---
 const formatJoinDate = (dateString) => {
+  if (!dateString) return "";
   const date = new Date(dateString);
   return date.toLocaleDateString("th-TH", {
     year: "numeric",
@@ -55,27 +56,49 @@ const formatJoinDate = (dateString) => {
   });
 };
 
+// --- Reusable UI Sub-component ---
+const FormField = ({ icon: Icon, label, children }) => (
+  <div className="flex flex-col gap-2">
+    <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
+      <Icon className="h-4 w-4 text-slate-500" />
+      <span>{label}</span>
+    </label>
+    {children}
+  </div>
+);
+
+// --- Main Profile Component ---
 export default function Profile({ user }) {
-  const { actions } = useLiff();
+  const router = useRouter();
   const { mutate: updateUser, isPending: isSaving } = useUpdateUser();
   const [formData, setFormData] = useState({
-    fullname: "",
     phone: "",
     occupation: "",
     ageRange: "",
+    customOccupation: "",
   });
-
-  const router = useRouter();
   const [copyButtonText, setCopyButtonText] = useState("คัดลอก");
 
-  // ... handleCopyReferral and variants (remain the same) ...
+  useEffect(() => {
+    if (user) {
+      const isCustomOccupation =
+        user.occupation && !OCCUPATION_OPTIONS.some((opt) => opt.value === user.occupation);
+
+      setFormData({
+        phone: user.phone || "",
+        occupation: isCustomOccupation ? "อื่นๆ" : user.occupation || "",
+        ageRange: user.ageRange || "",
+        customOccupation: isCustomOccupation ? user.occupation : "",
+      });
+    }
+  }, [user]);
+
   const handleCopyReferral = () => {
+    if (!user?.referralCode) return;
     navigator.clipboard.writeText(user.referralCode);
     setCopyButtonText("คัดลอกแล้ว!");
     toast.success("คัดลอกรหัสแนะนำแล้ว!");
-    setTimeout(() => {
-      setCopyButtonText("คัดลอก");
-    }, 2000);
+    setTimeout(() => setCopyButtonText("คัดลอก"), 2000);
   };
 
   const handleInputChange = (e) => {
@@ -83,166 +106,184 @@ export default function Profile({ user }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    handleSave(formData);
+  const handleOccupationChange = (value) => {
+    setFormData((prev) => {
+      const newState = { ...prev, occupation: value };
+      if (value !== "อื่นๆ") {
+        newState.customOccupation = "";
+      }
+      return newState;
+    });
   };
 
+  const handleSave = () => {
+    const { occupation, customOccupation, ...restOfData } = formData;
+    const finalOccupation = occupation === "อื่นๆ" ? customOccupation : occupation;
+    const payload = { ...restOfData, occupation: finalOccupation };
+    const cleanedPayload = Object.fromEntries(Object.entries(payload).filter(([_, v]) => v));
+
+    updateUser({ line_user_id: user.line_user_id, updateData: cleanedPayload });
+  };
+
+  // --- Animation Variants ---
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
+    visible: { opacity: 1, transition: { staggerChildren: 0.07 } },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
+    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } },
   };
 
+  if (!user) {
+    return <div className="flex min-h-dvh flex-col bg-slate-50" />;
+  }
+
   return (
-    <div className="flex min-h-dvh flex-col bg-gray-50">
-      {/* --- 2. Updated Header --- */}
-      <header className="from-primary-pink to-primary-orange sticky top-0 z-10 flex items-center justify-between bg-gradient-to-br px-5 pt-10 pb-4 text-white shadow-lg">
-        {/* Back Button */}
-        <button
+    <div className="flex min-h-dvh flex-col bg-slate-50">
+      <header className="top-0 z-10 flex items-center bg-white/80 px-4 pt-10 pb-4 ring-1 ring-black/5 backdrop-blur-sm">
+        <motion.button
+          whileTap={{ scale: 0.9 }}
           onClick={() => router.back()}
-          className="text-2xl transition-transform hover:scale-110"
+          className="rounded-full p-2 text-slate-500 hover:bg-slate-200"
         >
-          <FaChevronLeft />
-        </button>
-
-        {/* Title */}
-        <h1 className="text-xl font-bold text-white drop-shadow-md">
-          โปรไฟล์ของฉัน
-        </h1>
-
-        {/* Spacer to keep title centered */}
-        <div className="w-6"></div>
+          <ChevronLeft size={24} />
+        </motion.button>
+        <h1 className="flex-grow text-center text-xl font-bold text-slate-800">โปรไฟล์ของฉัน</h1>
+        <div className="w-10" />
       </header>
 
-      {/* Profile Content (remains the same) */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="flex flex-col gap-4 p-4"
+        className="flex flex-col gap-4 p-4 pb-28"
       >
-        {/* User Info Card */}
         <motion.div
           variants={itemVariants}
-          className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm"
+          className="flex items-center gap-4 rounded-2xl bg-white p-4 ring-1 ring-black/5"
         >
           <Image
-            src={user.line_profile_url}
-            alt={user.line_display_name}
+            src={user.line_profile_url || "/default-avatar.png"}
+            alt={user.line_display_name || "User"}
             width={64}
             height={64}
-            className="rounded-full border-2 border-white shadow-md"
+            className="rounded-full"
           />
-          <div className="flex-grow">
-            <p className="text-lg font-bold text-gray-800">
-              {user.line_display_name}
-            </p>
-            <p className="text-xs text-gray-500">
+          <div>
+            <p className="text-lg font-bold text-slate-800">{user.line_display_name}</p>
+            <p className="text-xs text-slate-500">
               เป็นสมาชิกเมื่อ: {formatJoinDate(user.createdAt)}
             </p>
           </div>
         </motion.div>
 
-        {/* Referral Code Card */}
         <motion.div
           variants={itemVariants}
-          className="rounded-xl bg-white p-4 shadow-sm"
+          className="rounded-2xl bg-white p-4 ring-1 ring-black/5"
         >
-          <div className="mb-2 flex items-center gap-2 font-semibold text-gray-700">
-            <FaShareAlt className="text-primary-pink" />
-            <span>รหัสแนะนำเพื่อนของคุณ</span>
-          </div>
-          <div className="flex items-center justify-between gap-2 rounded-lg bg-gray-100 p-3">
-            <span className="text-lg font-bold tracking-widest text-purple-700">
+          <FormField icon={Share2} label="รหัสแนะนำเพื่อน" />
+          <div className="mt-2 flex items-center justify-between gap-2 rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 p-3">
+            <span className="text-lg font-bold tracking-widest text-slate-700">
               {user.referralCode}
             </span>
-            <button
+            <motion.button
+              whileTap={{ scale: 0.95 }}
               onClick={handleCopyReferral}
-              className="flex items-center gap-2 rounded-md bg-purple-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-purple-600"
+              className="from-primary-pink to-primary-orange flex items-center gap-2 rounded-md bg-gradient-to-br px-3 py-1.5 text-xs font-semibold text-white shadow-sm"
             >
-              <FaCopy />
+              <Copy size={12} />
               <span>{copyButtonText}</span>
-            </button>
+            </motion.button>
           </div>
         </motion.div>
 
-        {/* Menu List */}
         <motion.div
           variants={itemVariants}
-          className="overflow-hidden rounded-xl bg-white shadow-sm"
+          className="rounded-2xl bg-white p-6 ring-1 ring-black/5"
         >
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-grow flex-col gap-6 p-6"
-          >
-            {/* Input: Phone */}
-            <div>
-              <label className="text-bg-dark mb-2 block text-sm font-bold">
-                เบอร์โทรศัพท์
-              </label>
-              <div className="relative">
-                <PhoneCallIcon className="text-bg-dark absolute top-1/2 left-4 -translate-y-1/2" />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="text-bg-dark w-full rounded-xl border border-gray-300 p-4 pl-12 outline-none focus:ring-2 focus:ring-pink-400"
-                />
-              </div>
-            </div>
+          <div className="flex flex-col gap-6">
+            <FormField icon={Phone} label="เบอร์โทรศัพท์">
+              <Input
+                type="tel"
+                name="phone"
+                placeholder="กรอกเบอร์โทรศัพท์ของคุณ"
+                value={formData.phone}
+                onChange={handleInputChange}
+                className="w-full rounded-xl border-2 border-slate-200 p-6 font-medium text-slate-800 transition-all focus:ring-2 focus:ring-pink-400"
+              />
+            </FormField>
 
-            {/* --- 3. Replace the native select with your Dropdown component --- */}
-            <DropDownComponent
-              buttonClassName="text-bg-dark w-full rounded-xl border border-gray-300 p-4  outline-none focus:ring-2 focus:ring-pink-400"
-              labelClassName="text-bg-dark mb-2 block text-sm font-bold"
-              label="อาชีพ"
-              placeholder="เลือกอาชีพของคุณ"
-              options={OCCUPATION_OPTIONS}
-              value={formData.occupation}
-              onChange={(selectedValue) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  occupation: selectedValue,
-                }))
-              }
-            />
+            <FormField icon={Briefcase} label="อาชีพ">
+              <Select value={formData.occupation} onValueChange={handleOccupationChange}>
+                <SelectTrigger className="w-full rounded-xl border-2 border-slate-200 p-6 text-base font-semibold text-slate-800 focus:ring-2 focus:ring-pink-400">
+                  <SelectValue placeholder="เลือกอาชีพของคุณ" />
+                </SelectTrigger>
+                <SelectContent>
+                  {OCCUPATION_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormField>
 
-            <DropDownComponent
-              label="ช่วงอายุ"
-              buttonClassName="text-bg-dark w-full rounded-xl border border-gray-300 p-4  outline-none focus:ring-2 focus:ring-pink-400"
-              labelClassName="text-bg-dark mb-2 block text-sm font-bold"
-              placeholder="เลือกช่วงอายุของคุณ"
-              options={AGE_RANGE_OPTIONS}
-              value={formData.ageRange}
-              onChange={(selectedValue) =>
-                setFormData((prev) => ({ ...prev, ageRange: selectedValue }))
-              }
-            />
+            <AnimatePresence>
+              {formData.occupation === "อื่นๆ" && (
+                <motion.div
+                  key="custom-occupation-field"
+                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                  animate={{ opacity: 1, height: "auto", marginTop: "-1rem" }}
+                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                  transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                  className="pt-4"
+                >
+                  <FormField icon={Pencil} label="โปรดระบุอาชีพ">
+                    <Input
+                      name="customOccupation"
+                      placeholder="กรอกอาชีพของคุณ"
+                      value={formData.customOccupation}
+                      onChange={handleInputChange}
+                      className="w-full rounded-xl border-2 border-slate-200 p-6 font-medium text-slate-800 transition-all focus:ring-2 focus:ring-pink-400"
+                      autoFocus
+                    />
+                  </FormField>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            {/* CTA Button */}
-            <div className="mt-auto flex justify-center pt-4">
-              <CtaButton
-                onClick={handleSave}
-                disabled={isSaving}
-                className={"z-10 w-48 rounded-xl p-4 text-base font-bold"}
+            <FormField icon={CalendarDays} label="ช่วงอายุ">
+              <Select
+                value={formData.ageRange}
+                onValueChange={(value) => setFormData((p) => ({ ...p, ageRange: value }))}
               >
-                {isSaving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
-              </CtaButton>
-            </div>
-          </motion.div>
+                <SelectTrigger className="w-full rounded-xl border-2 border-slate-200 p-6 text-base font-semibold text-slate-800 focus:ring-2 focus:ring-pink-400">
+                  <SelectValue placeholder="เลือกช่วงอายุของคุณ" />
+                </SelectTrigger>
+                <SelectContent>
+                  {AGE_RANGE_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormField>
+          </div>
         </motion.div>
       </motion.div>
+
+      <footer className="fixed bottom-0 left-0 z-10 w-full bg-white/80 p-4 pt-3 ring-1 ring-black/5 backdrop-blur-sm">
+        <CtaButton
+          onClick={handleSave}
+          disabled={isSaving}
+          className="w-full rounded-xl p-4 text-base font-bold"
+        >
+          {isSaving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+        </CtaButton>
+      </footer>
     </div>
   );
 }

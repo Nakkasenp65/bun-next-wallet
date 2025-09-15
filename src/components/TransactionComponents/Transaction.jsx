@@ -64,8 +64,7 @@ const getMaskedDisplayValue = (transaction, field) => {
 // --- CORE LOGIC: The Contextual Transaction Storyteller ---
 // Determines the display context (income/outcome, name, appearance) from the user's perspective.
 const getTransactionContext = (transaction, currentWalletId) => {
-  const { type, status, fromWalletId, toWalletId, name, from, to } =
-    transaction;
+  const { type, status, fromWalletId, toWalletId, name, from, to } = transaction;
 
   let isIncome = false;
   let displayName = name;
@@ -149,10 +148,7 @@ export default function Transaction({ transaction, currentWalletId }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // All display logic is now derived from our new "brain"
-  const { isIncome, displayName, appearance } = getTransactionContext(
-    transaction,
-    currentWalletId,
-  );
+  const { isIncome, displayName, appearance } = getTransactionContext(transaction, currentWalletId);
 
   // Masking is still needed for the detail view
   const toDisplay = getMaskedDisplayValue(transaction, "to");
@@ -160,20 +156,14 @@ export default function Transaction({ transaction, currentWalletId }) {
 
   const renderAmount = () => {
     const amount =
-      transaction.status === "PENDING"
-        ? transaction.verifiedAmount
-        : transaction.amount;
+      transaction.status === "PENDING" ? transaction.verifiedAmount : transaction.amount;
     const amountToDisplay = amount ?? transaction.verifiedAmount;
 
     if (["REJECTED", "CANCELLED"].includes(transaction.status)) {
-      return (
-        <span className="text-sm font-bold text-red-500">ถูกปฏิเสธ/ยกเลิก</span>
-      );
+      return <span className="text-sm font-bold text-red-500">ถูกปฏิเสธ/ยกเลิก</span>;
     }
     if (transaction.status === "PENDING") {
-      return (
-        <span className="text-sm font-medium text-gray-500">รอตรวจสอบ</span>
-      );
+      return <span className="text-sm font-medium text-gray-500">รอตรวจสอบ</span>;
     }
     if (amountToDisplay == null) {
       return <span className="text-sm font-medium text-gray-400">-</span>;
@@ -190,12 +180,9 @@ export default function Transaction({ transaction, currentWalletId }) {
   };
 
   return (
-    <motion.li
-      layout
-      className="list-none border-b border-gray-100 last:border-b-0"
-    >
+    <motion.li layout className="list-none border-b border-gray-100 last:border-b-0">
       <div
-        className="flex cursor-pointer items-center gap-4 px-2 py-4 transition-colors hover:bg-gray-50"
+        className="flex cursor-pointer items-center gap-1 py-4 transition-colors"
         onClick={() => setIsExpanded((prev) => !prev)}
       >
         <div
@@ -205,9 +192,7 @@ export default function Transaction({ transaction, currentWalletId }) {
         </div>
         <div className="flex-grow">
           <p className="text-sm font-semibold text-gray-800">{displayName}</p>
-          <p className="text-xs text-gray-500">
-            {formatRelativeTime(transaction.createdAt)}
-          </p>
+          <p className="text-xs text-gray-500">{formatRelativeTime(transaction.createdAt)}</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex flex-col items-end">{renderAmount()}</div>
@@ -238,23 +223,17 @@ export default function Transaction({ transaction, currentWalletId }) {
               </div>
               <div className="flex justify-between">
                 <span className="font-medium text-gray-600">จาก</span>
-                <span className="text-right font-mono text-gray-800">
-                  {fromDisplay}
-                </span>
+                <span className="text-right font-mono text-gray-800">{fromDisplay}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium text-gray-600">ไปยัง</span>
-                <span className="text-right font-mono text-gray-800">
-                  {toDisplay}
-                </span>
+                <span className="text-right font-mono text-gray-800">{toDisplay}</span>
               </div>
 
               {transaction.description && (
                 <div className="flex items-start gap-2.5 rounded-md bg-blue-50/70 p-3 text-blue-800">
                   <Info size={16} className="mt-0.5 flex-shrink-0" />
-                  <p className="text-xs whitespace-pre-wrap">
-                    {transaction.description}
-                  </p>
+                  <p className="text-xs whitespace-pre-wrap">{transaction.description}</p>
                 </div>
               )}
 

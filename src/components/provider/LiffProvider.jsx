@@ -2,6 +2,7 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import liff from "@line/liff";
 import Loading from "@/components/StatusComponents/Loading";
+import toast from "react-hot-toast";
 
 const LiffContext = createContext({
   liffProfile: null,
@@ -9,11 +10,8 @@ const LiffContext = createContext({
   isLoading: true,
   lineAccessToken: "",
   liff: null,
-  actions: {
-    closeWindow: () => {},
-    openWindow: (_url, _external) => {},
-    text: () => {},
-  },
+  actions: {},
+  liffDecodedIdToken: null,
 });
 
 const liffenvId = process.env.NEXT_PUBLIC_LIFF_ID;
@@ -25,6 +23,7 @@ export function LiffProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   const [lineAccessToken, setLineAccessToken] = useState("");
   const [liffReady, setLiffReady] = useState(false);
+  const [liffDecodedIdToken, setLiffDecodedIdToken] = useState(null);
 
   useEffect(() => {
     const longProfile = {
@@ -42,16 +41,29 @@ export function LiffProvider({ children }) {
     const testProfile = {
       userId: "U669f6092308023f227aa435c803b2e74",
       displayName: "Zzz59🧚🏻♀️🌈",
-      pictureUrl:
-        "https://lh3.googleusercontent.com/d/1eXgDln7TvPQGiMpzaUdo7l2hKmsh8Kvc",
+      pictureUrl: "https://lh3.googleusercontent.com/d/1eXgDln7TvPQGiMpzaUdo7l2hKmsh8Kvc",
     };
+    const mockDecodedTokenId = {
+      iss: "https://access.line.me",
+      sub: "U006fb519ba07650932c6981af95d0620",
+      aud: "2007338329",
+      exp: 1757671690,
+      iat: 1757668090,
+      amr: ["linesso"],
+      name: "Long👁️‍🗨️",
+      picture:
+        "https://profile.line-scdn.net/0hPsTqXG7qD1xpCB7EtsVwCxRNATEeJgkUEW0SPRxcV21AME0NBm8SMk9YUD8WPUpeBjpCOxwOUWpFJz0CKDZGfRV7GG5GWiNZVQU2Pg1zKRoqMTF1HC44PCtULzg4UB5eFWsfPSpxCm0acBx8PGhEewd-FShCOTBuNAw",
+      email: "nakkasenwunthar@gmail.com",
+    };
+
     const lineAccessTokenDev = process.env.NEXT_PUBLIC_ACCESS_TOKEN;
     const init = async () => {
       if (server === "dev") {
         // Dev mode: mock login/profile, mark as ready
         setIsLoggedIn(true);
-        setLiffProfile(testProfile); // or longProfile
+        setLiffProfile(longProfile); // or longProfile
         setLineAccessToken(lineAccessTokenDev);
+        setLiffDecodedIdToken(mockDecodedTokenId);
         setLiffReady(true); // no real LIFF in dev
         setIsLoading(false);
         return;
@@ -63,8 +75,10 @@ export function LiffProvider({ children }) {
 
         if (liff.isLoggedIn()) {
           setIsLoggedIn(true);
+          const decodedIdToken = liff.getDecodedIDToken();
           const profile = await liff.getProfile();
           setLiffProfile(profile);
+          setLiffDecodedIdToken(decodedIdToken);
           const accessToken = liff.getAccessToken();
           console.log("Access token liff provider: ", accessToken);
           setLineAccessToken(accessToken || "");
@@ -133,6 +147,120 @@ export function LiffProvider({ children }) {
         return { status: "error", error: e?.message };
       }
     },
+    shareTargetPicker: async (walletUniqueId, phoneNumber) => {
+      if (server === "dev") {
+        console.warn("[LIFF DEV] Simulating shareTargetPicker with payload:", {
+          walletUniqueId,
+          phoneNumber,
+        });
+        toast.success("แชร์ (จำลอง) สำเร็จ!");
+        return; // จบการทำงานในโหมด dev
+      }
+
+      if (!liffReady || !liff.isLoggedIn()) {
+        console.error(
+          "[LIFF_ERROR] LIFF is not ready or user is not logged in for shareTargetPicker.",
+        );
+        toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อกับ LINE");
+        return;
+      }
+
+      const flexMessagePayload = {
+        type: "bubble",
+        hero: {
+          type: "image",
+          url: "https://lh3.googleusercontent.com/d/1Ykf_Ph5JHrnWZRyXufzh4aiq_OlvYDP7",
+          size: "full",
+          action: {
+            type: "uri",
+            uri: "https://line.me/",
+          },
+          aspectMode: "cover",
+          aspectRatio: "6:2",
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "text",
+              text: "กระเป๋า 1 Wallet ของฉัน 👜",
+              weight: "bold",
+              size: "lg",
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              margin: "lg",
+              spacing: "sm",
+              contents: [
+                {
+                  type: "box",
+                  layout: "baseline",
+                  spacing: "sm",
+                  contents: [
+                    {
+                      type: "text",
+                      text: "Wallet ID:",
+                      color: "#aaaaaa",
+                      size: "sm",
+                      flex: 2,
+                    },
+                    {
+                      type: "text",
+                      text: `${walletUniqueId}`,
+                      wrap: true,
+                      color: "#666666",
+                      size: "sm",
+                      flex: 3,
+                    },
+                  ],
+                },
+                {
+                  type: "box",
+                  layout: "baseline",
+                  spacing: "sm",
+                  contents: [
+                    {
+                      type: "text",
+                      text: "Phone:",
+                      color: "#aaaaaa",
+                      size: "sm",
+                      flex: 2,
+                    },
+                    {
+                      type: "text",
+                      text: `${phoneNumber}`,
+                      wrap: true,
+                      color: "#666666",
+                      size: "sm",
+                      flex: 3,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      try {
+        const result = await liff.shareTargetPicker(flexMessagePayload, {
+          isMultiple: true,
+        });
+        if (result) {
+          console.log(`[LIFF_SUCCESS] Message sent with status:`, result.status);
+          toast.success("แชร์ข้อความสำเร็จ!");
+        } else {
+          console.log("[LIFF_INFO] TargetPicker was closed by the user.");
+          // ไม่จำเป็นต้องแจ้งเตือนผู้ใช้ในกรณีนี้
+        }
+      } catch (error) {
+        // [CRITICAL FIX] บันทึก "error object" ทั้งหมดและแจ้งเตือนผู้ใช้
+        console.error("[LIFF_FATAL_ERROR] shareTargetPicker failed:", error);
+        toast.error(`การแชร์ล้มเหลว: ${error.message}`);
+      }
+    },
   };
 
   if (isLoading) {
@@ -152,6 +280,7 @@ export function LiffProvider({ children }) {
         lineAccessToken,
         liff: liffReady ? liff : null,
         actions,
+        liffDecodedIdToken,
       }}
     >
       {children}

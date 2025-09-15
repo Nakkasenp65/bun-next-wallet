@@ -61,7 +61,7 @@ export default function MainPage({ liffProfile }) {
     isLoading: walletLoading,
     error: walletError,
     refetch: refetchWallet,
-  } = useGetWallet(userData?.id);
+  } = useGetWallet(liffProfile?.userId);
 
   // ดึงข้อมูล goal ของ user
   const {
@@ -69,7 +69,6 @@ export default function MainPage({ liffProfile }) {
     isLoading: goalLoading,
     error: goalError,
   } = useGetGoal(liffProfile?.userId);
-  // console.log("Goal in main page: \n", goal);
 
   // ดึงข้อมูลการแจ้งเตือนของ user
   const { data: notificationData, isLoading: notificationLoading } =
@@ -113,7 +112,7 @@ export default function MainPage({ liffProfile }) {
     setShowRedeemModal(false);
     window
       .open(
-        `http://app.no1.mobi/landing-page-installment/${userData.line_user_id}`,
+        `http://app.no1.mobi/landing-page-installment/${userData?.line_user_id}`,
         "_blank",
       )
       ?.focus();
@@ -276,7 +275,7 @@ export default function MainPage({ liffProfile }) {
               line_user_id={userData?.line_user_id}
             />
           </section>
-          <section className="relative flex min-h-[500px] flex-col items-center gap-8 rounded-t-3xl bg-white px-4 pt-10 pb-28 shadow-lg">
+          <section className="relative flex min-h-[500px] flex-col items-center gap-8 rounded-t-3xl bg-white px-4 pt-10 pb-32 shadow-lg">
             <div className="absolute top-3 flex h-4 w-full items-center justify-center">
               <span className="h-1.5 w-10 rounded-full bg-gray-300" />
             </div>

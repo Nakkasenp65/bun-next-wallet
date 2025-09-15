@@ -17,23 +17,14 @@ const MyMissionCard = ({
   type,
   usedOn = "mainPage",
 }) => {
-  const {
-    mission,
-    status,
-    currentProgress,
-    completeProgress,
-    userExpiresAt,
-    claimExpiresAt,
-  } = userMission;
+  const { mission, status, currentProgress, completeProgress, userExpiresAt, claimExpiresAt } =
+    userMission;
   // คำนวณ % ความคืบหน้า
-  const progressPercent =
-    completeProgress > 0 ? (currentProgress / completeProgress) * 100 : 0;
-  const countdownTarget =
-    status === "AWAITING_CLAIM" ? claimExpiresAt : userExpiresAt;
+  const progressPercent = completeProgress > 0 ? (currentProgress / completeProgress) * 100 : 0;
+  const countdownTarget = status === "AWAITING_CLAIM" ? claimExpiresAt : userExpiresAt;
   // ดึงค่า timeLeft และ isCounting ออกมาจาก hook
   const { timeLeft, isCounting } = useCountdown(countdownTarget);
   const showTimer = Boolean(isCounting || timeLeft === "หมดเวลา");
-  const router = useRouter();
 
   // ฟังก์ชันสำหรับแสดงผลปุ่ม CTA และสถานะต่างๆ
   const renderCTA = () => {
@@ -99,11 +90,8 @@ const MyMissionCard = ({
         `flex w-full flex-shrink-0 snap-start flex-col gap-1 rounded-4xl bg-gradient-to-br from-purple-600 to-pink-700 p-4 px-6 text-white`,
         status === "AWAITING_CLAIM" &&
           "bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500",
-        status === "ENROLLED" &&
-          "bg-gradient-to-br from-purple-600 to-pink-600",
-        (status === "CLAIMED" ||
-          status === "EXPIRED" ||
-          status === "CLAIM_EXPIRED") &&
+        status === "ENROLLED" && "bg-gradient-to-br from-purple-600 to-pink-600",
+        (status === "CLAIMED" || status === "EXPIRED" || status === "CLAIM_EXPIRED") &&
           "bg-gradient-to-br from-gray-600 to-gray-800 opacity-80",
       )}
     >

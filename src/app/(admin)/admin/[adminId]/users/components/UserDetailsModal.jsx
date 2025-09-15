@@ -5,27 +5,11 @@
 import React, { useState, useEffect } from "react";
 import { useGetUserById } from "@/hooks/useUser";
 
-import {
-  Loader2,
-  X,
-  Edit3,
-  Save,
-  User,
-  ShieldCheck,
-  Briefcase,
-  Phone,
-} from "lucide-react";
+import { Loader2, X, Edit3, Save, User, ShieldCheck, Briefcase, Phone } from "lucide-react";
 import DropDownComponent from "@/components/Ui/DropDownComponent";
 
 // Helper component ที่ยืมมาจาก VerificationModal
-const EditableField = ({
-  label,
-  value,
-  name,
-  onChange,
-  isEditing,
-  type = "text",
-}) => (
+const EditableField = ({ label, value, name, onChange, isEditing, type = "text" }) => (
   <div className="py-2">
     <p className="text-sm text-slate-500">{label}</p>
     {isEditing ? (
@@ -50,9 +34,6 @@ export default function UserDetailsModal({
   isProcessing,
 }) {
   const { data: user, isLoading, isError } = useGetUserById(line_user_id);
-
-  console.log("line-user-id: \n", line_user_id);
-
   const [isEditing, setIsEditing] = useState(false);
   const [formState, setFormState] = useState({});
 
@@ -83,11 +64,10 @@ export default function UserDetailsModal({
 
   const handleSave = () => {
     onUpdate(
-      { userId, payload: formState },
+      { line_user_id, payload: formState },
       {
         onSuccess: () => {
           setIsEditing(false);
-          // ไม่ต้อง onClose ที่นี่ ให้หน้าหลักจัดการ
         },
       },
     );
@@ -126,11 +106,7 @@ export default function UserDetailsModal({
               <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
             </div>
           )}
-          {isError && (
-            <div className="h-64 text-center text-red-600">
-              ไม่สามารถโหลดข้อมูลได้
-            </div>
-          )}
+          {isError && <div className="h-64 text-center text-red-600">ไม่สามารถโหลดข้อมูลได้</div>}
           {user && (
             <div>
               {/* Profile Header */}
@@ -141,12 +117,8 @@ export default function UserDetailsModal({
                   className="h-16 w-16 rounded-full"
                 />
                 <div>
-                  <h4 className="text-xl font-bold text-slate-900">
-                    {user.line_display_name}
-                  </h4>
-                  <p className="text-[10px] text-slate-500">
-                    ID: {user.line_user_id}
-                  </p>
+                  <h4 className="text-xl font-bold text-slate-900">{user.line_display_name}</h4>
+                  <p className="text-[10px] text-slate-500">ID: {user.line_user_id}</p>
                 </div>
               </div>
 
@@ -186,9 +158,7 @@ export default function UserDetailsModal({
                       buttonClassName="mt-1 w-full text-left bg-white border border-slate-300 rounded-md px-3 py-1.5 text-sm font-semibold text-slate-800"
                     />
                   ) : (
-                    <p className="font-semibold text-slate-800">
-                      {formState.role}
-                    </p>
+                    <p className="font-semibold text-slate-800">{formState.role}</p>
                   )}
                 </div>
               </div>
