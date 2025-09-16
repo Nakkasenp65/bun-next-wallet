@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Briefcase } from "lucide-react"; // Icon for Occupation
-import DropDownComponent from "@/components/Ui/DropDownComponent";
+import DropDownComponent from "@/components/ui/DropDownComponent";
 
 // --- Animation Variants (Internal to this component) ---
 const contentVariants = {

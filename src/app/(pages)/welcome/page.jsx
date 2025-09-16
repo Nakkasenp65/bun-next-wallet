@@ -1,6 +1,6 @@
 "use client";
 
-import CtaButton from "@/components/Ui/CtaButton";
+import CtaButton from "@/components/ui/CtaButton";
 import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useLiff } from "@/components/provider/LiffProvider";

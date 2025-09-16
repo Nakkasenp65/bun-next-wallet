@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { CalendarDays } from "lucide-react"; // Icon for context
-import DropDownComponent from "@/components/Ui/DropDownComponent"; // Reverting to the Dropdown
+import DropDownComponent from "@/components/ui/DropDownComponent"; // Reverting to the Dropdown
 
 const contentVariants = {
   initial: { opacity: 0, scale: 0.95 },

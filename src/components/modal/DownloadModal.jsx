@@ -4,15 +4,13 @@ import { FaDownload, FaXmark, FaEnvelope, FaCalendar } from "react-icons/fa6";
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import CtaButton from "../Ui/CtaButton";
+import CtaButton from "../ui/CtaButton";
 import axios from "@/lib/axios";
 
 const startOfMonth = (d) => new Date(d.getFullYear(), d.getMonth(), 1);
 const endOfMonth = (d) => new Date(d.getFullYear(), d.getMonth() + 1, 0);
 const toInputDate = (d) =>
-  new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 10);
+  new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v || "");
 
 export default function DownloadModal({
@@ -22,14 +20,8 @@ export default function DownloadModal({
   defaultMonthDate, // use currently viewed month as default
 }) {
   // defaults to the visible month's start/end
-  const defaultStart = useMemo(
-    () => startOfMonth(defaultMonthDate),
-    [defaultMonthDate],
-  );
-  const defaultEnd = useMemo(
-    () => endOfMonth(defaultMonthDate),
-    [defaultMonthDate],
-  );
+  const defaultStart = useMemo(() => startOfMonth(defaultMonthDate), [defaultMonthDate]);
+  const defaultEnd = useMemo(() => endOfMonth(defaultMonthDate), [defaultMonthDate]);
 
   const [email, setEmail] = useState("");
   const [startDate, setStartDate] = useState(toInputDate(defaultStart));
@@ -106,10 +98,7 @@ export default function DownloadModal({
                 <FaDownload className="text-primary-pink" />
                 <h3 className="text-base font-extrabold">ขอรายการเดินบัญชี</h3>
               </div>
-              <button
-                onClick={onClose}
-                className="text-gray-500 hover:text-gray-800"
-              >
+              <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                 <FaXmark className="text-xl" />
               </button>
             </div>
@@ -131,9 +120,7 @@ export default function DownloadModal({
                   />
                 </div>
                 {!isEmail(email) && email.length > 0 && (
-                  <p className="mt-1 text-xs text-red-500">
-                    รูปแบบอีเมลไม่ถูกต้อง
-                  </p>
+                  <p className="mt-1 text-xs text-red-500">รูปแบบอีเมลไม่ถูกต้อง</p>
                 )}
               </div>
 
@@ -159,9 +146,7 @@ export default function DownloadModal({
                     </div>
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs font-bold text-gray-500">
-                      ถึงวันที่
-                    </label>
+                    <label className="mb-1 block text-xs font-bold text-gray-500">ถึงวันที่</label>
                     <div className="relative">
                       <FaCalendar className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
                       <input
@@ -177,9 +162,7 @@ export default function DownloadModal({
                   </div>
                 </div>
                 {invalidRange && (
-                  <p className="mt-1 text-xs font-semibold text-red-500">
-                    ช่วงเวลาไม่ถูกต้อง
-                  </p>
+                  <p className="mt-1 text-xs font-semibold text-red-500">ช่วงเวลาไม่ถูกต้อง</p>
                 )}
               </div>
             </div>

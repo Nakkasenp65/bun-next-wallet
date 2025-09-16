@@ -1,4 +1,4 @@
-import DropDownComponent from "@/components/Ui/DropDownComponent";
+import DropDownComponent from "@/components/ui/DropDownComponent";
 import { Search } from "lucide-react";
 
 export default function Toolbar({ filters, onFilterChange, filterOptions }) {

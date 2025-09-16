@@ -12,7 +12,9 @@ const approveTransaction = async ({ transactionId, amount }) => {
 
 // PATCH: ปฏิเสธธุรกรรม
 const rejectTransaction = async (transactionId) => {
-  const { data } = await axios.patch(`/admin/transactions/${transactionId}/reject`);
+  const { data } = await axios.patch(
+    `/admin/transactions/${transactionId}/reject`,
+  );
   return data;
 };
 
@@ -49,7 +51,10 @@ async function createTransactionRequest(payload) {
 }
 
 async function updateTransactionRequest({ transactionId, payload }) {
-  const { data } = await axios.patch(`/admin/transactions/${transactionId}`, payload);
+  const { data } = await axios.patch(
+    `/admin/transactions/${transactionId}`,
+    payload,
+  );
   return data;
 }
 
@@ -63,7 +68,9 @@ export function useCreateTransaction() {
       queryClient.invalidateQueries({ queryKey: ["adminTransactions"] });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการสร้างรายการ");
+      toast.error(
+        error.response?.data?.message || "เกิดข้อผิดพลาดในการสร้างรายการ",
+      );
     },
   });
 }
@@ -97,10 +104,6 @@ export function useSearchRecipient() {
       });
       return data;
     },
-    // [CRITICAL] ลบ onError ออกจาก Hook
-    // การจัดการ Error ควรเป็นความรับผิดชอบของ "คอมโพเนนต์"
-    // เพราะแต่ละคอมโพเนนต์อาจต้องการจัดการ Error แตกต่างกัน
-    // (เช่น แสดง toast, ตั้งค่า state เป็น null, etc.)
   });
 }
 
@@ -108,11 +111,13 @@ export function useWalletTransaction(year, month, walletId) {
   return useQuery({
     queryKey: ["transactions", year, month, walletId],
     queryFn: async () => {
-      const response = await axios.get(`/transaction/${walletId}?year=${year}&month=${month}`);
+      const response = await axios.get(
+        `/transaction/${walletId}?year=${year}&month=${month}`,
+      );
       return response.data;
     },
     enabled: !!walletId,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 10 * 1000,
   });
 }
 
@@ -170,7 +175,10 @@ export function useCreateSavingTransaction({ onSuccessCallback }) {
     },
     onError: (error) => {
       console.error("Error creating transaction:", error);
-      toast.error(error.response?.data?.message || "ส่งสลิปไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+      toast.error(
+        error.response?.data?.message ||
+          "ส่งสลิปไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
+      );
     },
   });
 }
@@ -185,7 +193,9 @@ export function useApproveTransaction() {
       queryClient.invalidateQueries({ queryKey: ["adminTransactions"] });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการอนุมัติ");
+      toast.error(
+        error.response?.data?.message || "เกิดข้อผิดพลาดในการอนุมัติ",
+      );
     },
   });
 }
@@ -202,7 +212,9 @@ export function useRejectTransaction() {
       queryClient.invalidateQueries({ queryKey: ["adminTransactions"] });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการปฏิเสธรายการ");
+      toast.error(
+        error.response?.data?.message || "เกิดข้อผิดพลาดในการปฏิเสธรายการ",
+      );
     },
   });
 }

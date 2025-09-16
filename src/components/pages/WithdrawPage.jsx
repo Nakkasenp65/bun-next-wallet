@@ -2,29 +2,21 @@
 
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faChevronLeft,
-  faHashtag,
-  faUser,
-} from "@fortawesome/free-solid-svg-icons";
+import { faChevronLeft, faHashtag, faUser } from "@fortawesome/free-solid-svg-icons";
 import { IoIosArrowForward } from "react-icons/io";
-import CtaButton from "../Ui/CtaButton";
+import CtaButton from "../ui/CtaButton";
 import FramerDiv from "../framerComponents/FramerDiv";
-import BankSelectionModal from "../Ui/BankSelectionModal";
+import BankSelectionModal from "../ui/BankSelectionModal";
 import Loading from "../StatusComponents/Loading";
 import { useWithdrawTransaction } from "@/hooks/useTransactions";
 import toast from "react-hot-toast";
 import { FaExclamationTriangle } from "react-icons/fa";
+import { ChevronLeft } from "lucide-react";
 
 const MIN_WITHDRAW = 100;
 const FEE_RATE = 0.2; // 20%
 
-export default function WithdrawPage({
-  userData,
-  showWithdraw,
-  setShowWithdraw,
-  balance = 0,
-}) {
+export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw, balance = 0 }) {
   const [showBankModal, setShowBankModal] = useState(false);
   const [formData, setFormData] = useState({
     userId: userData?.id,
@@ -82,10 +74,8 @@ export default function WithdrawPage({
     });
 
   const handleSubmit = () => {
-    if (!amountNum || isNaN(amountNum))
-      return toast.error("กรุณาระบุจำนวนเงินที่ถูกต้อง");
-    if (belowMin)
-      return toast.error(`ขั้นต่ำในการถอนคือ ${fmtTHB(MIN_WITHDRAW)}`);
+    if (!amountNum || isNaN(amountNum)) return toast.error("กรุณาระบุจำนวนเงินที่ถูกต้อง");
+    if (belowMin) return toast.error(`ขั้นต่ำในการถอนคือ ${fmtTHB(MIN_WITHDRAW)}`);
     if (exceedsBalance) return toast.error("ยอดถอนมากกว่ายอดเงินที่ใช้ได้");
     if (!formData.bank) return toast.error("กรุณาเลือกธนาคาร");
     if (!formData.accountNumber.trim()) return toast.error("กรุณากรอกเลขบัญชี");
@@ -123,44 +113,34 @@ export default function WithdrawPage({
       <FramerDiv
         isOpen={showWithdraw}
         id="withdraw-overlay"
-        className="text-bg-dark bg-bg-dark/80 fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
+        className="text-bg-dark bg-bg-dark fixed inset-0 z-40 flex flex-col backdrop-blur-sm"
       >
         {/* Header */}
-        <header className="flex flex-shrink-0 items-center px-5 pt-10 pb-4">
-          <button
-            onClick={closePage}
-            className="text-secondary-text text-2xl transition-colors hover:text-white"
-          >
-            <FontAwesomeIcon icon={faChevronLeft} />
+        <header className="flex items-center p-4 pt-10">
+          <button onClick={closePage} className="text-white">
+            <ChevronLeft size={28} />
           </button>
-          <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
+          <h2 className="from-primary-pink to-primary-orange mx-auto bg-gradient-to-r bg-clip-text text-lg font-extrabold tracking-tight text-transparent">
             ถอนเงิน
           </h2>
           <div className="w-6" />
         </header>
 
         {/* Body */}
-        <div className="flex flex-grow flex-col gap-5 overflow-y-auto rounded-t-[30px] bg-white p-6">
+        <div className="flex flex-grow flex-col gap-5 overflow-y-auto rounded-t-3xl bg-white p-6">
           {/* Available balance */}
           <div className="rounded-lg bg-gray-100 p-3 text-center text-sm text-gray-600">
             ยอดเงินที่ใช้ได้
-            <span className="text-bg-dark ml-2 font-bold">
-              {fmtTHB(displayBalance)}
-            </span>
+            <span className="text-bg-dark ml-2 font-bold">{fmtTHB(displayBalance)}</span>
           </div>
 
           {/* Warning */}
           <div className="flex items-center gap-3 rounded-lg bg-yellow-50 p-3 text-yellow-800">
-            <FaExclamationTriangle
-              size={24}
-              className="mt-1 flex-shrink-0 text-yellow-500"
-            />
+            <FaExclamationTriangle size={24} className="mt-1 flex-shrink-0 text-yellow-500" />
             <p className="text-base">
-              <span className="font-bold">แจ้ง:</span>{" "}
-              ชื่อบัญชีผู้รับต้องตรงกับชื่อของบัญชี 1 Wallet Premium เท่านั้น{" "}
-              <span className="font-bold text-red-600">
-                โปรดตรวจสอบชื่อบัญชีผู้รับก่อนโอน
-              </span>
+              <span className="font-bold">แจ้ง:</span> ชื่อบัญชีผู้รับต้องตรงกับชื่อของบัญชี 1
+              Wallet Premium เท่านั้น{" "}
+              <span className="font-bold text-red-600">โปรดตรวจสอบชื่อบัญชีผู้รับก่อนโอน</span>
             </p>
           </div>
 
@@ -243,11 +223,7 @@ export default function WithdrawPage({
               onClick={() => setShowBankModal(true)}
               className="hover:border-primary-pink flex w-full cursor-pointer items-center justify-between rounded-xl border border-gray-300 p-4"
             >
-              <span
-                className={
-                  formData.bank ? "text-bg-dark font-semibold" : "text-gray-400"
-                }
-              >
+              <span className={formData.bank ? "text-bg-dark font-semibold" : "text-gray-400"}>
                 {formData.bank || "เลือกธนาคาร"}
               </span>
               <IoIosArrowForward className="text-xl text-gray-400" />
@@ -289,28 +265,20 @@ export default function WithdrawPage({
           <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
             <div className="mb-2 flex items-center justify-between text-sm text-gray-600">
               <span>จำนวนเงินที่ขอถอน</span>
-              <span className="text-bg-dark font-semibold">
-                {fmtTHB(amountNum)}
-              </span>
+              <span className="text-bg-dark font-semibold">{fmtTHB(amountNum)}</span>
             </div>
             <div className="mb-2 flex items-center justify-between text-sm text-gray-600">
               <span>ค่าธรรมเนียม ({Math.round(FEE_RATE * 100)}%)</span>
-              <span className="font-semibold text-red-600">
-                - {fmtTHB(fee)}
-              </span>
+              <span className="font-semibold text-red-600">- {fmtTHB(fee)}</span>
             </div>
             <div className="my-2 h-px w-full bg-gray-200" />
             <div className="flex items-center justify-between text-base">
               <span className="font-bold text-gray-700">ยอดที่จะได้รับ</span>
-              <span className="text-bg-dark text-3xl font-extrabold">
-                {fmtTHB(net)}
-              </span>
+              <span className="text-bg-dark text-3xl font-extrabold">{fmtTHB(net)}</span>
             </div>
             <div className="mt-2 text-xs text-gray-500">
               ยอดเงินที่ใช้ได้:{" "}
-              <span className="font-semibold text-gray-700">
-                {fmtTHB(balance)}
-              </span>
+              <span className="font-semibold text-gray-700">{fmtTHB(balance)}</span>
             </div>
           </div>
 

@@ -24,7 +24,7 @@ import {
   useAdminDeleteProduct,
   useAdminGetProductFilters,
 } from "@/hooks/useAdmin";
-import DropDownComponent from "@/components/Ui/DropDownComponent";
+import DropDownComponent from "@/components/ui/DropDownComponent";
 import AdminProductCard from "./components/AdminProductCard";
 import Pagination from "./components/Pagination";
 import Toolbar from "./components/Toolbar";

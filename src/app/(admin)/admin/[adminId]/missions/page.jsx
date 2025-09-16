@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation";
 import { useDebounce } from "use-debounce";
 import { useCreateMission, useDeleteMission } from "@/hooks/useMission"; // ตรวจสอบว่า Path และชื่อไฟล์ Hook ถูกต้อง
 import { useGetAdminMissions, useUpdateAdminMission } from "@/hooks/useAdmin";
-import DropDownComponent from "@/components/Ui/DropDownComponent";
+import DropDownComponent from "@/components/ui/DropDownComponent";
 import MissionCard from "./components/MissionCard";
 import StatCard from "../components/StatCard";
 import MissionFormModal from "./components/MissionFormModal";
@@ -92,8 +92,7 @@ const Pagination = ({ paging, onPageChange }) => (
   <div className="mt-4 flex flex-col items-center justify-between gap-4 rounded-xl bg-white p-4 shadow-sm sm:flex-row">
     <span className="text-sm text-gray-700">
       หน้า <span className="font-semibold">{paging.page}</span> /{" "}
-      <span className="font-semibold">{paging.totalPages}</span> (รวม{" "}
-      {paging.total} รายการ)
+      <span className="font-semibold">{paging.totalPages}</span> (รวม {paging.total} รายการ)
     </span>
     <div className="inline-flex items-center gap-1 sm:gap-2">
       <button
@@ -142,15 +141,9 @@ export default function AdminMissionsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingMission, setEditingMission] = useState(null);
   const queryFilters = { ...filters, search: debouncedSearch };
-  const {
-    data: apiResponse,
-    isLoading,
-    isError,
-    error,
-  } = useGetAdminMissions(queryFilters);
+  const { data: apiResponse, isLoading, isError, error } = useGetAdminMissions(queryFilters);
   const { mutate: createMission, isLoading: isCreating } = useCreateMission();
-  const { mutate: updateMission, isLoading: isUpdating } =
-    useUpdateAdminMission();
+  const { mutate: updateMission, isLoading: isUpdating } = useUpdateAdminMission();
   const { mutate: deleteMission } = useDeleteMission();
   const isProcessing = isCreating || isUpdating;
   const missions = apiResponse?.data || [];
@@ -192,11 +185,7 @@ export default function AdminMissionsPage() {
   };
 
   const daysLeft = (iso) =>
-    iso
-      ? Math.ceil(
-          (new Date(iso).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
-        )
-      : null;
+    iso ? Math.ceil((new Date(iso).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
 
   return (
     <div className="min-h-dvh bg-gray-50">
@@ -212,12 +201,8 @@ export default function AdminMissionsPage() {
               <ChevronLeft className="h-5 w-5" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">
-                จัดการภารกิจ
-              </h1>
-              <p className="text-sm text-slate-500">
-                สร้าง แก้ไข และตรวจสอบสถานะภารกิจทั้งหมด
-              </p>
+              <h1 className="text-2xl font-bold text-slate-900">จัดการภารกิจ</h1>
+              <p className="text-sm text-slate-500">สร้าง แก้ไข และตรวจสอบสถานะภารกิจทั้งหมด</p>
             </div>
           </div>
           <button
@@ -287,15 +272,12 @@ export default function AdminMissionsPage() {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {missions.map((m) => {
-                      const expired =
-                        new Date(m.webExpiresAt).getTime() < Date.now();
+                      const expired = new Date(m.webExpiresAt).getTime() < Date.now();
                       const left = daysLeft(m.webExpiresAt);
                       return (
                         <tr key={m.id} className="bg-white hover:bg-slate-50">
                           <td className="max-w-xs px-6 py-4">
-                            <div className="truncate font-semibold text-slate-900">
-                              {m.title}
-                            </div>
+                            <div className="truncate font-semibold text-slate-900">{m.title}</div>
                             <div className="truncate text-xs text-slate-500">
                               {m.description || "-"}
                             </div>
@@ -319,9 +301,7 @@ export default function AdminMissionsPage() {
                               </span>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {m.enrolledByCount}
-                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">{m.enrolledByCount}</td>
                           <td className="px-6 py-4 text-right">
                             <div className="inline-flex gap-2">
                               <button

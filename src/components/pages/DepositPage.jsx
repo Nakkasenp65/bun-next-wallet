@@ -3,31 +3,22 @@
 import React, { useState, useRef, useEffect } from "react"; // Import useEffect
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
-import {
-  FaEllipsisH,
-  FaExclamationTriangle,
-  FaUniversity,
-  FaUpload,
-} from "react-icons/fa";
+import { FaEllipsisH, FaExclamationTriangle, FaUniversity, FaUpload } from "react-icons/fa";
 import { FaQrcode } from "react-icons/fa6";
 import jsQR from "jsqr";
 import toast from "react-hot-toast";
 import clsx from "clsx";
 
-import CtaButton from "../Ui/CtaButton";
+import CtaButton from "../ui/CtaButton";
 import FramerDiv from "../framerComponents/FramerDiv";
 import Loading from "@/components/StatusComponents/Loading";
 import TransferContent from "../Payment/TransferContent";
 import QrContent from "../Payment/QrContent";
 import OtherMethodsContent from "../Payment/OtherMethodsContent";
 import { useCreateSavingTransaction } from "@/hooks/useTransactions";
+import { ChevronLeft } from "lucide-react";
 
-export default function DepositPage({
-  balance = 0,
-  userData,
-  showDeposit,
-  setShowDeposit,
-}) {
+export default function DepositPage({ balance = 0, userData, showDeposit, setShowDeposit }) {
   const [activeTab, setActiveTab] = useState("transfer");
   const [selectedFile, setSelectedFile] = useState(null);
   // previewUrl will now store a Data URL (base64 string) instead of a blob URL
@@ -80,12 +71,7 @@ export default function DepositPage({
         canvas.width = image.width;
         canvas.height = image.height;
         context.drawImage(image, 0, 0, image.width, image.height);
-        const imageData = context.getImageData(
-          0,
-          0,
-          canvas.width,
-          canvas.height,
-        );
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
         const code = jsQR(imageData.data, imageData.width, imageData.height, {
           inversionAttempts: "dontInvert",
         });
@@ -126,9 +112,7 @@ export default function DepositPage({
       const hasQRCode = await scanImageDataForQRCode(dataUrl);
 
       if (!hasQRCode) {
-        toast.error(
-          "ไม่พบ QR Code ในรูปภาพสลิป กรุณาตรวจสอบและแนบใหม่อีกครั้ง",
-        );
+        toast.error("ไม่พบ QR Code ในรูปภาพสลิป กรุณาตรวจสอบและแนบใหม่อีกครั้ง");
         setPreviewUrl(null); // Clear preview if QR not found
         setSelectedFile(null);
         input.value = null; // Reset input value
@@ -183,16 +167,16 @@ export default function DepositPage({
       <FramerDiv
         isOpen={showDeposit}
         id="topup-overlay"
-        className="bg-bg-dark/80 fixed inset-0 z-20 flex h-dvh w-full flex-col backdrop-blur-sm"
+        className="bg-bg-dark fixed inset-0 z-20 flex h-dvh w-full flex-col backdrop-blur-sm"
       >
-        <header className="flex flex-shrink-0 items-center px-5 pt-10 pb-4">
+        <header className="flex items-center p-4 pt-10">
           <button
             onClick={closePage}
             className="text-secondary-text text-2xl transition-colors hover:text-white"
           >
-            <FontAwesomeIcon icon={faChevronLeft} />
+            <ChevronLeft size={28} />
           </button>
-          <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
+          <h2 className="from-primary-pink to-primary-orange mx-auto bg-gradient-to-r bg-clip-text text-lg font-extrabold tracking-tight text-transparent">
             เติมเงิน (ฝากเงิน)
           </h2>
           <div className="w-6"></div>
@@ -213,24 +197,15 @@ export default function DepositPage({
               </div>
 
               <div className="flex items-center justify-center gap-2">
-                <FaUniversity
-                  color="#f36"
-                  size={24}
-                  className="animate-bounce"
-                />
-                <h1 className="text-xl font-bold text-[#f36]">
-                  เลือกช่องทางการชำระเงิน
-                </h1>
+                <FaUniversity color="#f36" size={24} className="animate-bounce" />
+                <h1 className="text-xl font-bold text-[#f36]">เลือกช่องทางการชำระเงิน</h1>
               </div>
 
               <div className="flex items-start gap-3 rounded-lg bg-yellow-50 p-3 text-yellow-800">
                 <FaExclamationTriangle className="mt-1 flex-shrink-0 text-yellow-500" />
                 <p className="text-[12px]">
-                  <span className="font-bold">ข้อแนะนำ:</span>{" "}
-                  โปรดหลีกเลี่ยงการชำระเงินช่วงเวลา{" "}
-                  <span className="font-bold text-red-600">
-                    00:00 - 01:00น.
-                  </span>{" "}
+                  <span className="font-bold">ข้อแนะนำ:</span> โปรดหลีกเลี่ยงการชำระเงินช่วงเวลา{" "}
+                  <span className="font-bold text-red-600">00:00 - 01:00น.</span>{" "}
                   เพื่อป้องกันข้อผิดพลาดช่วงเวลาธนาคารปิดปรับปรุงระบบ
                 </p>
               </div>
@@ -251,8 +226,7 @@ export default function DepositPage({
                   {activeTab === "transfer" && <TransferContent />}
                   {activeTab === "promptpay" && <QrContent />}
                   {activeTab === "other" && <OtherMethodsContent />}
-                  {(activeTab === "spaylater" ||
-                    activeTab === "creditcard") && (
+                  {(activeTab === "spaylater" || activeTab === "creditcard") && (
                     <div className="p-16 text-center text-gray-400">
                       <p>ช่องทางนี้ยังไม่เปิดให้บริการ</p>
                     </div>
@@ -280,9 +254,7 @@ export default function DepositPage({
                   ) : (
                     <>
                       <FaUpload className="text-3xl text-gray-400" />
-                      <p className="mt-2 font-medium text-gray-700">
-                        คลิกเพื่อแนบสลิป
-                      </p>
+                      <p className="mt-2 font-medium text-gray-700">คลิกเพื่อแนบสลิป</p>
                       <p className="text-xs text-gray-500">รองรับ: JPG, PNG</p>
                     </>
                   )}
@@ -304,9 +276,7 @@ export default function DepositPage({
               disabled={!selectedFile || createTransactionMutation.isPending}
               className="z-10 w-48 rounded-xl p-4 text-base font-bold"
             >
-              {createTransactionMutation.isPending
-                ? "กำลังส่ง..."
-                : "ยืนยันการชำระเงิน"}
+              {createTransactionMutation.isPending ? "กำลังส่ง..." : "ยืนยันการชำระเงิน"}
             </CtaButton>
           </div>
         </div>

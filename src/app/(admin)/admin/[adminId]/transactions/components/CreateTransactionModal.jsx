@@ -5,7 +5,7 @@
 import { useState } from "react";
 import { X, Loader2, Save } from "lucide-react";
 import toast from "react-hot-toast";
-import DropDownComponent from "@/components/Ui/DropDownComponent";
+import DropDownComponent from "@/components/ui/DropDownComponent";
 
 const INITIAL_STATE = {
   name: "",
@@ -32,12 +32,7 @@ const statusOptions = [
   { label: "ยกเลิก", value: "CANCELLED" },
 ];
 
-export default function CreateTransactionModal({
-  isOpen,
-  onClose,
-  onCreate,
-  isProcessing,
-}) {
+export default function CreateTransactionModal({ isOpen, onClose, onCreate, isProcessing }) {
   const [formState, setFormState] = useState(INITIAL_STATE);
 
   if (!isOpen) return null;
@@ -72,9 +67,7 @@ export default function CreateTransactionModal({
       >
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between border-b p-4">
-            <h3 className="text-lg font-semibold text-slate-900">
-              สร้างธุรกรรมใหม่
-            </h3>
+            <h3 className="text-lg font-semibold text-slate-900">สร้างธุรกรรมใหม่</h3>
             <button
               type="button"
               onClick={onClose}

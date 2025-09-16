@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import CtaButton from "@/components/Ui/CtaButton";
+import CtaButton from "@/components/ui/CtaButton";
 import ProgressIndicator from "./ProgressIndicator";
 
 // --- นำเข้า "หน่วยปฏิบัติการพิเศษ" ทั้งหมด ---

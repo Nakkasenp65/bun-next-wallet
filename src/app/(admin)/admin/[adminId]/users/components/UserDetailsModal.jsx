@@ -6,7 +6,7 @@ import React, { useState, useEffect } from "react";
 import { useGetUserById } from "@/hooks/useUser";
 
 import { Loader2, X, Edit3, Save, User, ShieldCheck, Briefcase, Phone } from "lucide-react";
-import DropDownComponent from "@/components/Ui/DropDownComponent";
+import DropDownComponent from "@/components/ui/DropDownComponent";
 
 // Helper component ที่ยืมมาจาก VerificationModal
 const EditableField = ({ label, value, name, onChange, isEditing, type = "text" }) => (

@@ -5,23 +5,19 @@ import toast from "react-hot-toast";
 
 // PROVIDERS AND HOOKS
 import { useGetUser } from "@/hooks/useUser";
-import {
-  useGetMyMissions,
-  useGetAvailableMissions,
-  useClaimMission,
-} from "@/hooks/useMission";
+import { useGetMyMissions, useGetAvailableMissions, useClaimMission } from "@/hooks/useMission";
 import { useSuccessTransactions } from "@/hooks/useTransactions";
 
 // UI & PAGE COMPONENTS
-import ErrorComponent from "../Ui/ErrorComponent";
-import WalletHeader from "../Ui/WalletHeader";
-import SavingsGoalCard from "../Ui/SavingGoalCard";
-import ActionGrid from "../Ui/ActionGrid";
-import SavingMission from "../Ui/SavingMission";
-import BottomNav from "../Ui/BottomNav";
-import MyMissions from "../Ui/MyMissions";
+import ErrorComponent from "../ui/ErrorComponent";
+import WalletHeader from "../ui/WalletHeader";
+import SavingsGoalCard from "../ui/SavingGoalCard";
+import ActionGrid from "../ui/ActionGrid";
+import SavingMission from "../ui/SavingMission";
+import BottomNav from "../ui/BottomNav";
+import MyMissions from "../ui/MyMissions";
 import MainTransactionList from "@/components/TransactionComponents/MainTransactionList";
-import RedeemConfirmationModal from "@/components/Ui/RedeemConfirmation";
+import RedeemConfirmationModal from "@/components/ui/RedeemConfirmation";
 import TransferPage from "./TransferPage";
 import WithdrawPage from "./WithdrawPage";
 import DepositPage from "./DepositPage";
@@ -36,7 +32,7 @@ import { useNotification } from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
 import { FcQuestions } from "react-icons/fc";
 import Loading from "../StatusComponents/Loading";
-import TransactionSkeleton from "../Ui/TransactionSkeleton";
+import TransactionSkeleton from "../ui/TransactionSkeleton";
 import MissionCardSkeleton from "../SkeletonComponents/MissionCardSkeleton";
 import MissionGridSkeleton from "../SkeletonComponents/MissionGridSkeleton";
 import MyMissionCardSkeleton from "../SkeletonComponents/MyMissionCardSkeleton";
@@ -64,15 +60,10 @@ export default function MainPage({ liffProfile }) {
   } = useGetWallet(liffProfile?.userId);
 
   // ดึงข้อมูล goal ของ user
-  const {
-    data: goal,
-    isLoading: goalLoading,
-    error: goalError,
-  } = useGetGoal(liffProfile?.userId);
+  const { data: goal, isLoading: goalLoading, error: goalError } = useGetGoal(liffProfile?.userId);
 
   // ดึงข้อมูลการแจ้งเตือนของ user
-  const { data: notificationData, isLoading: notificationLoading } =
-    useNotification(userData?.id);
+  const { data: notificationData, isLoading: notificationLoading } = useNotification(userData?.id);
 
   const claimRewardMutation = useClaimMission();
 
@@ -111,10 +102,7 @@ export default function MainPage({ liffProfile }) {
   const confirmAndProceedToRedeem = () => {
     setShowRedeemModal(false);
     window
-      .open(
-        `http://app.no1.mobi/landing-page-installment/${userData?.line_user_id}`,
-        "_blank",
-      )
+      .open(`http://app.no1.mobi/landing-page-installment/${userData?.line_user_id}`, "_blank")
       ?.focus();
   };
 
@@ -182,8 +170,7 @@ export default function MainPage({ liffProfile }) {
     }
   };
 
-  if (isUserDataError || missionError || transactionError)
-    return <ErrorComponent />;
+  if (isUserDataError || missionError || transactionError) return <ErrorComponent />;
 
   return (
     <>
@@ -230,10 +217,7 @@ export default function MainPage({ liffProfile }) {
             showGoal={showGoal}
             setShowGoal={setShowGoal}
           />
-          <ContactPage
-            showContact={showContact}
-            setShowContact={setShowContact}
-          />
+          <ContactPage showContact={showContact} setShowContact={setShowContact} />
         </>
       )}
 

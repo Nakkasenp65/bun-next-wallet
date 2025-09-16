@@ -1,5 +1,5 @@
 import { useState } from "react";
-import SlideToConfirm from "../Ui/SlideToConfirm";
+import SlideToConfirm from "../ui/SlideToConfirm";
 import { IoIosArrowBack } from "react-icons/io";
 import DisposeFramerDiv from "../framerComponents/DisposeFramerDiv";
 

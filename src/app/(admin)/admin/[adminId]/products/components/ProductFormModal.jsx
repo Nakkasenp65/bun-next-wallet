@@ -1,17 +1,11 @@
 "use client";
 
-import DropDownComponent from "@/components/Ui/DropDownComponent";
+import DropDownComponent from "@/components/ui/DropDownComponent";
 import { Loader2, Save, X } from "lucide-react";
 
 const { useEffect, useState } = require("react");
 
-export default function ProductFormModal({
-  open,
-  initial,
-  onClose,
-  onSubmit,
-  isProcessing,
-}) {
+export default function ProductFormModal({ open, initial, onClose, onSubmit, isProcessing }) {
   const [form, setForm] = useState({});
   const [otherColor, setOtherColor] = useState("");
 
@@ -52,10 +46,7 @@ export default function ProductFormModal({
     };
     setForm(initialData);
 
-    if (
-      initialData.color &&
-      !commonColors.some((c) => c.value === initialData.color)
-    ) {
+    if (initialData.color && !commonColors.some((c) => c.value === initialData.color)) {
       setForm((prev) => ({ ...prev, color: "OTHER" }));
       setOtherColor(initialData.color);
     } else {
@@ -75,13 +66,11 @@ export default function ProductFormModal({
     ].includes(name);
     setForm((s) => ({ ...s, [name]: isNumeric ? Number(value) : value }));
   };
-  const handleDropdownChange = (name, value) =>
-    setForm((s) => ({ ...s, [name]: value }));
+  const handleDropdownChange = (name, value) => setForm((s) => ({ ...s, [name]: value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.brand?.trim() || !form.model?.trim())
-      return alert("กรุณากรอกยี่ห้อและรุ่น");
+    if (!form.brand?.trim() || !form.model?.trim()) return alert("กรุณากรอกยี่ห้อและรุ่น");
     const finalColor = form.color === "OTHER" ? otherColor.trim() : form.color;
     onSubmit({ ...form, color: finalColor });
   };
@@ -132,9 +121,7 @@ export default function ProductFormModal({
               />
             </div>
             <div>
-              <label className="text-sm text-slate-600">
-                ความจุ (Capacity)
-              </label>
+              <label className="text-sm text-slate-600">ความจุ (Capacity)</label>
               <input
                 name="capacity"
                 value={form.capacity || ""}

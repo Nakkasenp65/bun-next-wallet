@@ -6,7 +6,7 @@ import { HiOutlineViewfinderCircle } from "react-icons/hi2";
 import { MdAutoAwesome } from "react-icons/md";
 import { FaExchangeAlt } from "react-icons/fa";
 import Image from "next/image";
-import DropDownComponent from "../../../../components/Ui/DropDownComponent";
+import DropDownComponent from "../../../../components/ui/DropDownComponent";
 import FramerButton from "../../../../components/framerComponents/FramerButton";
 import GridSelectorComponent from "./GridSelectorComponent";
 import Poco from "../../../../components/logos/Poco";

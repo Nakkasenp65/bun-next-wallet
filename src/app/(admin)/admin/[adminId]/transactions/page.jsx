@@ -24,7 +24,7 @@ import {
   useDeleteTransaction,
 } from "@/hooks/useAdmin";
 import VerificationModal from "./components/VerificationModal";
-import DropDownComponent from "@/components/Ui/DropDownComponent"; // Import the reusable DropDownComponent
+import DropDownComponent from "@/components/ui/DropDownComponent"; // Import the reusable DropDownComponent
 import CreateTransactionModal from "./components/CreateTransactionModal";
 import { motion } from "framer-motion";
 const StatusTag = ({ status }) => {
@@ -90,9 +90,7 @@ const TypeTag = ({ type }) => {
       },
     }[type] || {};
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 font-medium ${styles.color}`}
-    >
+    <span className={`inline-flex items-center gap-1.5 font-medium ${styles.color}`}>
       {styles.icon} {styles.text}
     </span>
   );
@@ -104,9 +102,7 @@ const TransactionCard = ({ tx, onOpenModal }) => (
       <div>
         <p className="font-semibold text-slate-800">{tx.name || "N/A"}</p>
         <p className="text-xs text-slate-500">จาก: {tx.from}</p>
-        <p className="text-xs text-slate-400">
-          {new Date(tx.createdAt).toLocaleString("th-TH")}
-        </p>
+        <p className="text-xs text-slate-400">{new Date(tx.createdAt).toLocaleString("th-TH")}</p>
       </div>
       <StatusTag status={tx.status} />
     </div>
@@ -162,9 +158,7 @@ const Toolbar = ({ filters, onFilterChange }) => {
           label="แสดงผลต่อหน้า"
           name="pageSize"
           value={filters.pageSize}
-          onChange={(selectedValue) =>
-            onFilterChange("pageSize", selectedValue)
-          }
+          onChange={(selectedValue) => onFilterChange("pageSize", selectedValue)}
           options={pageSizeOptions}
           placeholder="เลือกจำนวน"
           labelClassName="block text-sm font-medium text-slate-600 mb-1"
@@ -186,21 +180,13 @@ export default function AdminTransactionsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const router = useRouter();
 
-  const {
-    data: apiResponse,
-    isLoading,
-    isError,
-    error,
-  } = useGetAdminTransactions(filters);
+  const { data: apiResponse, isLoading, isError, error } = useGetAdminTransactions(filters);
 
-  const { mutate: deleteTransaction, isLoading: isDeleting } =
-    useDeleteTransaction();
+  const { mutate: deleteTransaction, isLoading: isDeleting } = useDeleteTransaction();
 
-  const { mutate: updateTransaction, isLoading: isProcessing } =
-    useUpdateTransaction();
+  const { mutate: updateTransaction, isLoading: isProcessing } = useUpdateTransaction();
 
-  const { mutate: createTransaction, isLoading: isCreating } =
-    useCreateTransaction();
+  const { mutate: createTransaction, isLoading: isCreating } = useCreateTransaction();
 
   const transactions = apiResponse?.data || [];
   const paging = apiResponse?.paging || {};
@@ -243,12 +229,8 @@ export default function AdminTransactionsPage() {
               <ChevronLeft className="h-5 w-5" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                จัดการธุรกรรม
-              </h1>
-              <p className="text-sm text-gray-500">
-                ตรวจสอบและจัดการรายการธุรกรรมทั้งหมด
-              </p>
+              <h1 className="text-2xl font-bold text-gray-900">จัดการธุรกรรม</h1>
+              <p className="text-sm text-gray-500">ตรวจสอบและจัดการรายการธุรกรรมทั้งหมด</p>
             </div>
           </div>
           {/* [NEW] ปุ่มสำหรับเปิด Modal สร้างรายการ */}
@@ -276,19 +258,13 @@ export default function AdminTransactionsPage() {
         ) : transactions.length === 0 ? (
           <div className="rounded-lg bg-white p-8 text-center text-gray-500 shadow-sm">
             <h3 className="font-semibold">ไม่พบรายการธุรกรรม</h3>
-            <p className="mt-1 text-sm">
-              ไม่พบข้อมูลที่ตรงกับตัวกรองที่คุณเลือก
-            </p>
+            <p className="mt-1 text-sm">ไม่พบข้อมูลที่ตรงกับตัวกรองที่คุณเลือก</p>
           </div>
         ) : (
           <>
             <ul className="space-y-3 md:hidden">
               {transactions.map((tx) => (
-                <TransactionCard
-                  key={tx.id}
-                  tx={tx}
-                  onOpenModal={setSelectedTx}
-                />
+                <TransactionCard key={tx.id} tx={tx} onOpenModal={setSelectedTx} />
               ))}
             </ul>
             <div className="hidden overflow-hidden rounded-xl bg-white shadow-sm md:block">
@@ -346,9 +322,7 @@ export default function AdminTransactionsPage() {
                           <TypeTag type={tx.type} />
                         </td>
                         <td className="px-6 py-4 text-right font-semibold text-slate-900">
-                          {tx.amount != null
-                            ? `฿${tx.amount.toLocaleString()}`
-                            : "-"}
+                          {tx.amount != null ? `฿${tx.amount.toLocaleString()}` : "-"}
                         </td>
                         <td className="px-6 py-4">
                           <StatusTag status={tx.status} />
@@ -384,8 +358,8 @@ export default function AdminTransactionsPage() {
               <div className="mt-4 flex flex-col items-center justify-between gap-4 rounded-xl bg-white p-4 shadow-sm sm:flex-row">
                 <span className="text-sm text-gray-700">
                   หน้า <span className="font-semibold">{paging.page}</span> /{" "}
-                  <span className="font-semibold">{paging.totalPages}</span>{" "}
-                  (รวม {paging.total} รายการ)
+                  <span className="font-semibold">{paging.totalPages}</span> (รวม {paging.total}{" "}
+                  รายการ)
                 </span>
                 <div className="inline-flex items-center gap-1 sm:gap-2">
                   <button

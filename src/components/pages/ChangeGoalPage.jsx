@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
-import CtaButton from "../Ui/CtaButton";
+import CtaButton from "../ui/CtaButton";
 import FramerDiv from "../framerComponents/FramerDiv";
 import GoalSetter from "../../app/(pages)/welcome/components/GoalSetter";
 import { useUpdateGoal } from "@/hooks/useUser";
@@ -197,7 +197,7 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData, bala
               onGoalChange={handleGoalUpdate}
               onBack={closePage} // สามารถใช้ closePage ได้โดยตรง
             />
-            <footer className="sticky bottom-0 flex w-full items-center justify-center bg-white p-4 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+            <footer className="bottom-0 flex w-full items-center justify-center bg-white p-4 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
               <CtaButton
                 onClick={handleSaveChanges}
                 disabled={!newGoal.planId || isUpdatingGoal}

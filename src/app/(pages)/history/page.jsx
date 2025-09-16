@@ -5,11 +5,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { useWalletTransaction } from "@/hooks/useTransactions";
-import CtaButton from "@/components/Ui/CtaButton";
+import CtaButton from "@/components/ui/CtaButton";
 import Transaction from "@/components/TransactionComponents/Transaction";
 import { useGetUser } from "@/hooks/useUser";
 import { useLiff } from "@/components/provider/LiffProvider";
-import TransactionSkeleton from "@/components/Ui/TransactionSkeleton";
+import TransactionSkeleton from "@/components/ui/TransactionSkeleton";
 import DownloadModal from "@/components/modal/DownloadModal";
 
 const thaiMonths = [

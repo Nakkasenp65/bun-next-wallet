@@ -24,7 +24,7 @@ import {
   useAdminDeleteProduct,
   useAdminGetProductFilters,
 } from "@/hooks/useAdmin";
-import DropDownComponent from "@/components/Ui/DropDownComponent";
+import DropDownComponent from "@/components/ui/DropDownComponent";
 import AdminProductCard from "../products/components/AdminProductCard";
 import Pagination from "../products/components/Pagination";
 
@@ -112,13 +112,7 @@ const Toolbar = ({ filters, onFilterChange, filterOptions }) => {
 };
 
 // [MODIFIED] ProductFormModal: ปรับปรุง UX การใส่ข้อมูล
-const ProductFormModal = ({
-  open,
-  initial,
-  onClose,
-  onSubmit,
-  isProcessing,
-}) => {
+const ProductFormModal = ({ open, initial, onClose, onSubmit, isProcessing }) => {
   const [form, setForm] = useState({});
   const [otherColor, setOtherColor] = useState("");
 
@@ -159,10 +153,7 @@ const ProductFormModal = ({
     };
     setForm(initialData);
 
-    if (
-      initialData.color &&
-      !commonColors.some((c) => c.value === initialData.color)
-    ) {
+    if (initialData.color && !commonColors.some((c) => c.value === initialData.color)) {
       setForm((prev) => ({ ...prev, color: "OTHER" }));
       setOtherColor(initialData.color);
     } else {
@@ -182,13 +173,11 @@ const ProductFormModal = ({
     ].includes(name);
     setForm((s) => ({ ...s, [name]: isNumeric ? Number(value) : value }));
   };
-  const handleDropdownChange = (name, value) =>
-    setForm((s) => ({ ...s, [name]: value }));
+  const handleDropdownChange = (name, value) => setForm((s) => ({ ...s, [name]: value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.brand?.trim() || !form.model?.trim())
-      return alert("กรุณากรอกยี่ห้อและรุ่น");
+    if (!form.brand?.trim() || !form.model?.trim()) return alert("กรุณากรอกยี่ห้อและรุ่น");
     const finalColor = form.color === "OTHER" ? otherColor.trim() : form.color;
     onSubmit({ ...form, color: finalColor });
   };
@@ -239,9 +228,7 @@ const ProductFormModal = ({
               />
             </div>
             <div>
-              <label className="text-sm text-slate-600">
-                ความจุ (Capacity)
-              </label>
+              <label className="text-sm text-slate-600">ความจุ (Capacity)</label>
               <input
                 name="capacity"
                 value={form.capacity || ""}
@@ -362,15 +349,9 @@ export default function AdminProductsPage() {
 
   const queryFilters = { ...filters, search: debouncedSearch };
 
-  const {
-    data: apiResponse,
-    isLoading,
-    isError,
-    error,
-  } = useAdminGetProducts(queryFilters);
+  const { data: apiResponse, isLoading, isError, error } = useAdminGetProducts(queryFilters);
   const { data: filterOptions } = useAdminGetProductFilters(); // ดึง options สำหรับ filter
-  const { mutate: createProduct, isLoading: isCreating } =
-    useAdminCreateProduct();
+  const { mutate: createProduct, isLoading: isCreating } = useAdminCreateProduct();
   const { mutate: editProduct, isLoading: isEditing } = useAdminEditProduct();
   const { mutate: deleteProduct } = useAdminDeleteProduct();
   const isProcessing = isCreating || isEditing;
@@ -421,9 +402,7 @@ export default function AdminProductsPage() {
               <ChevronLeft className="h-5 w-5" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">
-                จัดการสินค้า
-              </h1>
+              <h1 className="text-2xl font-bold text-slate-900">จัดการสินค้า</h1>
               <p className="text-sm text-slate-500">
                 เพิ่ม ลบ แก้ไข และจัดการรายการสินค้าทั้งหมดในระบบ
               </p>
@@ -485,15 +464,11 @@ export default function AdminProductsPage() {
                               height={40}
                               className="h-10 w-10 rounded-md object-contain ring-1 ring-slate-100"
                             />
-                            <span className="font-semibold text-slate-800">
-                              {item.brand}
-                            </span>
+                            <span className="font-semibold text-slate-800">{item.brand}</span>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="font-medium text-slate-800">
-                            {item.model}
-                          </div>
+                          <div className="font-medium text-slate-800">{item.model}</div>
                           <div className="text-xs text-slate-500">
                             {item.capacity} - {item.color || "N/A"}
                           </div>

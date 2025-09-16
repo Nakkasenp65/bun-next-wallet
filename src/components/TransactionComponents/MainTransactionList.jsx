@@ -1,6 +1,6 @@
 import React from "react";
 import Transaction from "./Transaction";
-import TransactionSkeleton from "../Ui/TransactionSkeleton";
+import TransactionSkeleton from "../ui/TransactionSkeleton";
 import { FaArrowRightLong } from "react-icons/fa6";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -20,16 +20,10 @@ export default function MainTransactionList({
             <TransactionSkeleton />
           </>
         ) : transactionError ? (
-          <p className="p-8 text-center text-red-500">
-            เกิดข้อผิดพลาดในการโหลดข้อมูล
-          </p>
+          <p className="p-8 text-center text-red-500">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
         ) : transactions && transactions.length > 0 ? (
           transactions.map((t) => (
-            <Transaction
-              key={t.id}
-              transaction={t}
-              currentWalletId={currentWalletId}
-            />
+            <Transaction key={t.id} transaction={t} currentWalletId={currentWalletId} />
           ))
         ) : (
           <p className="p-8 text-center text-gray-500">ไม่พบรายการในเดือนนี้</p>

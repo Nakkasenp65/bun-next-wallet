@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { useUpdateUser } from "../../hooks/useUser";
-import CtaButton from "../Ui/CtaButton";
-
-// --- UI Library Imports ---
+import CtaButton from "../ui/CtaButton";
 import {
   Select,
   SelectContent,
@@ -16,11 +14,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-
-// --- Icon Imports ---
 import { ChevronLeft, Copy, Share2, Phone, Briefcase, CalendarDays, Pencil } from "lucide-react";
 
-// --- Data Constants ---
 const OCCUPATION_OPTIONS = [
   { value: "นักศึกษา", label: "นักศึกษา" },
   { value: "ข้าราชการ / เจ้าหน้าที่รัฐ", label: "ข้าราชการ / เจ้าหน้าที่รัฐ" },
@@ -45,7 +40,6 @@ const AGE_RANGE_OPTIONS = [
   { value: "มากกว่า 60 ปี", label: "มากกว่า 60 ปี" },
 ];
 
-// --- Helper Functions ---
 const formatJoinDate = (dateString) => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -56,7 +50,6 @@ const formatJoinDate = (dateString) => {
   });
 };
 
-// --- Reusable UI Sub-component ---
 const FormField = ({ icon: Icon, label, children }) => (
   <div className="flex flex-col gap-2">
     <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
@@ -67,7 +60,6 @@ const FormField = ({ icon: Icon, label, children }) => (
   </div>
 );
 
-// --- Main Profile Component ---
 export default function Profile({ user }) {
   const router = useRouter();
   const { mutate: updateUser, isPending: isSaving } = useUpdateUser();

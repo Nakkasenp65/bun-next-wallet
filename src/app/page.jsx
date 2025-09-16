@@ -8,9 +8,9 @@ import { useLiff } from "@/components/provider/LiffProvider";
 import { useGetUser, useUserStatus } from "@/hooks/useUser";
 
 // UI & PAGE COMPONENTS
-import LockScreen from "@/components/Ui/LockScreen"; // <-- IMPORTANT: Import the lock screen
+import LockScreen from "@/components/ui/LockScreen"; // <-- IMPORTANT: Import the lock screen
 import Loading from "@/components/StatusComponents/Loading";
-import ErrorComponent from "@/components/Ui/ErrorComponent";
+import ErrorComponent from "@/components/ui/ErrorComponent";
 
 // MAINPAGE COMPONENT
 import MainPage from "@/components/pages/MainPage";
@@ -45,11 +45,7 @@ export default function HomePage() {
   } = useGetWallet(liffProfile?.userId);
 
   // ดึงข้อมูล goal ของ user
-  const {
-    data: goal,
-    isLoading: goalLoading,
-    error: goalError,
-  } = useGetGoal(liffProfile?.userId);
+  const { data: goal, isLoading: goalLoading, error: goalError } = useGetGoal(liffProfile?.userId);
 
   const date = new Date();
 
@@ -121,9 +117,7 @@ export default function HomePage() {
   }
 
   if (gateStatus === "ERROR") {
-    return (
-      <ErrorComponent message="Failed to verify user status. Please try again." />
-    );
+    return <ErrorComponent message="Failed to verify user status. Please try again." />;
   }
 
   if (gateStatus === "ALLOWED") {
