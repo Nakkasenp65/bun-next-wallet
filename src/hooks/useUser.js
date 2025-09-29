@@ -115,7 +115,8 @@ export function useCheckOkMobileUser(line_user_id) {
         );
         return data;
       } catch (error) {
-        if (error.status === 404) router.replace("https://liff.line.me/2006703040-RYAyYAyA");
+        if (error.status === 404)
+          router.replace("https://liff.line.me/2006703040-RYAyYAyA");
         return null;
       }
     },
@@ -130,7 +131,9 @@ export function useMainServerUser(line_user_id) {
       const mainUserApiUrl = process.env.NEXT_PUBLIC_MAIN_USER_API;
       try {
         if (!mainUserApiUrl) throw new Error("mainUserApiUrl is not defined");
-        const { data } = await externalLinkAxios.get(`${mainUserApiUrl}${line_user_id}`);
+        const { data } = await externalLinkAxios.get(
+          `${mainUserApiUrl}${line_user_id}`,
+        );
         return data;
       } catch (error) {
         console.log("Error fetchUserfromMainServer", error);
@@ -163,7 +166,8 @@ export function useCreateGoal() {
     },
     onError: (error) => {
       console.error("Error creating goal:", error);
-      const errorMessage = error.response?.data?.message || "สร้างเป้าหมายการออมเงินไม่สำเร็จ";
+      const errorMessage =
+        error.response?.data?.message || "สร้างเป้าหมายการออมเงินไม่สำเร็จ";
       toast.error(errorMessage);
     },
   });
@@ -185,10 +189,14 @@ export function useUpdateGoal() {
       setTimeout(() => {
         console.log("wait for 0.5 second (race condition)");
       }, 500);
-      queryClient.invalidateQueries({ queryKey: ["goal", variables.line_user_id] });
+      queryClient.invalidateQueries({
+        queryKey: ["goal", variables.line_user_id],
+      });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "ไม่สามารถเปลี่ยนเป้าหมายได้");
+      toast.error(
+        error.response?.data?.message || "ไม่สามารถเปลี่ยนเป้าหมายได้",
+      );
     },
   });
 }
@@ -210,7 +218,9 @@ export function useUpdateUser() {
       router.back();
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+      toast.error(
+        error.response?.data?.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
+      );
     },
   });
 }

@@ -41,7 +41,8 @@ export function LiffProvider({ children }) {
     const testProfile = {
       userId: "U669f6092308023f227aa435c803b2e74",
       displayName: "Zzz59🧚🏻♀️🌈",
-      pictureUrl: "https://lh3.googleusercontent.com/d/1eXgDln7TvPQGiMpzaUdo7l2hKmsh8Kvc",
+      pictureUrl:
+        "https://lh3.googleusercontent.com/d/1eXgDln7TvPQGiMpzaUdo7l2hKmsh8Kvc",
     };
     const mockDecodedTokenId = {
       iss: "https://access.line.me",
@@ -249,7 +250,10 @@ export function LiffProvider({ children }) {
           isMultiple: true,
         });
         if (result) {
-          console.log(`[LIFF_SUCCESS] Message sent with status:`, result.status);
+          console.log(
+            `[LIFF_SUCCESS] Message sent with status:`,
+            result.status,
+          );
           toast.success("แชร์ข้อความสำเร็จ!");
         } else {
           console.log("[LIFF_INFO] TargetPicker was closed by the user.");
@@ -266,7 +270,7 @@ export function LiffProvider({ children }) {
   if (isLoading) {
     return (
       <div className="gradient-background flex h-dvh w-full items-center justify-center">
-        <Loading message={"liff init"} />
+        <Loading message={"กำลังเริ่มต้น LIFF"} />
       </div>
     );
   }

@@ -45,7 +45,11 @@ export default function HomePage() {
   } = useGetWallet(liffProfile?.userId);
 
   // ดึงข้อมูล goal ของ user
-  const { data: goal, isLoading: goalLoading, error: goalError } = useGetGoal(liffProfile?.userId);
+  const {
+    data: goal,
+    isLoading: goalLoading,
+    error: goalError,
+  } = useGetGoal(liffProfile?.userId);
 
   const date = new Date();
 
@@ -99,7 +103,7 @@ export default function HomePage() {
   if (gateStatus === "CHECKING") {
     return (
       <div className="gradient-background flex h-dvh w-full items-center justify-center">
-        <Loading message={"Verifying user status..."} />
+        <Loading message={"กำลังตรวจสอบสถานะ"} />
       </div>
     );
   }
@@ -107,7 +111,7 @@ export default function HomePage() {
   if (gateStatus === "REDIRECTING") {
     return (
       <div className="gradient-background flex h-dvh w-full items-center justify-center">
-        <Loading message={"Redirecting to registration..."} />
+        <Loading message={"กำลังไปยังหน้าสมัครสมาชิก"} />
       </div>
     );
   }
@@ -117,7 +121,9 @@ export default function HomePage() {
   }
 
   if (gateStatus === "ERROR") {
-    return <ErrorComponent message="Failed to verify user status. Please try again." />;
+    return (
+      <ErrorComponent message="Failed to verify user status. Please try again." />
+    );
   }
 
   if (gateStatus === "ALLOWED") {

@@ -103,7 +103,7 @@
 .gradient-bg {
   background: linear-gradient(270deg, #0d0221, #ff0073, #4a00e0, #000428);
   background-size: 400% 400%;
-  animation: gradient-animation 18s ease infinite;
+  animation: gradient-animation 10s ease infinite;
 }
 
 @keyframes gradient-animation {
@@ -127,8 +127,16 @@
   --bright-cyan: #4dd2ff;
   --bright-green: #4ccd99;
   --bright-yellow: #ffd700;
-  --primary-gradient: linear-gradient(135deg, var(--primary-pink), var(--primary-orange));
-  --secondary-gradient: linear-gradient(135deg, var(--vibrant-purple), var(--primary-pink));
+  --primary-gradient: linear-gradient(
+    135deg,
+    var(--primary-pink),
+    var(--primary-orange)
+  );
+  --secondary-gradient: linear-gradient(
+    135deg,
+    var(--vibrant-purple),
+    var(--primary-pink)
+  );
   --progress-gradient: linear-gradient(
     90deg,
     var(--bright-cyan) 0%,
@@ -152,9 +160,12 @@
   --gold-accent: #ffd700;
   --platinum-accent: #e5e4e2;
 
-  --neon-pink: 0 0 10px rgba(255, 45, 150, 0.8), 0 0 20px rgba(255, 45, 150, 0.6);
-  --neon-purple: 0 0 10px rgba(138, 79, 255, 0.8), 0 0 20px rgba(138, 79, 255, 0.6);
-  --neon-cyan: 0 0 10px rgba(77, 210, 255, 0.8), 0 0 20px rgba(77, 210, 255, 0.6);
+  --neon-pink:
+    0 0 10px rgba(255, 45, 150, 0.8), 0 0 20px rgba(255, 45, 150, 0.6);
+  --neon-purple:
+    0 0 10px rgba(138, 79, 255, 0.8), 0 0 20px rgba(138, 79, 255, 0.6);
+  --neon-cyan:
+    0 0 10px rgba(77, 210, 255, 0.8), 0 0 20px rgba(77, 210, 255, 0.6);
   --glass-bg: rgba(255, 255, 255, 0.1);
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
@@ -242,8 +253,16 @@ body {
   --color-accent-gold: #ffd700;
   --color-accent-platinum: #e5e4e2;
 
-  --gradient-primary: linear-gradient(135deg, var(--primary-pink), var(--primary-orange));
-  --gradient-secondary: linear-gradient(135deg, var(--vibrant-purple), var(--primary-pink));
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--primary-pink),
+    var(--primary-orange)
+  );
+  --gradient-secondary: linear-gradient(
+    135deg,
+    var(--vibrant-purple),
+    var(--primary-pink)
+  );
   --gradient-progress: linear-gradient(
     90deg,
     var(--bright-cyan) 0%,
@@ -269,7 +288,8 @@ body {
 
   --shadow-neon-pink: 0 10px 25px rgba(255, 45, 150, 0.4), var(--neon-pink);
   --shadow-neon-pink-sm: 0 0 8px 4px rgba(255, 45, 150, 0.1), var(--neon-pink);
-  --shadow-neon-purple: 0 0 10px rgba(138, 79, 255, 0.8), 0 0 20px rgba(138, 79, 255, 0.6);
+  --shadow-neon-purple:
+    0 0 10px rgba(138, 79, 255, 0.8), 0 0 20px rgba(138, 79, 255, 0.6);
   --shadow-neon-gold: 0 0 8px rgba(255, 215, 0, 0.5);
 
   --drop-shadow-custom: 0 10px 25px rgba(255, 45, 150, 0.4), var(--neon-pink);
@@ -277,8 +297,10 @@ body {
 
   --effect-glow-pink: 0 0 15px rgba(255, 45, 150, 0.5);
   --effect-glow-purple: 0 0 15px rgba(138, 79, 255, 0.5);
-  --effect-neon-pink: 0 0 10px rgba(255, 45, 150, 0.8), 0 0 20px rgba(255, 45, 150, 0.6);
-  --effect-neon-cyan: 0 0 10px rgba(77, 210, 255, 0.8), 0 0 20px rgba(77, 210, 255, 0.6);
+  --effect-neon-pink:
+    0 0 10px rgba(255, 45, 150, 0.8), 0 0 20px rgba(255, 45, 150, 0.6);
+  --effect-neon-cyan:
+    0 0 10px rgba(77, 210, 255, 0.8), 0 0 20px rgba(77, 210, 255, 0.6);
   --effect-glass-bg: rgba(255, 255, 255, 0.1);
   --effect-glass-border: rgba(255, 255, 255, 0.2);
   --effect-glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);

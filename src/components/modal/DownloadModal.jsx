@@ -10,7 +10,9 @@ import axios from "@/lib/axios";
 const startOfMonth = (d) => new Date(d.getFullYear(), d.getMonth(), 1);
 const endOfMonth = (d) => new Date(d.getFullYear(), d.getMonth() + 1, 0);
 const toInputDate = (d) =>
-  new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 10);
 const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v || "");
 
 export default function DownloadModal({
@@ -20,36 +22,20 @@ export default function DownloadModal({
   defaultMonthDate, // use currently viewed month as default
 }) {
   // defaults to the visible month's start/end
-  const defaultStart = useMemo(() => startOfMonth(defaultMonthDate), [defaultMonthDate]);
-  const defaultEnd = useMemo(() => endOfMonth(defaultMonthDate), [defaultMonthDate]);
+  const defaultStart = useMemo(
+    () => startOfMonth(defaultMonthDate),
+    [defaultMonthDate],
+  );
+  const defaultEnd = useMemo(
+    () => endOfMonth(defaultMonthDate),
+    [defaultMonthDate],
+  );
 
   const [email, setEmail] = useState("");
   const [startDate, setStartDate] = useState(toInputDate(defaultStart));
   const [endDate, setEndDate] = useState(toInputDate(defaultEnd));
   const [submitting, setSubmitting] = useState(false);
 
-  // preset logic
-  const applyPreset = (key) => {
-    setPreset(key);
-    const today = new Date();
-    const viewed = defaultMonthDate;
-
-    if (key === "month") {
-      setStartDate(toInputDate(startOfMonth(viewed)));
-      setEndDate(toInputDate(endOfMonth(viewed)));
-    } else if (key === "lastMonth") {
-      const last = new Date(viewed.getFullYear(), viewed.getMonth() - 1, 1);
-      setStartDate(toInputDate(startOfMonth(last)));
-      setEndDate(toInputDate(endOfMonth(last)));
-    } else if (key === "last3") {
-      const start = new Date(viewed.getFullYear(), viewed.getMonth() - 2, 1);
-      setStartDate(toInputDate(startOfMonth(start)));
-      // end at end of current viewed month (not “today”) for consistency
-      setEndDate(toInputDate(endOfMonth(viewed)));
-    }
-  };
-
-  const toggle = (setter, obj, key) => setter({ ...obj, [key]: !obj[key] });
   const invalidRange = new Date(startDate) > new Date(endDate);
 
   const submit = async () => {
@@ -87,7 +73,7 @@ export default function DownloadModal({
             initial={{ y: 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 40, opacity: 0 }}
-            className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-xl"
+            className="w-full max-w-lg overflow-hidden rounded-t-2xl bg-white shadow-xl"
             role="dialog"
             aria-modal="true"
             aria-label="ขอรายการเดินบัญชี"
@@ -98,7 +84,10 @@ export default function DownloadModal({
                 <FaDownload className="text-primary-pink" />
                 <h3 className="text-base font-extrabold">ขอรายการเดินบัญชี</h3>
               </div>
-              <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+              <button
+                onClick={onClose}
+                className="text-gray-500 hover:text-gray-800"
+              >
                 <FaXmark className="text-xl" />
               </button>
             </div>
@@ -120,7 +109,9 @@ export default function DownloadModal({
                   />
                 </div>
                 {!isEmail(email) && email.length > 0 && (
-                  <p className="mt-1 text-xs text-red-500">รูปแบบอีเมลไม่ถูกต้อง</p>
+                  <p className="mt-1 text-xs text-red-500">
+                    รูปแบบอีเมลไม่ถูกต้อง
+                  </p>
                 )}
               </div>
 
@@ -146,7 +137,9 @@ export default function DownloadModal({
                     </div>
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs font-bold text-gray-500">ถึงวันที่</label>
+                    <label className="mb-1 block text-xs font-bold text-gray-500">
+                      ถึงวันที่
+                    </label>
                     <div className="relative">
                       <FaCalendar className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
                       <input
@@ -162,7 +155,9 @@ export default function DownloadModal({
                   </div>
                 </div>
                 {invalidRange && (
-                  <p className="mt-1 text-xs font-semibold text-red-500">ช่วงเวลาไม่ถูกต้อง</p>
+                  <p className="mt-1 text-xs font-semibold text-red-500">
+                    ช่วงเวลาไม่ถูกต้อง
+                  </p>
                 )}
               </div>
             </div>
