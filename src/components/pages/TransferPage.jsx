@@ -181,7 +181,7 @@ export default function TransferPage({
 
             {!hasReceiverPreset ? (
               <div className="flex flex-col gap-4">
-                <div className="relative grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
+                <div className="relative mb-2 grid h-16 grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
                   <motion.div
                     className="absolute top-1 bottom-1 left-1 w-1/2 rounded-lg bg-white shadow-md"
                     animate={{ x: searchMode === "phone" ? "0%" : "100%" }}
@@ -253,7 +253,7 @@ export default function TransferPage({
                             }
                             placeholder="กรอกเบอร์โทรศัพท์ 10 หลัก"
                             maxLength={10}
-                            className="w-full rounded-xl border-2 border-slate-200 p-6 pl-12 font-semibold text-slate-800 focus:ring-2 focus:ring-pink-400"
+                            className="h-16 w-full rounded-xl border-2 border-slate-200 p-6 pl-12 font-semibold text-slate-800 focus:ring-2 focus:ring-pink-400"
                           />
                         </div>
                       ) : (
@@ -270,7 +270,7 @@ export default function TransferPage({
                             }
                             placeholder="กรอกเลข Wallet ID 6 หลัก"
                             maxLength={6}
-                            className="w-full rounded-xl border-2 border-slate-200 p-6 pl-14 font-semibold text-slate-800 focus:ring-2 focus:ring-pink-400"
+                            className="h-16 w-full rounded-xl border-2 border-slate-200 p-6 pl-14 font-semibold text-slate-800 focus:ring-2 focus:ring-pink-400"
                           />
                         </div>
                       )}
@@ -361,7 +361,7 @@ export default function TransferPage({
                 onChange={(e) => setAmount(e.target.value)}
                 inputMode="decimal"
                 placeholder="฿0.00"
-                className="mt-2 w-full rounded-xl border-2 border-slate-200 p-6 text-lg font-bold text-slate-800 focus:ring-2 focus:ring-pink-400"
+                className="mt-2 h-16 w-full rounded-xl border-2 border-slate-200 p-6 text-lg font-bold text-slate-800 focus:ring-2 focus:ring-pink-400"
               />
             </div>
           </div>

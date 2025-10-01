@@ -12,7 +12,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { useWalletTransaction } from "@/hooks/useTransactions";
-import CtaButton from "@/components/ui/CtaButton";
 import Transaction from "@/components/TransactionComponents/Transaction";
 import { useGetUser } from "@/hooks/useUser";
 import { useLiff } from "@/components/provider/LiffProvider";
@@ -107,7 +106,7 @@ export default function HistoryPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="fixed inset-0 z-40 flex flex-col bg-gradient-to-br from-slate-50 to-slate-100"
+        className="fixed inset-0 z-40 flex flex-col bg-white"
       >
         <header className="flex flex-shrink-0 items-center px-6 pt-12 pb-6">
           <div className="h-10 w-10 rounded-xl bg-white/50 shadow-sm" />
@@ -138,7 +137,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/30">
+    <div className="fixed inset-0 z-40 flex flex-col bg-white">
       <DownloadModal
         open={openModal}
         onClose={() => setOpenModal(false)}
@@ -252,7 +251,7 @@ export default function HistoryPage() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="flex-grow"
+          className="flex flex-grow flex-col"
         >
           {transactionLoading ? (
             <div className="space-y-3">
@@ -285,7 +284,7 @@ export default function HistoryPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.2 }}
-                  className="space-y-2"
+                  className="flex-1 space-y-2"
                 >
                   {currentTransactions.map((t, index) => (
                     <motion.li

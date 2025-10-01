@@ -64,7 +64,8 @@ const getMaskedDisplayValue = (transaction, field) => {
 // --- CORE LOGIC: The Contextual Transaction Storyteller ---
 // Determines the display context (income/outcome, name, appearance) from the user's perspective.
 const getTransactionContext = (transaction, currentWalletId) => {
-  const { type, status, fromWalletId, toWalletId, name, from, to } = transaction;
+  const { type, status, fromWalletId, toWalletId, name, from, to } =
+    transaction;
 
   let isIncome = false;
   let displayName = name;
@@ -148,7 +149,10 @@ export default function Transaction({ transaction, currentWalletId }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // All display logic is now derived from our new "brain"
-  const { isIncome, displayName, appearance } = getTransactionContext(transaction, currentWalletId);
+  const { isIncome, displayName, appearance } = getTransactionContext(
+    transaction,
+    currentWalletId,
+  );
 
   // Masking is still needed for the detail view
   const toDisplay = getMaskedDisplayValue(transaction, "to");
@@ -156,14 +160,20 @@ export default function Transaction({ transaction, currentWalletId }) {
 
   const renderAmount = () => {
     const amount =
-      transaction.status === "PENDING" ? transaction.verifiedAmount : transaction.amount;
+      transaction.status === "PENDING"
+        ? transaction.verifiedAmount
+        : transaction.amount;
     const amountToDisplay = amount ?? transaction.verifiedAmount;
 
     if (["REJECTED", "CANCELLED"].includes(transaction.status)) {
-      return <span className="text-sm font-bold text-red-500">ถูกปฏิเสธ/ยกเลิก</span>;
+      return (
+        <span className="text-sm font-bold text-red-500">ถูกปฏิเสธ/ยกเลิก</span>
+      );
     }
     if (transaction.status === "PENDING") {
-      return <span className="text-sm font-medium text-gray-500">รอตรวจสอบ</span>;
+      return (
+        <span className="text-sm font-medium text-gray-500">รอตรวจสอบ</span>
+      );
     }
     if (amountToDisplay == null) {
       return <span className="text-sm font-medium text-gray-400">-</span>;
@@ -180,8 +190,14 @@ export default function Transaction({ transaction, currentWalletId }) {
   };
 
   return (
-    <motion.li layout className="list-none border-b border-gray-100 last:border-b-0">
-      <div
+    <motion.div
+      layout="position"
+      className="list-none border-b border-gray-100 last:border-b-0"
+      transition={{
+        layout: { duration: 0.2, ease: "easeOut" },
+      }}
+    >
+      <motion.div
         className="flex cursor-pointer items-center gap-1 py-4 transition-colors"
         onClick={() => setIsExpanded((prev) => !prev)}
       >
@@ -192,7 +208,9 @@ export default function Transaction({ transaction, currentWalletId }) {
         </div>
         <div className="flex-grow">
           <p className="text-sm font-semibold text-gray-800">{displayName}</p>
-          <p className="text-xs text-gray-500">{formatRelativeTime(transaction.createdAt)}</p>
+          <p className="text-xs text-gray-500">
+            {formatRelativeTime(transaction.createdAt)}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex flex-col items-end">{renderAmount()}</div>
@@ -201,16 +219,31 @@ export default function Transaction({ transaction, currentWalletId }) {
             className={`text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`}
           />
         </div>
-      </div>
+      </motion.div>
 
-      <AnimatePresence>
+      <AnimatePresence mode="sync">
         {isExpanded && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden px-4 pb-4"
+            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+            animate={{
+              opacity: 1,
+              height: "auto",
+              marginBottom: 16,
+              transition: {
+                height: { duration: 0.2, ease: "easeOut" },
+                opacity: { duration: 0.15, delay: 0.05 },
+              },
+            }}
+            exit={{
+              opacity: 0,
+              height: 0,
+              marginBottom: 0,
+              transition: {
+                height: { duration: 0.2, ease: "easeIn" },
+                opacity: { duration: 0.1 },
+              },
+            }}
+            className="overflow-hidden px-2"
           >
             <div className="space-y-3 rounded-lg bg-slate-50 p-4 text-sm ring-1 ring-slate-200/50">
               <div className="flex justify-between">
@@ -223,17 +256,23 @@ export default function Transaction({ transaction, currentWalletId }) {
               </div>
               <div className="flex justify-between">
                 <span className="font-medium text-gray-600">จาก</span>
-                <span className="text-right font-mono text-gray-800">{fromDisplay}</span>
+                <span className="text-right font-mono text-gray-800">
+                  {fromDisplay}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium text-gray-600">ไปยัง</span>
-                <span className="text-right font-mono text-gray-800">{toDisplay}</span>
+                <span className="text-right font-mono text-gray-800">
+                  {toDisplay}
+                </span>
               </div>
 
               {transaction.description && (
                 <div className="flex items-start gap-2.5 rounded-md bg-blue-50/70 p-3 text-blue-800">
                   <Info size={16} className="mt-0.5 flex-shrink-0" />
-                  <p className="text-xs whitespace-pre-wrap">{transaction.description}</p>
+                  <p className="text-xs whitespace-pre-wrap">
+                    {transaction.description}
+                  </p>
                 </div>
               )}
 
@@ -257,6 +296,6 @@ export default function Transaction({ transaction, currentWalletId }) {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.li>
+    </motion.div>
   );
 }

@@ -1,14 +1,26 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
 export default function Loading({ message }) {
+  const [particles, setParticles] = useState([]);
+
+  useEffect(() => {
+    // Initialize particles only on client side
+    setParticles(
+      [...Array(6)].map(() => ({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+      })),
+    );
+  }, []);
   return (
-    <div className="gradient-bg flex h-dvh w-full flex-col items-center justify-center gap-8 overflow-hidden px-6">
+    <div className="gradient-bg relative flex h-dvh w-full flex-col items-center justify-center gap-8 overflow-hidden px-6">
       {/* Animated background elements */}
       <motion.div
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 overflow-hidden opacity-20"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1.2, opacity: 0.2 }}
         transition={{
@@ -19,7 +31,7 @@ export default function Loading({ message }) {
         }}
       >
         <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-purple-500 blur-3xl" />
-        <div className="absolute right-1/4 bottom-1/4 h-64 w-64 rounded-full bg-pink-500 blur-3xl" />
+        <div className="absolute right-1/4 bottom-1/4 rounded-full bg-pink-500 blur-3xl" />
       </motion.div>
 
       {/* Main loading image with entrance animation */}
@@ -106,13 +118,13 @@ export default function Loading({ message }) {
       )}
 
       {/* Floating particles */}
-      {[...Array(6)].map((_, i) => (
+      {particles.map((particle, i) => (
         <motion.div
           key={i}
           className="absolute h-2 w-2 rounded-full bg-white opacity-40"
           initial={{
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
+            x: particle.x,
+            y: particle.y,
           }}
           animate={{
             y: [null, -50, null],

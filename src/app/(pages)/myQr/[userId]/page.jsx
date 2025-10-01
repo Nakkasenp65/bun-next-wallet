@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faDownload } from "@fortawesome/free-solid-svg-icons";
+import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import QRCode from "qrcode";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, Download, Info, Share2 } from "lucide-react";
+import { ChevronLeft, Info, Share2 } from "lucide-react";
 import { useLiff } from "../../../../components/provider/LiffProvider";
 import { useGetUser } from "../../../../hooks/useUser";
 
@@ -21,9 +19,10 @@ export default function MyQr() {
   const { actions } = useLiff();
 
   // normalize param (handles catch-all routes)
-  const userIdParam = Array.isArray(params.userId)
-    ? params.userId[0]
-    : params.userId;
+  const userIdParam = useMemo(
+    () => (Array.isArray(params.userId) ? params.userId[0] : params.userId),
+    [params.userId],
+  );
 
   // Hooks first (avoid hook-order warnings)
   const [qrDataUrl, setQrDataUrl] = useState("");
@@ -34,7 +33,11 @@ export default function MyQr() {
   useEffect(() => {
     let cancelled = false;
     if (!userIdParam) return;
-    QRCode.toDataURL(String(userIdParam), { width: 600, margin: 1 })
+    QRCode.toDataURL(String(userIdParam), {
+      width: 208,
+      margin: 1,
+      errorCorrectionLevel: "L",
+    })
       .then((url) => !cancelled && setQrDataUrl(url))
       .catch(() => setQrDataUrl(""));
     return () => {
@@ -43,16 +46,6 @@ export default function MyQr() {
   }, [userIdParam]);
 
   const handleClose = () => router.push("/");
-
-  const handleDownload = () => {
-    if (!qrDataUrl) return;
-    const a = document.createElement("a");
-    a.href = qrDataUrl;
-    a.download = `qr-${userIdParam}.png`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  };
 
   async function handleShare() {
     console.log("Share!");
@@ -100,7 +93,6 @@ export default function MyQr() {
             className="relative mt-6"
           >
             {/* The "Aura" Effect: แสงสะท้อนนุ่มๆ ด้านหลัง */}
-            <div className="from-primary-pink to-primary-orange absolute inset-0 -m-2 rounded-3xl bg-gradient-to-r opacity-50 blur-2xl" />
 
             <div className="relative rounded-2xl border-8 border-white bg-white p-2 shadow-xl shadow-black/10">
               {qrDataUrl ? (
