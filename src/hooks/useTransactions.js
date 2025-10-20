@@ -12,9 +12,11 @@ const approveTransaction = async ({ transactionId, amount }) => {
 
 // PATCH: ปฏิเสธธุรกรรม
 const rejectTransaction = async (transactionId) => {
-  const { data } = await axios.patch(
-    `/admin/transactions/${transactionId}/reject`,
-  );
+  // Fix: Use the existing PATCH endpoint with rejection status instead of non-existent /reject endpoint
+  const { data } = await axios.patch(`/admin/transactions/${transactionId}`, {
+    status: "REJECTED",
+    description: "รายการถูกปฏิเสธโดยผู้ดูแลระบบ"
+  });
   return data;
 };
 
@@ -169,8 +171,9 @@ export function useCreateSavingTransaction({ onSuccessCallback }) {
         onSuccessCallback();
       }
       setTimeout(async () => {
-        await queryClient.invalidateQueries({ queryKey: ["wallet"] }); // สำหรับอัปเดตยอดเงินใน Wallet
-        await queryClient.invalidateQueries({ queryKey: ["transactions"] }); // สำหรับอัปเดตรายการ Transaction
+        await queryClient.invalidateQueries({ queryKey: ["user"] }); // Ensure user data is updated
+        await queryClient.invalidateQueries({ queryKey: ["wallet"] }); // Fix: Changed from ["wallet"] to match other hooks
+        await queryClient.invalidateQueries({ queryKey: ["transactions"] }); // Ensure transaction list is updated
       }, 1000 * 10);
     },
     onError: (error) => {

@@ -12,19 +12,6 @@ const fetchMyMissions = async (userId) => {
   return data;
 };
 
-const claimMissionRewardAPI = async ({ userId, userMissionId }) => {
-  const { data } = await axios.post(`/user-mission/claim`, {
-    userId,
-    userMissionId,
-  });
-  return data; // Updated UserMission object
-};
-
-async function createMission(payload) {
-  const { data } = await axios.post("/admin/missions", payload);
-  return data;
-}
-
 async function deleteMission(missionId) {
   const { data } = await axios.delete(`/admin/missions/${missionId}`);
   return data;
@@ -33,7 +20,13 @@ async function deleteMission(missionId) {
 export const useClaimMission = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: claimMissionRewardAPI,
+    mutationFn: async ({ userId, userMissionId }) => {
+      const { data } = await axios.post(`/user-mission/claim`, {
+        userId,
+        userMissionId,
+      });
+      return data; // Updated UserMission object
+    },
     onSuccess: async (variables) => {
       const { userId, userMissionId } = variables;
       const myKey = ["myMissions", userId];
@@ -155,16 +148,14 @@ export const useGetMyMissions = (userId) => {
 };
 
 async function enrollMission({ missionId, userId }) {
-  console.log("ENROLL MISSION FUNCTION: ", { missionId, userId });
   const { data } = await axios.post(`/user-mission/enroll`, {
     missionId,
     userId,
   });
-  console.log("ENROLLED MISSION FUNCTION: ", data);
   return data;
 }
 
-export function useEnrollMission() {
+export function useEnrollMission({ onSuccessCallback } = {}) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: enrollMission,
@@ -217,7 +208,10 @@ export const useSubmitReferral = ({ onSuccess } = {}) => {
 export function useCreateMission() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: createMission,
+    mutationFn: async function createMission(payload) {
+      const { data } = await axios.post("/admin/missions", payload);
+      return data;
+    },
     onSuccess: () => {
       toast.success("สร้างภารกิจใหม่สำเร็จ!");
       queryClient.invalidateQueries({ queryKey: ["adminMissions"] });

@@ -65,3 +65,26 @@ export function useClearNotifications() {
     },
   });
 }
+
+/**
+ * A hook for deleting a single notification.
+ */
+export function useDeleteNotification() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ notificationId }) => {
+      const { data } = await axios.delete(`/notification/${notificationId}`);
+      return data;
+    },
+    onSuccess: async (data, variables) => {
+      toast.success("ลบการแจ้งเตือนสำเร็จ!");
+      // Invalidate to refetch the notification list
+      await queryClient.invalidateQueries({
+        queryKey: ["notification"],
+      });
+    },
+    onError: () => {
+      toast.error("ไม่สามารถลบการแจ้งเตือนได้");
+    },
+  });
+}

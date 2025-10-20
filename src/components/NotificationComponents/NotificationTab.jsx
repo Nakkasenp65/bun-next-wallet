@@ -7,6 +7,7 @@ import { FiGift } from "react-icons/fi";
 export default function NotificationTab({
   notifications,
   onNotificationClick,
+  onNotificationDelete,
 }) {
   if (!notifications || notifications.length === 0) {
     return (
@@ -32,6 +33,7 @@ export default function NotificationTab({
               key={notification.id}
               notification={notification} // Pass the whole notification object
               onClick={() => onNotificationClick(notification)}
+              onDelete={() => onNotificationDelete(notification)}
             />
           );
         }
@@ -45,6 +47,7 @@ export default function NotificationTab({
               promo={notification}
               displayIcon={displayIcon}
               onClick={() => onNotificationClick(notification)}
+              onDelete={() => onNotificationDelete(notification)}
             />
           );
         }

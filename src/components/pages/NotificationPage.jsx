@@ -7,6 +7,7 @@ import NotificationTab from "../NotificationComponents/NotificationTab";
 import {
   useMarkNotificationAsRead,
   useClearNotifications,
+  useDeleteNotification,
 } from "@/hooks/useNotification";
 import ConfirmationModal from "../NotificationComponents/ConfirmationModal";
 
@@ -19,8 +20,11 @@ export default function NotificationPage({
 }) {
   const [activeTab, setActiveTab] = useState("transactions");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null); // null or notification object
+
   const clearNotificationsMutation = useClearNotifications();
   const markAsReadMutation = useMarkNotificationAsRead();
+  const deleteNotificationMutation = useDeleteNotification();
 
   const handleNotificationClick = (notification) => {
     if (!notification.isRead && userId) {
@@ -28,24 +32,45 @@ export default function NotificationPage({
     }
   };
 
+  const handleNotificationDelete = (notification) => {
+    setDeleteTarget(notification);
+    setIsModalOpen(true);
+  };
+
   const handleClearClick = () => {
     if (filteredNotifications.length > 0) {
+      setDeleteTarget("clearAll");
       setIsModalOpen(true);
     }
   };
 
-  const onConfirmClear = () => {
-    if (filteredNotifications.length > 0 && userId) {
-      const typesToClear =
-        activeTab === "transactions" ? ["WALLET"] : ["SYSTEM", "REWARD"];
-      clearNotificationsMutation.mutate(
-        {
-          types: typesToClear,
-          userId,
-        },
+  const onConfirmAction = () => {
+    if (deleteTarget === "clearAll") {
+      // Clear all notifications in the current tab
+      if (filteredNotifications.length > 0 && userId) {
+        const typesToClear =
+          activeTab === "transactions" ? ["WALLET"] : ["SYSTEM", "REWARD"];
+        clearNotificationsMutation.mutate(
+          {
+            types: typesToClear,
+            userId,
+          },
+          {
+            onSuccess: () => {
+              setIsModalOpen(false);
+              setDeleteTarget(null);
+            },
+          },
+        );
+      }
+    } else if (deleteTarget && deleteTarget.id) {
+      // Delete individual notification
+      deleteNotificationMutation.mutate(
+        { notificationId: deleteTarget.id },
         {
           onSuccess: () => {
             setIsModalOpen(false);
+            setDeleteTarget(null);
           },
         },
       );
@@ -69,9 +94,28 @@ export default function NotificationPage({
     return null; // Render nothing while loading initial data
   }
 
-  const modalMessage = `คุณแน่ใจหรือไม่ว่าต้องการล้างการแจ้งเตือนในแท็บ "${
-    activeTab === "transactions" ? "ธุรกรรม" : "โปรโมชั่น"
-  }" ทั้งหมด?`;
+  // Dynamic modal messages
+  const getModalContent = () => {
+    if (deleteTarget === "clearAll") {
+      return {
+        title: "ยืนยันการล้างข้อมูล",
+        message: `คุณแน่ใจหรือไม่ว่าต้องการล้างการแจ้งเตือนในแท็บ "${
+          activeTab === "transactions" ? "ธุรกรรม" : "โปรโมชั่น"
+        }" ทั้งหมด?`,
+      };
+    } else if (deleteTarget) {
+      return {
+        title: "ยืนยันการลบ",
+        message: `คุณต้องการลบการแจ้งเตือน "${deleteTarget.title}" หรือไม่?`,
+      };
+    }
+    return { title: "", message: "" };
+  };
+
+  const modalContent = getModalContent();
+  const isConfirming =
+    clearNotificationsMutation.isPending ||
+    deleteNotificationMutation.isPending;
 
   return (
     // --- Using FramerDiv as the main animated container ---
@@ -135,10 +179,7 @@ export default function NotificationPage({
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={handleClearClick}
-              disabled={
-                filteredNotifications.length === 0 ||
-                clearNotificationsMutation.isPending
-              }
+              disabled={filteredNotifications.length === 0 || isConfirming}
               className="ml-4 flex-shrink-0 rounded-full p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
               aria-label="Clear notifications"
             >
@@ -149,17 +190,21 @@ export default function NotificationPage({
             <NotificationTab
               notifications={filteredNotifications}
               onNotificationClick={handleNotificationClick}
+              onNotificationDelete={handleNotificationDelete}
             />
           </div>
         </div>
       </FramerDiv>
       <ConfirmationModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onConfirm={onConfirmClear}
-        isConfirming={clearNotificationsMutation.isPending}
-        title="ยืนยันการล้างข้อมูล"
-        message={modalMessage}
+        onClose={() => {
+          setIsModalOpen(false);
+          setDeleteTarget(null);
+        }}
+        onConfirm={onConfirmAction}
+        isConfirming={isConfirming}
+        title={modalContent.title}
+        message={modalContent.message}
       />
     </>
   );
