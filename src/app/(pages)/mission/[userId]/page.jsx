@@ -104,12 +104,19 @@ export default function Page() {
   const [activeTab, setActiveTab] = useState("myMissions");
   const [myMissionStatusFilter, setMyMissionStatusFilter] = useState("ALL");
   const [myMissionTypeFilter, setMyMissionTypeFilter] = useState("ALL");
-  const [availableMissionTypeFilter, setAvailableMissionTypeFilter] = useState("ALL");
+  const [availableMissionTypeFilter, setAvailableMissionTypeFilter] =
+    useState("ALL");
 
-  const { data: userData, isLoading: isUserLoading } = useGetUser(params.userId);
+  const { data: userData, isLoading: isUserLoading } = useGetUser(
+    params.userId,
+  );
   const userId = userData?.id;
 
-  const { data: myMissions, isLoading: myMissionsLoading } = useGetMyMissions(userId);
+  // Use 'all' filter to get all missions including history on the dedicated mission page
+  const { data: myMissions, isLoading: myMissionsLoading } = useGetMyMissions(
+    userId,
+    "all",
+  );
   const { data: availableMissions, isLoading: availableMissionsLoading } =
     useGetAvailableMissions(userId);
 
@@ -121,8 +128,10 @@ export default function Page() {
     return myMissions
       .filter((m) => {
         if (myMissionStatusFilter === "ALL") return true;
-        if (myMissionStatusFilter === "AWAITING_CLAIM") return m.status === "AWAITING_CLAIM";
-        if (myMissionStatusFilter === "COMPLETED") return m.status === "CLAIMED";
+        if (myMissionStatusFilter === "AWAITING_CLAIM")
+          return m.status === "AWAITING_CLAIM";
+        if (myMissionStatusFilter === "COMPLETED")
+          return m.status === "CLAIMED";
         if (myMissionStatusFilter === "EXPIRED")
           return m.status === "EXPIRED" || m.status === "CLAIM_EXPIRED";
         return true;
@@ -136,7 +145,9 @@ export default function Page() {
   const filteredAvailableMissions = useMemo(() => {
     if (!availableMissions) return [];
     if (availableMissionTypeFilter === "ALL") return availableMissions;
-    return availableMissions.filter((m) => m?.type === availableMissionTypeFilter);
+    return availableMissions.filter(
+      (m) => m?.type === availableMissionTypeFilter,
+    );
   }, [availableMissions, availableMissionTypeFilter]);
 
   const counts = useMemo(
@@ -147,7 +158,8 @@ export default function Page() {
     [myMissions, availableMissions],
   );
 
-  const isLoading = isUserLoading || myMissionsLoading || availableMissionsLoading;
+  const isLoading =
+    isUserLoading || myMissionsLoading || availableMissionsLoading;
 
   const handleEnrollClick = (missionId) => {
     if (!userId) return;

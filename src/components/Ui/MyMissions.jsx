@@ -3,14 +3,18 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Compass } from "lucide-react"; // --- Replaced FaArrowRightLong with Lucide for consistency
+import { ArrowRight, Compass } from "lucide-react";
 import MyMissionCard from "../MissionComponents/MyMissionCard";
 import MissionSlider from "./MissionsSlider";
 import Image from "next/image";
 
-export default function MyMissions({ missions, line_user_id, userId, onDoMission, onClaim }) {
-  // --- The Re-Woven "Empty State" ---
-  // This section is now an "invitation card" instead of a simple text block.
+export default function MyMissions({
+  missions,
+  line_user_id,
+  userId,
+  onDoMission,
+  onClaim,
+}) {
   if (!missions || missions.length === 0) {
     return (
       <Link href={`/mission/${line_user_id}`} className="w-full">
@@ -33,8 +37,12 @@ export default function MyMissions({ missions, line_user_id, userId, onDoMission
             />
           </div>
           <div className="flex flex-col">
-            <h3 className="font-bold text-slate-800">ยังไม่มีภารกิจที่กำลังทำ</h3>
-            <p className="text-sm text-slate-500">สำรวจภารกิจใหม่ๆ เพื่อรับรางวัลพิเศษ!</p>
+            <h3 className="font-bold text-slate-800">
+              ยังไม่มีภารกิจที่กำลังทำ
+            </h3>
+            <p className="text-sm text-slate-500">
+              สำรวจภารกิจใหม่ๆ เพื่อรับรางวัลพิเศษ!
+            </p>
           </div>
           {/* --- Clear Call-to-Action --- */}
           <div className="text-primary-pink mt-2 flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-semibold shadow-sm">

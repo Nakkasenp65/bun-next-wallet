@@ -7,11 +7,6 @@ const fetchAvailableMissions = async (userId) => {
   return data;
 };
 
-const fetchMyMissions = async (userId) => {
-  const { data } = await axios.get(`/user-mission/${userId}`);
-  return data;
-};
-
 async function deleteMission(missionId) {
   const { data } = await axios.delete(`/admin/missions/${missionId}`);
   return data;
@@ -138,10 +133,14 @@ export const useGetAvailableMissions = (userId) => {
   });
 };
 
-export const useGetMyMissions = (userId) => {
+export const useGetMyMissions = (userId, filter) => {
   return useQuery({
-    queryKey: ["myMissions", userId],
-    queryFn: () => fetchMyMissions(userId),
+    queryKey: ["myMissions", userId, filter],
+    queryFn: async () => {
+      const params = filter ? { filter } : {};
+      const { data } = await axios.get(`/user-mission/${userId}`, { params });
+      return data;
+    },
     enabled: !!userId,
     staleTime: 15 * 1000,
   });
