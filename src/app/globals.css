@@ -390,6 +390,16 @@ body::-webkit-scrollbar {
   display: none;
 }
 
+/* Hide scrollbar for filter containers */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
 .nav-icon {
   text-shadow: var(--effect-neon-pink);
 }

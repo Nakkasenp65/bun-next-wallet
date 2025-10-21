@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { ChevronLeft, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
-import FramerDiv from "../framerComponents/FramerDiv"; // --- Restoring your custom component ---
+import FramerDiv from "../framerComponents/FramerDiv";
 import NotificationTab from "../NotificationComponents/NotificationTab";
 import {
   useMarkNotificationAsRead,

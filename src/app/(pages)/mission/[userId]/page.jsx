@@ -1,9 +1,9 @@
 "use client";
-import React, { useMemo, useState, useRef, useCallback } from "react";
+import React, { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import clsx from "clsx";
-import { ChevronLeft, Filter, Sparkles } from "lucide-react";
+import { ChevronLeft, Sparkles } from "lucide-react";
 
 import {
   useGetAvailableMissions,
@@ -16,72 +16,12 @@ import { useGetUser } from "@/hooks/useUser";
 import MyMissionCard from "@/components/MissionComponents/MyMissionCard";
 import AvailableMissionCard from "@/components/ui/AvailableMissionCard";
 import MissionGridSkeleton from "@/components/SkeletonComponents/MissionGridSkeleton";
-
-/* =========================================================
-   Filter configs
-========================================================= */
-const STATUS_FILTERS = [
-  { key: "ALL", label: "ทั้งหมด" },
-  { key: "AWAITING_CLAIM", label: "รอรับรางวัล" },
-  { key: "COMPLETED", label: "สำเร็จแล้ว" },
-  { key: "EXPIRED", label: "หมดอายุ" },
-];
-
-const TYPE_FILTERS = [
-  { key: "ALL", label: "ทุกประเภท" },
-  { key: "ONBOARDING", label: "ภารกิจต้อนรับ" },
-  { key: "ACCUMULATION", label: "ภารกิจสะสม" },
-  { key: "STREAK", label: "ภารกิจต่อเนื่อง" },
-  { key: "REFERRAL", label: "ภารกิจชวนเพื่อน" },
-];
+import FilterRow from "./components/FilterRow";
+import TabBtn from "./components/TabBtn";
 
 /* =========================================================
    UI Atoms
 ========================================================= */
-const TabBtn = ({ active, onClick, children, count }) => (
-  <button
-    onClick={onClick}
-    className={clsx(
-      "group relative flex-1 py-3 text-center font-bold transition-all",
-      // --- FIXED COLOR LOGIC ---
-      active ? "text-primary-pink" : "text-bg-dark hover:opacity-80",
-    )}
-  >
-    <span className="inline-flex items-center justify-center gap-2">
-      {children}
-      {typeof count === "number" && (
-        <span
-          className={clsx(
-            "rounded-full px-2.5 py-0.5 text-xs font-semibold",
-            active ? "bg-pink-100 text-pink-600" : "bg-gray-200 text-gray-700",
-          )}
-        >
-          {count}
-        </span>
-      )}
-    </span>
-    <span
-      className={clsx(
-        "absolute inset-x-6 -bottom-0.5 h-0.5 rounded-full transition-all",
-        active ? "bg-primary-pink" : "bg-transparent",
-      )}
-    />
-  </button>
-);
-
-const Chip = ({ active, onClick, children }) => (
-  <button
-    onClick={onClick}
-    className={clsx(
-      "w-max flex-shrink-0 rounded-full px-4 py-1.5 text-xs font-medium text-nowrap transition-colors",
-      active
-        ? "bg-pink-500 text-white shadow-md shadow-pink-500/20"
-        : "bg-gray-200 text-gray-700 hover:bg-gray-300",
-    )}
-  >
-    {children}
-  </button>
-);
 
 const EmptyState = ({ title, subtitle, action }) => (
   <div className="flex flex-col items-center justify-center gap-3 rounded-2xl bg-white p-10 text-center shadow-sm">
@@ -97,7 +37,7 @@ const EmptyState = ({ title, subtitle, action }) => (
 /* =========================================================
    Main Page
 ========================================================= */
-export default function Page() {
+export default function MissionPage() {
   const params = useParams();
   const router = useRouter();
 
@@ -107,17 +47,11 @@ export default function Page() {
   const [availableMissionTypeFilter, setAvailableMissionTypeFilter] =
     useState("ALL");
 
-  // Refs to preserve scroll position
-  const statusScrollRef = useRef(null);
-  const typeScrollRef = useRef(null);
-  const availableTypeScrollRef = useRef(null);
-
   const { data: userData, isLoading: isUserLoading } = useGetUser(
     params.userId,
   );
   const userId = userData?.id;
 
-  // Use 'all' filter to get all missions including history on the dedicated mission page
   const { data: myMissions, isLoading: myMissionsLoading } = useGetMyMissions(
     userId,
     "all",
@@ -127,38 +61,6 @@ export default function Page() {
 
   const { mutate: enroll, isPending: isEnrolling } = useEnrollMission();
   const { mutate: claim, isPending: isClaiming } = useClaimMission();
-
-  // Handler functions that preserve scroll position
-  const handleStatusFilterChange = useCallback((newStatus) => {
-    const scrollPos = statusScrollRef.current?.scrollLeft || 0;
-    setMyMissionStatusFilter(newStatus);
-    // Restore scroll position after state update
-    requestAnimationFrame(() => {
-      if (statusScrollRef.current) {
-        statusScrollRef.current.scrollLeft = scrollPos;
-      }
-    });
-  }, []);
-
-  const handleTypeFilterChange = useCallback((newType) => {
-    const scrollPos = typeScrollRef.current?.scrollLeft || 0;
-    setMyMissionTypeFilter(newType);
-    requestAnimationFrame(() => {
-      if (typeScrollRef.current) {
-        typeScrollRef.current.scrollLeft = scrollPos;
-      }
-    });
-  }, []);
-
-  const handleAvailableTypeFilterChange = useCallback((newType) => {
-    const scrollPos = availableTypeScrollRef.current?.scrollLeft || 0;
-    setAvailableMissionTypeFilter(newType);
-    requestAnimationFrame(() => {
-      if (availableTypeScrollRef.current) {
-        availableTypeScrollRef.current.scrollLeft = scrollPos;
-      }
-    });
-  }, []);
 
   const filteredMyMissions = useMemo(() => {
     if (!myMissions) return [];
@@ -208,70 +110,6 @@ export default function Page() {
     setMyMissionTypeFilter("ALL");
     setAvailableMissionTypeFilter("ALL");
   };
-
-  const FilterRow = ({ forTab }) => (
-    <div className="sticky top-[116px] z-10 border-b border-slate-200/60 bg-white/80 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      {forTab === "my" ? (
-        <>
-          <div
-            ref={statusScrollRef}
-            className="scrollbar-hide flex items-center gap-2 overflow-x-auto py-1"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            <span className="inline-flex flex-shrink-0 items-center gap-1.5 text-xs font-semibold text-slate-600">
-              <Filter className="h-4 w-4" /> สถานะ
-            </span>
-            {STATUS_FILTERS.map(({ key, label }) => (
-              <Chip
-                key={key}
-                active={myMissionStatusFilter === key}
-                onClick={() => handleStatusFilterChange(key)}
-              >
-                {label}
-              </Chip>
-            ))}
-          </div>
-          <div
-            ref={typeScrollRef}
-            className="scrollbar-hide mt-2 flex items-center gap-2 overflow-x-auto py-1"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            <span className="ml-1 inline-flex flex-shrink-0 items-center gap-1.5 text-xs font-semibold text-slate-600">
-              ประเภท
-            </span>
-            {TYPE_FILTERS.map(({ key, label }) => (
-              <Chip
-                key={key}
-                active={myMissionTypeFilter === key}
-                onClick={() => handleTypeFilterChange(key)}
-              >
-                {label}
-              </Chip>
-            ))}
-          </div>
-        </>
-      ) : (
-        <div
-          ref={availableTypeScrollRef}
-          className="scrollbar-hide flex items-center gap-2 overflow-x-auto py-1"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          <span className="inline-flex flex-shrink-0 items-center gap-1.5 text-xs font-semibold text-slate-600">
-            <Filter className="h-4 w-4" /> ประเภท
-          </span>
-          {TYPE_FILTERS.map(({ key, label }) => (
-            <Chip
-              key={key}
-              active={availableMissionTypeFilter === key}
-              onClick={() => handleAvailableTypeFilterChange(key)}
-            >
-              {label}
-            </Chip>
-          ))}
-        </div>
-      )}
-    </div>
-  );
 
   const renderMy = () => {
     if (isLoading)
@@ -383,11 +221,18 @@ export default function Page() {
             ภารกิจใหม่
           </TabBtn>
         </div>
+        <FilterRow
+          forTab={activeTab === "myMissions" ? "my" : "available"}
+          myMissionStatusFilter={myMissionStatusFilter}
+          setMyMissionStatusFilter={setMyMissionStatusFilter}
+          myMissionTypeFilter={myMissionTypeFilter}
+          setMyMissionTypeFilter={setMyMissionTypeFilter}
+          availableMissionTypeFilter={availableMissionTypeFilter}
+          setAvailableMissionTypeFilter={setAvailableMissionTypeFilter}
+        />
       </header>
 
-      <FilterRow forTab={activeTab === "myMissions" ? "my" : "available"} />
-
-      <main className="flex-grow px-4">
+      <main className="flex-grow px-4 py-4 pb-24">
         {activeTab === "myMissions" ? renderMy() : renderAvailable()}
       </main>
     </div>

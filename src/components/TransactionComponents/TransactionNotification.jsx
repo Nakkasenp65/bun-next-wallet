@@ -16,18 +16,14 @@ export default function TransactionNotification({
   onDelete,
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [swipeX, setSwipeX] = useState(0);
 
   // This function now correctly handles the click event
   const handleItemClick = () => {
-    // Only handle read/expand if not swiped
-    if (swipeX === 0) {
-      // Always call the mark as read function on any click
-      onClick();
-      // Only toggle expansion if there are details to show
-      if (notification.transaction) {
-        setIsExpanded(!isExpanded);
-      }
+    // Always call the mark as read function on any click
+    onClick();
+    // Only toggle expansion if there are details to show
+    if (notification.transaction) {
+      setIsExpanded(!isExpanded);
     }
   };
 
@@ -62,25 +58,8 @@ export default function TransactionNotification({
 
   return (
     <li className="relative overflow-hidden rounded-lg">
-      {/* Delete Button Background (Revealed on Swipe) */}
-      <div className="absolute inset-y-0 right-0 flex w-20 items-center justify-center bg-red-500">
-        <Trash2 className="h-5 w-5 text-white" />
-      </div>
-
-      {/* Swipeable Content */}
-      <motion.div
-        drag="x"
-        dragConstraints={{ left: -80, right: 0 }}
-        dragElastic={0.1}
-        onDragEnd={(e, { offset }) => {
-          if (offset.x < -40) {
-            setSwipeX(-80);
-          } else {
-            setSwipeX(0);
-          }
-        }}
-        animate={{ x: swipeX }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      {/* Content (no drag-to-delete) */}
+      <div
         onClick={handleItemClick}
         className={clsx(
           "relative cursor-pointer rounded-lg p-3 transition-colors",
@@ -192,7 +171,7 @@ export default function TransactionNotification({
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </div>
     </li>
   );
 }
