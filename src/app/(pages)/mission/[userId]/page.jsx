@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import clsx from "clsx";
@@ -73,7 +73,7 @@ const Chip = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
     className={clsx(
-      "w-max rounded-full px-4 py-1.5 text-xs font-medium text-nowrap transition-colors",
+      "w-max flex-shrink-0 rounded-full px-4 py-1.5 text-xs font-medium text-nowrap transition-colors",
       active
         ? "bg-pink-500 text-white shadow-md shadow-pink-500/20"
         : "bg-gray-200 text-gray-700 hover:bg-gray-300",
@@ -107,6 +107,11 @@ export default function Page() {
   const [availableMissionTypeFilter, setAvailableMissionTypeFilter] =
     useState("ALL");
 
+  // Refs to preserve scroll position
+  const statusScrollRef = useRef(null);
+  const typeScrollRef = useRef(null);
+  const availableTypeScrollRef = useRef(null);
+
   const { data: userData, isLoading: isUserLoading } = useGetUser(
     params.userId,
   );
@@ -122,6 +127,38 @@ export default function Page() {
 
   const { mutate: enroll, isPending: isEnrolling } = useEnrollMission();
   const { mutate: claim, isPending: isClaiming } = useClaimMission();
+
+  // Handler functions that preserve scroll position
+  const handleStatusFilterChange = useCallback((newStatus) => {
+    const scrollPos = statusScrollRef.current?.scrollLeft || 0;
+    setMyMissionStatusFilter(newStatus);
+    // Restore scroll position after state update
+    requestAnimationFrame(() => {
+      if (statusScrollRef.current) {
+        statusScrollRef.current.scrollLeft = scrollPos;
+      }
+    });
+  }, []);
+
+  const handleTypeFilterChange = useCallback((newType) => {
+    const scrollPos = typeScrollRef.current?.scrollLeft || 0;
+    setMyMissionTypeFilter(newType);
+    requestAnimationFrame(() => {
+      if (typeScrollRef.current) {
+        typeScrollRef.current.scrollLeft = scrollPos;
+      }
+    });
+  }, []);
+
+  const handleAvailableTypeFilterChange = useCallback((newType) => {
+    const scrollPos = availableTypeScrollRef.current?.scrollLeft || 0;
+    setAvailableMissionTypeFilter(newType);
+    requestAnimationFrame(() => {
+      if (availableTypeScrollRef.current) {
+        availableTypeScrollRef.current.scrollLeft = scrollPos;
+      }
+    });
+  }, []);
 
   const filteredMyMissions = useMemo(() => {
     if (!myMissions) return [];
@@ -176,7 +213,11 @@ export default function Page() {
     <div className="sticky top-[116px] z-10 border-b border-slate-200/60 bg-white/80 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       {forTab === "my" ? (
         <>
-          <div className="flex items-center gap-2 overflow-x-auto py-1">
+          <div
+            ref={statusScrollRef}
+            className="scrollbar-hide flex items-center gap-2 overflow-x-auto py-1"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
             <span className="inline-flex flex-shrink-0 items-center gap-1.5 text-xs font-semibold text-slate-600">
               <Filter className="h-4 w-4" /> สถานะ
             </span>
@@ -184,13 +225,17 @@ export default function Page() {
               <Chip
                 key={key}
                 active={myMissionStatusFilter === key}
-                onClick={() => setMyMissionStatusFilter(key)}
+                onClick={() => handleStatusFilterChange(key)}
               >
                 {label}
               </Chip>
             ))}
           </div>
-          <div className="mt-2 flex items-center gap-2 overflow-x-auto py-1">
+          <div
+            ref={typeScrollRef}
+            className="scrollbar-hide mt-2 flex items-center gap-2 overflow-x-auto py-1"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
             <span className="ml-1 inline-flex flex-shrink-0 items-center gap-1.5 text-xs font-semibold text-slate-600">
               ประเภท
             </span>
@@ -198,7 +243,7 @@ export default function Page() {
               <Chip
                 key={key}
                 active={myMissionTypeFilter === key}
-                onClick={() => setMyMissionTypeFilter(key)}
+                onClick={() => handleTypeFilterChange(key)}
               >
                 {label}
               </Chip>
@@ -206,7 +251,11 @@ export default function Page() {
           </div>
         </>
       ) : (
-        <div className="flex items-center gap-2 overflow-x-auto py-1">
+        <div
+          ref={availableTypeScrollRef}
+          className="scrollbar-hide flex items-center gap-2 overflow-x-auto py-1"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
           <span className="inline-flex flex-shrink-0 items-center gap-1.5 text-xs font-semibold text-slate-600">
             <Filter className="h-4 w-4" /> ประเภท
           </span>
@@ -214,7 +263,7 @@ export default function Page() {
             <Chip
               key={key}
               active={availableMissionTypeFilter === key}
-              onClick={() => setAvailableMissionTypeFilter(key)}
+              onClick={() => handleAvailableTypeFilterChange(key)}
             >
               {label}
             </Chip>
