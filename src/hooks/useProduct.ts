@@ -1,37 +1,53 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "../lib/axios";
 
-export const useGetProducts = (mode, minPrice, maxPrice) => {
+export type Product = {
+  id: string;
+  brand: string;
+  model: string;
+  capacity: string;
+  color: string;
+  downPaymentAmount: number;
+  imageUrl: string;
+  uniqueId: string;
+};
+
+export const useGetProducts = (
+  mode: "affordable" | "upgrade" | "all",
+  minPrice: number,
+  maxPrice: number,
+) => {
   return useQuery({
     queryKey: ["products", mode, minPrice, maxPrice],
     queryFn: async () => {
       console.log(mode, minPrice, maxPrice);
-      const { data } = await axios.get("/product", {
+      const { data } = await axios.get<Product[]>("/product", {
         params: {
           mode,
           minPrice,
           maxPrice,
         },
       });
+
       return data;
     },
-    staleTime: 60 * 1000 * 60,
+    staleTime: "static",
   });
 };
 
-export const useGetWelcomeProduct = (maxPrice) => {
+export const useGetWelcomeProduct = (maxPrice: number) => {
   return useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      const topPerBrand = false;
-      const { data } = await axios.get("/product", {
+      const { data } = await axios.get<Product[]>("/product", {
         params: {
           max: maxPrice,
         },
       });
+
       return data;
     },
-    staleTime: 60 * 1000 * 60,
+    staleTime: "static",
     enabled: !!maxPrice,
   });
 };

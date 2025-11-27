@@ -4,11 +4,23 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
-export default function Loading({ message }) {
-  const [particles, setParticles] = useState([]);
+// --- Types ---
+interface Particle {
+  x: number;
+  y: number;
+}
+
+interface LoadingProps {
+  message?: string;
+}
+
+export default function Loading({ message }: LoadingProps) {
+  // Explicitly type the state as an array of Particle objects
+  const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
-    // Initialize particles only on client side
+    // Initialize particles only on client side to avoid hydration mismatch
+    // (window is not defined on the server)
     setParticles(
       [...Array(6)].map(() => ({
         x: Math.random() * window.innerWidth,
@@ -16,6 +28,7 @@ export default function Loading({ message }) {
       })),
     );
   }, []);
+
   return (
     <div className="gradient-bg relative flex h-dvh w-full flex-col items-center justify-center gap-8 overflow-hidden px-6">
       {/* Animated background elements */}
@@ -31,7 +44,7 @@ export default function Loading({ message }) {
         }}
       >
         <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-purple-500 blur-3xl" />
-        <div className="absolute right-1/4 bottom-1/4 rounded-full bg-pink-500 blur-3xl" />
+        <div className="absolute right-1/4 bottom-1/4 h-64 w-64 rounded-full bg-pink-500 blur-3xl" />
       </motion.div>
 
       {/* Main loading image with entrance animation */}

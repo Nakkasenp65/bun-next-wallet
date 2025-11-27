@@ -1,6 +1,11 @@
 import Image from "next/image";
 
-export default function Realme({ className, ...props }) {
+interface RealmeProps {
+  className?: string;
+  [key: string]: any;
+}
+
+export default function Realme({ className, ...props }: RealmeProps) {
   return (
     <div className={`${className}`} {...props}>
       <Image

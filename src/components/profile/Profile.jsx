@@ -14,7 +14,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { ChevronLeft, Copy, Share2, Phone, Briefcase, CalendarDays, Pencil } from "lucide-react";
+import {
+  ChevronLeft,
+  Copy,
+  Share2,
+  Phone,
+  Briefcase,
+  CalendarDays,
+  Pencil,
+} from "lucide-react";
 
 const OCCUPATION_OPTIONS = [
   { value: "นักศึกษา", label: "นักศึกษา" },
@@ -74,7 +82,8 @@ export default function Profile({ user }) {
   useEffect(() => {
     if (user) {
       const isCustomOccupation =
-        user.occupation && !OCCUPATION_OPTIONS.some((opt) => opt.value === user.occupation);
+        user.occupation &&
+        !OCCUPATION_OPTIONS.some((opt) => opt.value === user.occupation);
 
       setFormData({
         phone: user.phone || "",
@@ -110,9 +119,12 @@ export default function Profile({ user }) {
 
   const handleSave = () => {
     const { occupation, customOccupation, ...restOfData } = formData;
-    const finalOccupation = occupation === "อื่นๆ" ? customOccupation : occupation;
+    const finalOccupation =
+      occupation === "อื่นๆ" ? customOccupation : occupation;
     const payload = { ...restOfData, occupation: finalOccupation };
-    const cleanedPayload = Object.fromEntries(Object.entries(payload).filter(([_, v]) => v));
+    const cleanedPayload = Object.fromEntries(
+      Object.entries(payload).filter(([_, v]) => v),
+    );
 
     updateUser({ line_user_id: user.line_user_id, updateData: cleanedPayload });
   };
@@ -125,7 +137,11 @@ export default function Profile({ user }) {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100 },
+    },
   };
 
   if (!user) {
@@ -142,7 +158,9 @@ export default function Profile({ user }) {
         >
           <ChevronLeft size={24} />
         </motion.button>
-        <h1 className="flex-grow text-center text-xl font-bold text-slate-800">โปรไฟล์ของฉัน</h1>
+        <h1 className="flex-grow text-center text-xl font-bold text-slate-800">
+          โปรไฟล์ของฉัน
+        </h1>
         <div className="w-10" />
       </header>
 
@@ -164,7 +182,9 @@ export default function Profile({ user }) {
             className="rounded-full"
           />
           <div>
-            <p className="text-lg font-bold text-slate-800">{user.line_display_name}</p>
+            <p className="text-lg font-bold text-slate-800">
+              {user.line_display_name}
+            </p>
             <p className="text-xs text-slate-500">
               เป็นสมาชิกเมื่อ: {formatJoinDate(user.createdAt)}
             </p>
@@ -208,7 +228,10 @@ export default function Profile({ user }) {
             </FormField>
 
             <FormField icon={Briefcase} label="อาชีพ">
-              <Select value={formData.occupation} onValueChange={handleOccupationChange}>
+              <Select
+                value={formData.occupation}
+                onValueChange={handleOccupationChange}
+              >
                 <SelectTrigger className="w-full rounded-xl border-2 border-slate-200 p-6 text-base font-semibold text-slate-800 focus:ring-2 focus:ring-pink-400">
                   <SelectValue placeholder="เลือกอาชีพของคุณ" />
                 </SelectTrigger>
@@ -249,7 +272,9 @@ export default function Profile({ user }) {
             <FormField icon={CalendarDays} label="ช่วงอายุ">
               <Select
                 value={formData.ageRange}
-                onValueChange={(value) => setFormData((p) => ({ ...p, ageRange: value }))}
+                onValueChange={(value) =>
+                  setFormData((p) => ({ ...p, ageRange: value }))
+                }
               >
                 <SelectTrigger className="w-full rounded-xl border-2 border-slate-200 p-6 text-base font-semibold text-slate-800 focus:ring-2 focus:ring-pink-400">
                   <SelectValue placeholder="เลือกช่วงอายุของคุณ" />

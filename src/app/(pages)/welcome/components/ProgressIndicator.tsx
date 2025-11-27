@@ -1,6 +1,14 @@
 import { motion } from "framer-motion";
 
-export default function ProgressIndicator({ totalSteps, currentStep }) {
+interface ProgressIndicatorProps {
+  totalSteps: number;
+  currentStep: number;
+}
+
+export default function ProgressIndicator({
+  totalSteps,
+  currentStep,
+}: ProgressIndicatorProps) {
   return (
     <div className="flex w-full justify-center gap-2">
       {Array.from({ length: totalSteps }).map((_, index) => (

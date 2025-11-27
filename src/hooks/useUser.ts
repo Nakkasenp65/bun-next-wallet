@@ -1,37 +1,65 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import externalLinkAxios from "axios";
+import externalLinkAxios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-/**
- * ดึงข้อมูลผู้ใช้ทั้งหมดแบบแบ่งหน้าสำหรับ Admin
- * @param {object} filters - ตัวกรอง เช่น page, pageSize, search, role
- */
-async function fetchAdminUsers(filters) {
-  // เราจะส่ง object filters เข้าไปใน `params` ของ axios
-  // axios จะแปลงเป็น query string ให้เอง (เช่น /api/users?page=1&pageSize=10)
-  const { data } = await axios.get("/admin/users", { params: filters });
-  return data; // คาดว่า backend จะ trả về { data, paging }
+// --- Interfaces ---
+
+interface AdminUserFilters {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  role?: string;
+  [key: string]: any;
 }
 
-async function updateAdminUser({ userId, payload }) {
-  // Endpoint นี้คุณต้องสร้างขึ้นมาเพื่อเรียก service ข้างบน
+interface UpdateAdminUserParams {
+  userId: string;
+  payload: Record<string, any>;
+}
+
+interface UpdateGoalDTO {
+  userId: string;
+  [key: string]: any;
+}
+
+interface UpdateUserParams {
+  line_user_id: string;
+  updateData: Record<string, any>;
+}
+
+interface UnlockAppData {
+  line_user_id: string;
+  pin: string;
+}
+
+// --- Fetcher Functions ---
+
+/**
+ * ดึงข้อมูลผู้ใช้ทั้งหมดแบบแบ่งหน้าสำหรับ Admin
+ */
+async function fetchAdminUsers(filters: AdminUserFilters) {
+  // axios params will serialize the object to query string
+  const { data } = await axios.get("/admin/users", { params: filters });
+  return data;
+}
+
+async function updateAdminUser({ userId, payload }: UpdateAdminUserParams) {
   const { data } = await axios.patch(`/admin/users/${userId}`, payload);
   return data;
 }
 
+// --- Hooks ---
+
 /**
  * Hook สำหรับดึงข้อมูลผู้ใช้ทั้งหมดสำหรับหน้า Admin Table
- * @param {object} filters - State ของตัวกรองจากหน้า Page
  */
-export function useGetAdminUsers(filters) {
+export function useGetAdminUsers(filters: AdminUserFilters) {
   return useQuery({
-    // queryKey ต้องขึ้นอยู่กับ filters เพื่อให้ re-fetch อัตโนมัติเมื่อ filter เปลี่ยน
     queryKey: ["adminUsers", filters],
     queryFn: () => fetchAdminUsers(filters),
-    // keepPreviousData ช่วยให้ UX ดีขึ้นตอนเปลี่ยนหน้า (ข้อมูลเก่าจะยังแสดงอยู่จนกว่าข้อมูลใหม่จะโหลดเสร็จ)
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // keepPreviousData is deprecated in v5, replaced by placeholderData logic, or use keepPreviousData if on v4
   });
 }
 
@@ -41,48 +69,48 @@ export function useUpdateAdminUser() {
     mutationFn: updateAdminUser,
     onSuccess: (updatedUser, variables) => {
       toast.success("อัปเดตข้อมูลผู้ใช้สำเร็จ!");
-      // 1. Invalidate list เพื่อให้ Table โหลดใหม่
+      // 1. Invalidate list
       queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
-      // 2. (สำคัญ) Invalidate user detail เพื่อให้ข้อมูลใน Modal สดใหม่หากเปิดอีกครั้ง
+      // 2. Invalidate user detail
       queryClient.invalidateQueries({
         queryKey: ["adminUserDetail", variables.userId],
       });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการอัปเดต");
     },
   });
 }
 
-export function useGetUserById(line_user_id) {
+export function useGetUserById(line_user_id: string | undefined) {
   return useQuery({
     queryKey: ["adminUserDetail", line_user_id],
     queryFn: async () => {
+      if (!line_user_id) return null;
       const { data } = await axios.get(`/admin/users/${line_user_id}`);
       return data;
     },
-    // Query นี้จะทำงานก็ต่อเมื่อมี userId เท่านั้น (เช่น เมื่อ Modal เปิด)
     enabled: !!line_user_id,
   });
 }
 
-export function useUserStatus(lineUserId) {
+export function useUserStatus(lineUserId: string | undefined) {
   return useQuery({
     queryKey: ["userStatus", lineUserId],
     queryFn: async () => {
-      {
-        const { data } = await axios.get(`/user/status/${lineUserId}`);
-        return data;
-      }
+      if (!lineUserId) return null;
+      const { data } = await axios.get(`/user/status/${lineUserId}`);
+      return data;
     },
     enabled: !!lineUserId,
   });
 }
 
-export function useGetUser(lineUserId) {
+export function useGetUser(lineUserId: string | undefined) {
   return useQuery({
     queryKey: ["user", lineUserId],
     queryFn: async () => {
+      if (!lineUserId) return null;
       const { data } = await axios.get(`/user/${lineUserId}`);
       return data;
     },
@@ -91,10 +119,11 @@ export function useGetUser(lineUserId) {
   });
 }
 
-export function useLockStatus(lineUserId) {
+export function useLockStatus(lineUserId: string | undefined) {
   return useQuery({
     queryKey: ["lockStatus", lineUserId],
     queryFn: async () => {
+      if (!lineUserId) return null;
       const { data } = await axios.get(`/user/lock/${lineUserId}`);
       console.log("CHECK LOCK DATA: ", data);
       return data;
@@ -104,19 +133,22 @@ export function useLockStatus(lineUserId) {
   });
 }
 
-export function useCheckOkMobileUser(line_user_id) {
+export function useCheckOkMobileUser(line_user_id: string | undefined) {
   const router = useRouter();
   return useQuery({
     queryKey: ["isOkMobileUser", line_user_id],
     queryFn: async () => {
+      if (!line_user_id) return null;
       try {
         const { data } = await externalLinkAxios.get(
           `https://checkuserdb.vercel.app/api/check-user/${line_user_id}`,
         );
         return data;
-      } catch (error) {
-        if (error.status === 404)
+      } catch (error: any) {
+        // Check for 404 status
+        if (error.response?.status === 404 || error.status === 404) {
           router.replace("https://liff.line.me/2006703040-RYAyYAyA");
+        }
         return null;
       }
     },
@@ -124,10 +156,11 @@ export function useCheckOkMobileUser(line_user_id) {
   });
 }
 
-export function useMainServerUser(line_user_id) {
+export function useMainServerUser(line_user_id: string | undefined) {
   return useQuery({
     queryKey: ["mainServerUser", line_user_id],
     queryFn: async () => {
+      if (!line_user_id) return null;
       const mainUserApiUrl = process.env.NEXT_PUBLIC_MAIN_USER_API;
       try {
         if (!mainUserApiUrl) throw new Error("mainUserApiUrl is not defined");
@@ -144,11 +177,28 @@ export function useMainServerUser(line_user_id) {
   });
 }
 
+export type CreateGoalPayload = {
+  line_user_id: string;
+  line_display_name: string;
+  line_profile_url: string;
+  email: string;
+  mobileId: string;
+  planId: string;
+  fullname: string;
+  phone: string;
+  pin: string;
+  chat_url: string;
+  referToCode: string;
+  occupation: string;
+  ageRange: string;
+  monthlyPayment: string;
+};
+
 export function useCreateGoal() {
   const queryClient = useQueryClient();
   const router = useRouter();
   return useMutation({
-    mutationFn: async (goalData) => {
+    mutationFn: async (goalData: CreateGoalPayload) => {
       const { data } = await axios.post(`/user`, goalData);
       return data;
     },
@@ -157,14 +207,17 @@ export function useCreateGoal() {
       setTimeout(() => {
         console.log("wait for 1 second");
       }, 500);
-      await queryClient.invalidateQueries(["users", data.line_user_id]);
-      // await queryClient.setQueryData(["user", data.line_user_id], data);
+      await queryClient.invalidateQueries({
+        queryKey: ["users", data.line_user_id],
+      });
+
+      // Update cache manually if needed
       await queryClient.setQueryData(["userStatus", data.line_user_id], {
         isNewUser: false,
       });
       router.push("/");
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       console.error("Error creating goal:", error);
       const errorMessage =
         error.response?.data?.message || "สร้างเป้าหมายการออมเงินไม่สำเร็จ";
@@ -176,24 +229,26 @@ export function useCreateGoal() {
 export function useUpdateGoal() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (goalData) => {
-      // You will need to create this backend endpoint: PATCH /v1/goal/:userId
-      // It will update the user's goal with the new productId and planId.
+    mutationFn: async (goalData: UpdateGoalDTO) => {
       const { userId, ...payload } = goalData;
       const { data } = await axios.patch(`/goal/${userId}`, payload);
       return data;
     },
     onSuccess: (data, variables) => {
       toast.success("เปลี่ยนเป้าหมายสำเร็จ!");
-      // Invalidate the user query to refetch all data, including the new goal.
       setTimeout(() => {
         console.log("wait for 0.5 second (race condition)");
       }, 500);
-      queryClient.invalidateQueries({
-        queryKey: ["goal", variables.line_user_id],
-      });
+
+      // Note: variables.line_user_id might not exist on UpdateGoalDTO based on how you call it,
+      // check if you need to pass it or if userId is actually the line_user_id
+      const queryKey = variables["line_user_id"]
+        ? ["goal", variables["line_user_id"]]
+        : ["goal", variables.userId];
+
+      queryClient.invalidateQueries({ queryKey });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(
         error.response?.data?.message || "ไม่สามารถเปลี่ยนเป้าหมายได้",
       );
@@ -206,18 +261,17 @@ export function useUpdateUser() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: async ({ line_user_id, updateData }) => {
+    mutationFn: async ({ line_user_id, updateData }: UpdateUserParams) => {
       console.log(line_user_id);
       const { data } = await axios.patch(`/user/${line_user_id}`, updateData);
       return data;
     },
     onSuccess: (data) => {
-      // 'data' คือ user object ที่อัปเดตแล้ว
       toast.success("บันทึกข้อมูลสำเร็จ!");
-      queryClient.invalidateQueries("user");
+      queryClient.invalidateQueries({ queryKey: ["user"] });
       router.back();
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(
         error.response?.data?.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
       );
@@ -229,17 +283,15 @@ export function useLockApp() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (lineUserId) => {
+    mutationFn: async (lineUserId: string) => {
       const { data } = await axios.post(`/user/lock/${lineUserId}`);
       return data;
     },
     onSuccess: (data, lineUserId) => {
       toast.success("แอปถูกล็อคแล้ว");
-      // Immediately update the UI to show the lock screen
-      // Invalidate the user status query to ensure the backend state is refetched
       queryClient.invalidateQueries({ queryKey: ["userStatus", lineUserId] });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(error.response?.data?.message || "ไม่สามารถล็อคแอปได้");
     },
   });
@@ -249,8 +301,7 @@ export function useUnlockApp() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (unlockData) => {
-      // unlockData will be { line_user_id, pin }
+    mutationFn: async (unlockData: UnlockAppData) => {
       const { data } = await axios.post(`/user/unlock`, unlockData);
       return data;
     },
@@ -260,7 +311,7 @@ export function useUnlockApp() {
         queryKey: ["userStatus", variables.line_user_id],
       });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(error.response?.data?.message || "รหัส PIN ไม่ถูกต้อง");
     },
   });
