@@ -3,6 +3,13 @@ import axios from "@/lib/axios";
 import externalLinkAxios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import {
+  CheckOkMobileUser,
+  MainServerUser,
+  UserData,
+  UserLockStatus,
+} from "@/types/user";
+import { CreateGoalPayload } from "../types/goal";
 
 // --- Interfaces ---
 
@@ -106,12 +113,13 @@ export function useUserStatus(lineUserId: string | undefined) {
   });
 }
 
+// ROUTE: /user/:lineUserId
 export function useGetUser(lineUserId: string | undefined) {
   return useQuery({
     queryKey: ["user", lineUserId],
     queryFn: async () => {
       if (!lineUserId) return null;
-      const { data } = await axios.get(`/user/${lineUserId}`);
+      const { data } = await axios.get<UserData>(`/user/${lineUserId}`);
       return data;
     },
     enabled: !!lineUserId,
@@ -119,13 +127,15 @@ export function useGetUser(lineUserId: string | undefined) {
   });
 }
 
+// ROUTE: /user/lock/:lineUserId
 export function useLockStatus(lineUserId: string | undefined) {
   return useQuery({
     queryKey: ["lockStatus", lineUserId],
     queryFn: async () => {
       if (!lineUserId) return null;
-      const { data } = await axios.get(`/user/lock/${lineUserId}`);
-      console.log("CHECK LOCK DATA: ", data);
+      const { data } = await axios.get<UserLockStatus>(
+        `/user/lock/${lineUserId}`,
+      );
       return data;
     },
     enabled: !!lineUserId,
@@ -140,7 +150,7 @@ export function useCheckOkMobileUser(line_user_id: string | undefined) {
     queryFn: async () => {
       if (!line_user_id) return null;
       try {
-        const { data } = await externalLinkAxios.get(
+        const { data } = await externalLinkAxios.get<CheckOkMobileUser>(
           `https://checkuserdb.vercel.app/api/check-user/${line_user_id}`,
         );
         return data;
@@ -164,7 +174,7 @@ export function useMainServerUser(line_user_id: string | undefined) {
       const mainUserApiUrl = process.env.NEXT_PUBLIC_MAIN_USER_API;
       try {
         if (!mainUserApiUrl) throw new Error("mainUserApiUrl is not defined");
-        const { data } = await externalLinkAxios.get(
+        const { data } = await externalLinkAxios.get<MainServerUser>(
           `${mainUserApiUrl}${line_user_id}`,
         );
         return data;
@@ -176,23 +186,6 @@ export function useMainServerUser(line_user_id: string | undefined) {
     enabled: !!line_user_id,
   });
 }
-
-export type CreateGoalPayload = {
-  line_user_id: string;
-  line_display_name: string;
-  line_profile_url: string;
-  email: string;
-  mobileId: string;
-  planId: string;
-  fullname: string;
-  phone: string;
-  pin: string;
-  chat_url: string;
-  referToCode: string;
-  occupation: string;
-  ageRange: string;
-  monthlyPayment: string;
-};
 
 export function useCreateGoal() {
   const queryClient = useQueryClient();

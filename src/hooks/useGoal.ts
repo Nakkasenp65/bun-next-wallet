@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
+import { Goal } from "@/types/prisma";
 
-export function useGetGoal(line_user_id) {
+export function useGetGoal(line_user_id: string | undefined) {
   return useQuery({
     queryKey: ["goal", line_user_id],
     queryFn: async () => {
-      const { data } = await axios.get(`/goal/${line_user_id}`);
+      const { data } = await axios.get<Goal>(`/goal/${line_user_id}`);
       console.log("goal data : \n", data);
       return data;
     },

@@ -5,14 +5,14 @@ import { useState, useEffect } from "react";
  * @param {number} num - ตัวเลข
  * @returns {string} - String ของตัวเลข (เช่น 7 -> "07")
  */
-const padZero = (num) => num.toString().padStart(2, "0");
+const padZero = (num: number): string => num.toString().padStart(2, "0");
 
 /**
  * Hook สำหรับนับเวลาถอยหลังไปยังวันเวลาที่กำหนด
  * @param {string | Date} expiryTimestamp - เวลาที่จะนับถอยหลังไปหา
  * @returns {{timeLeft: string, isCounting: boolean}} - Object ที่มีเวลาที่เหลือในรูปแบบ string และสถานะว่ากำลังนับหรือไม่
  */
-const useCountdown = (expiryTimestamp) => {
+const useCountdown = (expiryTimestamp: string | Date | null | undefined) => {
   const [timeLeft, setTimeLeft] = useState("");
   const [isCounting, setIsCounting] = useState(false);
 

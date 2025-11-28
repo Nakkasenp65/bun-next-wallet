@@ -1,28 +1,67 @@
 import axios from "@/lib/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { Mission, Transaction, Notification, Broadcast, Product } from "@/types/prisma";
+import { AxiosError } from "axios";
 
 // MISSION
 
-async function updateMission({ missionId, payload }) {
+interface UpdateMissionPayload {
+  missionId: string;
+  payload: Partial<Mission>;
+}
+
+interface MissionFilters {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  [key: string]: any;
+}
+
+interface ParticipantFilters {
+  page?: number;
+  pageSize?: number;
+  [key: string]: any;
+}
+
+export interface ApprovePayload {
+  status: "SUCCESS" | "REJECTED";
+  amount: number;
+  description: string;
+}
+
+export interface RejectPayload {
+  status: "REJECTED";
+  description: string;
+}
+
+export interface UpdatePayload {
+  from: string;
+  to: string;
+  description: string;
+  status: string;
+  type: string;
+  amount: string;
+}
+
+async function updateMission({ missionId, payload }: UpdateMissionPayload) {
   console.log("payload:", missionId);
   const { data } = await axios.patch(`/admin/missions/${missionId}`, payload);
   return data;
 }
 
-export function useGetAdminMissions(filters) {
+export function useGetAdminMissions(filters: MissionFilters) {
   return useQuery({
     queryKey: ["adminMissions", filters],
-    queryFn: async (filters) => {
+    queryFn: async () => {
       const { data } = await axios.get("/admin/missions", { params: filters });
       return data;
     },
-    keepPreviousData: true,
     staleTime: 1000 * 120,
   });
 }
 
-export function useAdminGetMissionDetails(missionId, participantFilters) {
+export function useAdminGetMissionDetails(missionId: string | undefined, participantFilters: ParticipantFilters) {
   return useQuery({
     // Query Key ต้องขึ้นอยู่กับทั้ง missionId และ filters ของผู้เข้าร่วม
     // เพื่อให้ re-fetch อัตโนมัติเมื่อมีการเปลี่ยนหน้าของผู้เข้าร่วม
@@ -42,7 +81,7 @@ export function useAdminGetMissionDetails(missionId, participantFilters) {
 export function useUpdateAdminMission() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ payload }) => {
+    mutationFn: async ({ payload }: { payload: Partial<Mission> }) => {
       const { data } = await axios.patch(`/admin/missions`, payload);
       return data;
     },
@@ -50,25 +89,31 @@ export function useUpdateAdminMission() {
       toast.success("บันทึกการเปลี่ยนแปลงสำเร็จ!");
       queryClient.invalidateQueries({ queryKey: ["adminMissions"] });
     },
-    onError: (err) =>
+    onError: (err: AxiosError<any>) =>
       toast.error(err.response?.data?.message || "อัปเดตภารกิจไม่สำเร็จ"),
   });
 }
 
 // TRANSACTION
 
-export function useGetAdminTransactions(filters) {
+interface TransactionFilters {
+  page?: number;
+  pageSize?: number;
+  status?: string;
+  [key: string]: any;
+}
+
+export function useGetAdminTransactions(filters: TransactionFilters) {
   return useQuery({
     // queryKey จะเปลี่ยนตาม filters เพื่อให้ React Query ดึงข้อมูลใหม่เมื่อ filter เปลี่ยน
     queryKey: ["adminTransactions", filters],
-    queryFn: async (filters) => {
+    queryFn: async () => {
       // แปลง object filters เป็น query string, เช่น { page: 1, status: 'PENDING' } -> '?page=1&status=PENDING'
-      const params = new URLSearchParams(filters).toString();
+      const params = new URLSearchParams(filters as any).toString();
       const { data } = await axios.get(`/admin/transactions?${params}`);
       return data;
     },
     staleTime: 1000 * 120,
-    keepPreviousData: true, // แสดงข้อมูลเก่าอยู่ขณะโหลดข้อมูลหน้าใหม่ (UX ที่ดีสำหรับ Pagination)
   });
 }
 
@@ -88,7 +133,7 @@ export function useDeleteTransaction() {
 
   return useMutation({
     // mutationFn จะรับ transactionId ที่ต้องการลบ
-    mutationFn: async (transactionId) => {
+    mutationFn: async (transactionId: string) => {
       const { data } = await axios.delete(
         `/admin/transactions/${transactionId}`,
       );
@@ -99,7 +144,7 @@ export function useDeleteTransaction() {
       // สำคัญมาก: ต้อง invalidate query เพื่อให้ UI อัปเดตและนำรายการที่ถูกลบออกไป
       queryClient.invalidateQueries({ queryKey: ["adminTransactions"] });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการลบ");
     },
   });
@@ -108,10 +153,10 @@ export function useDeleteTransaction() {
 export function useUpdateTransaction() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ transactionId, formData }) => {
+    mutationFn: async ({ transactionId, payload }: { transactionId: string; payload: UpdatePayload | ApprovePayload | RejectPayload }) => {
       const { data } = await axios.patch(
         `/admin/transactions/${transactionId}`,
-        formData,
+        payload,
       );
       return data;
     },
@@ -119,7 +164,7 @@ export function useUpdateTransaction() {
       toast.success("อัปเดตข้อมูลสำเร็จ!");
       queryClient.invalidateQueries({ queryKey: ["adminTransactions"] });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการอัปเดต");
     },
   });
@@ -127,7 +172,13 @@ export function useUpdateTransaction() {
 
 // NOTIFICATION
 
-export function useAdminGetSystemNotifications(filters) {
+interface NotificationFilters {
+  page?: number;
+  pageSize?: number;
+  [key: string]: any;
+}
+
+export function useAdminGetSystemNotifications(filters: NotificationFilters) {
   return useQuery({
     // queryKey ต้องขึ้นอยู่กับ filters เพื่อให้ re-fetch อัตโนมัติเมื่อ filter เปลี่ยน
     queryKey: ["adminSystemNotifications", filters],
@@ -139,15 +190,13 @@ export function useAdminGetSystemNotifications(filters) {
       });
       return data;
     },
-    // ช่วยให้ UX ดีขึ้นตอนเปลี่ยนหน้า (ข้อมูลเก่าจะยังแสดงอยู่จนกว่าข้อมูลใหม่จะโหลดเสร็จ)
-    keepPreviousData: true,
   });
 }
 
 export function useAdminCreateSystemNotification() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload) => {
+    mutationFn: async (payload: Partial<Notification>) => {
       // POST /admin/notifications พร้อมกับส่งข้อมูลใน body
       const { data } = await axios.post("/admin/notifications", payload);
       return data;
@@ -157,7 +206,7 @@ export function useAdminCreateSystemNotification() {
       // เมื่อสำเร็จ ให้ invalidate query ของ list เพื่อให้ table โหลดข้อมูลใหม่
       queryClient.invalidateQueries({ queryKey: ["adminSystemNotifications"] });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(
         error.response?.data?.message || "เกิดข้อผิดพลาดในการสร้างการแจ้งเตือน",
       );
@@ -169,7 +218,7 @@ export function useAdminEditNotification() {
   const queryClient = useQueryClient();
   return useMutation({
     // mutationFn จะได้รับ object ที่มีทั้ง notificationId และ payload
-    mutationFn: async ({ notificationId, payload }) => {
+    mutationFn: async ({ notificationId, payload }: { notificationId: string; payload: Partial<Notification> }) => {
       // PATCH /admin/notifications/:notificationId
       const { data } = await axios.patch(
         `/admin/notifications/${notificationId}`,
@@ -182,7 +231,7 @@ export function useAdminEditNotification() {
       // Invalidate query ของ list เพื่ออัปเดตข้อมูลในตาราง
       queryClient.invalidateQueries({ queryKey: ["adminSystemNotifications"] });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการแก้ไข");
     },
   });
@@ -192,7 +241,7 @@ export function useAdminDeleteNotification() {
   const queryClient = useQueryClient();
   return useMutation({
     // mutationFn จะได้รับ notificationId ที่ต้องการลบ
-    mutationFn: async (notificationId) => {
+    mutationFn: async (notificationId: string) => {
       // DELETE /admin/notifications/:notificationId
       const { data } = await axios.delete(
         `/admin/notifications/${notificationId}`,
@@ -204,14 +253,22 @@ export function useAdminDeleteNotification() {
       // Invalidate query ของ list เพื่อนำรายการที่ถูกลบออกจากตาราง
       queryClient.invalidateQueries({ queryKey: ["adminSystemNotifications"] });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการลบ");
     },
   });
 }
 
 // BROADCAST
-export function useAdminGetBroadcasts(filters) {
+
+interface BroadcastFilters {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  [key: string]: any;
+}
+
+export function useAdminGetBroadcasts(filters: BroadcastFilters) {
   return useQuery({
     queryKey: ["adminBroadcasts"],
     queryFn: async () => {
@@ -222,14 +279,13 @@ export function useAdminGetBroadcasts(filters) {
       return data;
     },
     staleTime: 1000 * 360,
-    keepPreviousData: true,
   });
 }
 
 export function useAdminCreateBroadcast() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload) => {
+    mutationFn: async (payload: Partial<Broadcast>) => {
       // POST /admin/broadcasts
       const { data } = await axios.post("/admin/broadcasts", payload);
       return data;
@@ -238,7 +294,7 @@ export function useAdminCreateBroadcast() {
       toast.success("สร้าง Broadcast ฉบับร่างสำเร็จ!");
       queryClient.invalidateQueries({ queryKey: ["adminBroadcasts"] });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการสร้าง");
     },
   });
@@ -247,7 +303,7 @@ export function useAdminCreateBroadcast() {
 export function useAdminUpdateBroadcast() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ broadcastId, payload }) => {
+    mutationFn: async ({ broadcastId, payload }: { broadcastId: string; payload: Partial<Broadcast> }) => {
       // PATCH /admin/broadcasts/:broadcastId
       const { data } = await axios.patch(
         `/admin/broadcasts/${broadcastId}`,
@@ -259,7 +315,7 @@ export function useAdminUpdateBroadcast() {
       toast.success("แก้ไข Broadcast สำเร็จ!");
       queryClient.invalidateQueries({ queryKey: ["adminBroadcasts"] });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการแก้ไข");
     },
   });
@@ -268,7 +324,7 @@ export function useAdminUpdateBroadcast() {
 export function useAdminDeleteBroadcast() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (broadcastId) => {
+    mutationFn: async (broadcastId: string) => {
       // DELETE /admin/broadcasts/:broadcastId
       await axios.delete(`/admin/broadcasts/${broadcastId}`);
     },
@@ -276,7 +332,7 @@ export function useAdminDeleteBroadcast() {
       toast.success("ลบ Broadcast สำเร็จ!");
       queryClient.invalidateQueries({ queryKey: ["adminBroadcasts"] });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการลบ");
     },
   });
@@ -285,7 +341,7 @@ export function useAdminDeleteBroadcast() {
 export function useAdminSendBroadcast() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (broadcastId) => {
+    mutationFn: async (broadcastId: string) => {
       // POST /admin/broadcasts/:broadcastId/send
       const { data } = await axios.post(
         `/admin/broadcasts/${broadcastId}/send`,
@@ -297,7 +353,7 @@ export function useAdminSendBroadcast() {
       toast.success(data.message || "ส่ง Broadcast สำเร็จ!");
       queryClient.invalidateQueries({ queryKey: ["adminBroadcasts"] });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการส่ง");
     },
   });
@@ -307,7 +363,16 @@ export function useAdminSendBroadcast() {
  * Hook สำหรับดึงข้อมูล Products ทั้งหมดแบบแบ่งหน้าสำหรับ Admin
  * @param {object} filters - State ของตัวกรองจากหน้า Page (page, pageSize, search, brand, sort)
  */
-export function useAdminGetProducts(filters) {
+interface ProductFilters {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  brand?: string;
+  sort?: string;
+  [key: string]: any;
+}
+
+export function useAdminGetProducts(filters: ProductFilters) {
   return useQuery({
     // queryKey ต้องขึ้นอยู่กับ filters เพื่อให้ re-fetch อัตโนมัติเมื่อ filter เปลี่ยน
     queryKey: ["adminProducts", filters],
@@ -316,14 +381,13 @@ export function useAdminGetProducts(filters) {
       const { data } = await axios.get("/admin/products", { params: filters });
       return data; // คาดว่าจะได้ { data, paging }
     },
-    keepPreviousData: true,
   });
 }
 
 export function useAdminCreateProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload) => {
+    mutationFn: async (payload: Partial<Product>) => {
       // POST /admin/products
       const { data } = await axios.post("/admin/products", payload);
       return data;
@@ -333,7 +397,7 @@ export function useAdminCreateProduct() {
       // เมื่อสำเร็จ, invalidate query ของ list เพื่อให้ table โหลดข้อมูลใหม่
       queryClient.invalidateQueries({ queryKey: ["adminProducts"] });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(
         error.response?.data?.message || "เกิดข้อผิดพลาดในการสร้างสินค้า",
       );
@@ -344,7 +408,7 @@ export function useAdminCreateProduct() {
 export function useAdminEditProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ productId, payload }) => {
+    mutationFn: async ({ productId, payload }: { productId: string; payload: Partial<Product> }) => {
       // PATCH /admin/products/:productId
       const { data } = await axios.patch(
         `/admin/products/${productId}`,
@@ -356,7 +420,7 @@ export function useAdminEditProduct() {
       toast.success("แก้ไขข้อมูลสินค้าสำเร็จ!");
       queryClient.invalidateQueries({ queryKey: ["adminProducts"] });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการแก้ไข");
     },
   });
@@ -365,7 +429,7 @@ export function useAdminEditProduct() {
 export function useAdminDeleteProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (productId) => {
+    mutationFn: async (productId: string) => {
       // DELETE /admin/products/:productId
       await axios.delete(`/admin/products/${productId}`);
     },
@@ -373,7 +437,7 @@ export function useAdminDeleteProduct() {
       toast.success("ลบสินค้าสำเร็จ!");
       queryClient.invalidateQueries({ queryKey: ["adminProducts"] });
     },
-    onError: (error) => {
+    onError: (error: AxiosError<any>) => {
       toast.error(
         error.response?.data?.message || "เกิดข้อผิดพลาดในการลบสินค้า",
       );

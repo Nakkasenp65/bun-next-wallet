@@ -1,50 +1,113 @@
 "use client";
-import React, { createContext, useState, useEffect, useContext } from "react";
-import liff from "@line/liff";
+
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  ReactNode,
+} from "react";
+import liff from "@line/liff"; // Ensure you have @line/liff installed
 import Loading from "@/components/StatusComponents/Loading";
 import toast from "react-hot-toast";
 
-const LiffContext = createContext({
+// --- Types ---
+
+export interface LiffProfile {
+  userId: string;
+  displayName: string;
+  pictureUrl?: string;
+  statusMessage?: string;
+}
+
+export interface DecodedIdToken {
+  iss?: string;
+  sub?: string;
+  aud?: string;
+  exp?: number;
+  iat?: number;
+  amr?: string[];
+  name?: string;
+  picture?: string;
+  email?: string;
+  [key: string]: any;
+}
+
+export interface LiffActions {
+  closeWindow: () => void;
+  openWindow: (url: string, external?: boolean) => void;
+  text: (message: string) => Promise<{ status: string; error?: string }>;
+  shareTargetPicker: (
+    walletUniqueId: string,
+    phoneNumber: string,
+  ) => Promise<void>;
+}
+
+export interface LiffContextProps {
+  liffProfile: LiffProfile | null;
+  isLoggedIn: boolean;
+  isLoading: boolean;
+  lineAccessToken: string;
+  liff: typeof liff | null;
+  actions: LiffActions;
+  liffDecodedIdToken: DecodedIdToken | null;
+}
+
+// Default Context Value
+const LiffContext = createContext<LiffContextProps>({
   liffProfile: null,
   isLoggedIn: false,
   isLoading: true,
   lineAccessToken: "",
   liff: null,
-  actions: {},
+  actions: {
+    closeWindow: () => {},
+    openWindow: () => {},
+    text: async () => ({ status: "error", error: "Not initialized" }),
+    shareTargetPicker: async () => {},
+  },
   liffDecodedIdToken: null,
 });
 
-const liffenvId = process.env.NEXT_PUBLIC_LIFF_ID;
+const liffenvId = process.env.NEXT_PUBLIC_LIFF_ID || "";
 const server = process.env.NEXT_PUBLIC_SERVER_OPTION; // "dev" | "prod" etc.
 
-export function LiffProvider({ children }) {
-  const [liffProfile, setLiffProfile] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [lineAccessToken, setLineAccessToken] = useState("");
-  const [liffReady, setLiffReady] = useState(false);
-  const [liffDecodedIdToken, setLiffDecodedIdToken] = useState(null);
+export function LiffProvider({ children }: { children: ReactNode }) {
+  const [liffProfile, setLiffProfile] = useState<LiffProfile | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [lineAccessToken, setLineAccessToken] = useState<string>("");
+  const [liffReady, setLiffReady] = useState<boolean>(false);
+  const [liffDecodedIdToken, setLiffDecodedIdToken] =
+    useState<DecodedIdToken | null>(null);
+
+  // Helper to check if running in LINE Client
+  const inClient = () => {
+    // If liff is not ready or not loaded, we are likely not in client or in dev
+    if (!liffReady && server === "dev") return false;
+    try {
+      return liff.isInClient();
+    } catch {
+      return false;
+    }
+  };
 
   useEffect(() => {
-    const longProfile = {
+    const longProfile: LiffProfile = {
       userId: "U006fb519ba07650932c6981af95d0620",
       displayName: "Long👁️‍🗨️",
       pictureUrl:
         "https://profile.line-scdn.net/0hPsTql5LvD1x5CB7EtsVxYglYDDZaeVZOVjxHahgOUGhMPU9ZVDxIORwJAj5BOhxZAWxBakoIV21bTUB3DWgHYz9BU24mUxsKPhhEezdwJwJNQTdDFRZGXRB2BRAsbhxKUDFHXDVTUDIMbD5jU2oBcTpMFWpFQCxrN19jCnw6Yd8WCngJVG9GOE4BU2_M",
     };
-    const thirdProfile = {
-      userId: "U87dc3cebcbaecb31cf42e2efd55af2cc",
-      displayName: "PINTO🍊",
-      pictureUrl:
-        "https://profile.line-scdn.net/0h33pF1d5RbBxdP30rE1ASYy1vb3Z-TjUOJV4kfWloNihoD35KIVklcmA9YHkwXysZJlogf2xqZShRLBt6Q2mQKFoPMS1hCSlIeFsg8g",
-    };
-    const testProfile = {
+
+    const testProfile: LiffProfile = {
       userId: "U669f6092308023f227aa435c803b2e74",
       displayName: "Zzz59🧚🏻♀️🌈",
       pictureUrl:
         "https://lh3.googleusercontent.com/d/1eXgDln7TvPQGiMpzaUdo7l2hKmsh8Kvc",
     };
-    const mockDecodedTokenId = {
+
+    const mockDecodedTokenId: DecodedIdToken = {
       iss: "https://access.line.me",
       sub: "U006fb519ba07650932c6981af95d0620",
       aud: "2007338329",
@@ -57,12 +120,13 @@ export function LiffProvider({ children }) {
       email: "nakkasenwunthar@gmail.com",
     };
 
-    const lineAccessTokenDev = process.env.NEXT_PUBLIC_ACCESS_TOKEN;
+    const lineAccessTokenDev = process.env.NEXT_PUBLIC_ACCESS_TOKEN || "";
+
     const init = async () => {
       if (server === "dev") {
         // Dev mode: mock login/profile, mark as ready
         setIsLoggedIn(true);
-        setLiffProfile(longProfile); // or longProfile
+        setLiffProfile(longProfile);
         setLineAccessToken(lineAccessTokenDev);
         setLiffDecodedIdToken(mockDecodedTokenId);
         setLiffReady(true); // no real LIFF in dev
@@ -78,8 +142,10 @@ export function LiffProvider({ children }) {
           setIsLoggedIn(true);
           const decodedIdToken = liff.getDecodedIDToken();
           const profile = await liff.getProfile();
+
           setLiffProfile(profile);
           setLiffDecodedIdToken(decodedIdToken);
+
           const accessToken = liff.getAccessToken();
           console.log("Access token liff provider: ", accessToken);
           setLineAccessToken(accessToken || "");
@@ -89,6 +155,8 @@ export function LiffProvider({ children }) {
         }
       } catch (e) {
         console.error("[LIFF init error]", e);
+        // Even on error, we stop loading to prevent infinite spinner
+        setIsLoading(false);
       }
     };
 
@@ -96,12 +164,11 @@ export function LiffProvider({ children }) {
   }, []);
 
   // Safe wrappers so components can call without worrying about environment
-  const actions = {
+  const actions: LiffActions = {
     closeWindow: () => {
       try {
         if (server === "dev") {
           console.warn("[LIFF] closeWindow noop in dev");
-          // As a dev fallback, just navigate away or no-op.
           return;
         }
         if (inClient()) {
@@ -114,7 +181,7 @@ export function LiffProvider({ children }) {
         console.error("[LIFF closeWindow error]", e);
       }
     },
-    openWindow: (url, external = false) => {
+    openWindow: (url: string, external: boolean = false) => {
       try {
         if (server === "dev") {
           window.open(url, "_blank");
@@ -125,7 +192,7 @@ export function LiffProvider({ children }) {
         console.error("[LIFF openWindow error]", e);
       }
     },
-    text: async (message) => {
+    text: async (message: string) => {
       try {
         if (server === "dev") {
           console.warn("[LIFF] text noop in dev:", message);
@@ -143,19 +210,19 @@ export function LiffProvider({ children }) {
         }
         await liff.sendMessages([{ type: "text", text: message }]);
         return { status: "sent" };
-      } catch (e) {
+      } catch (e: any) {
         console.error("[LIFF text error]", e);
         return { status: "error", error: e?.message };
       }
     },
-    shareTargetPicker: async (walletUniqueId, phoneNumber) => {
+    shareTargetPicker: async (walletUniqueId: string, phoneNumber: string) => {
       if (server === "dev") {
         console.warn("[LIFF DEV] Simulating shareTargetPicker with payload:", {
           walletUniqueId,
           phoneNumber,
         });
         toast.success("แชร์ (จำลอง) สำเร็จ!");
-        return; // จบการทำงานในโหมด dev
+        return;
       }
 
       if (!liffReady || !liff.isLoggedIn()) {
@@ -166,7 +233,10 @@ export function LiffProvider({ children }) {
         return;
       }
 
-      const flexMessagePayload = {
+      // Note: This matches the structure of a Flex Bubble Container.
+      // To send it, it usually needs to be wrapped in a Flex Message,
+      // but shareTargetPicker is flexible. We treat it as 'any' to satisfy TS.
+      const flexMessagePayload: any = {
         type: "bubble",
         hero: {
           type: "image",
@@ -246,9 +316,20 @@ export function LiffProvider({ children }) {
       };
 
       try {
-        const result = await liff.shareTargetPicker(flexMessagePayload, {
+        // Technically, shareTargetPicker expects Message[], but it also accepts Flex Container objects in some versions/implementations.
+        // We wrap it in an array to be safe and compatible with standard Message[] type.
+        // However, since flexMessagePayload is a 'bubble' (Container), and not a 'flex' (Message),
+        // we construct the valid Flex Message wrapper here:
+        const messageToSend = {
+          type: "flex",
+          altText: "ข้อมูล Wallet ของฉัน",
+          contents: flexMessagePayload,
+        };
+
+        const result = await liff.shareTargetPicker([messageToSend as any], {
           isMultiple: true,
         });
+
         if (result) {
           console.log(
             `[LIFF_SUCCESS] Message sent with status:`,
@@ -257,10 +338,8 @@ export function LiffProvider({ children }) {
           toast.success("แชร์ข้อความสำเร็จ!");
         } else {
           console.log("[LIFF_INFO] TargetPicker was closed by the user.");
-          // ไม่จำเป็นต้องแจ้งเตือนผู้ใช้ในกรณีนี้
         }
-      } catch (error) {
-        // [CRITICAL FIX] บันทึก "error object" ทั้งหมดและแจ้งเตือนผู้ใช้
+      } catch (error: any) {
         console.error("[LIFF_FATAL_ERROR] shareTargetPicker failed:", error);
         toast.error(`การแชร์ล้มเหลว: ${error.message}`);
       }

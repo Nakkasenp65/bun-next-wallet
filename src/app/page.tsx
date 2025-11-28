@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 // PROVIDERS AND HOOKS
-import { useLiff } from "@/components/provider/LiffProvider";
+import { LiffProfile, useLiff } from "@/components/provider/LiffProvider";
 import { useGetUser, useUserStatus } from "@/hooks/useUser";
 
 // UI & PAGE COMPONENTS
@@ -21,8 +21,13 @@ import { useGetAvailableMissions, useGetMyMissions } from "../hooks/useMission";
 
 export default function HomePage() {
   const router = useRouter();
-  const { liffProfile, isLoggedIn } = useLiff();
-  const [gateStatus, setGateStatus] = useState("CHECKING"); // CHECKING | REDIRECTING | LOCKED | ALLOWED
+  const {
+    liffProfile,
+    isLoggedIn,
+  }: { liffProfile: LiffProfile | null; isLoggedIn: boolean } = useLiff();
+  const [gateStatus, setGateStatus] = useState<
+    "CHECKING" | "REDIRECTING" | "LOCKED" | "ALLOWED" | "ERROR"
+  >("CHECKING"); // CHECKING | REDIRECTING | LOCKED | ALLOWED
   const {
     data: userStatus,
     isLoading: isStatusLoading,

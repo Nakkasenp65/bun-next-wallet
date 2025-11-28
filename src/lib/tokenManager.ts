@@ -1,6 +1,6 @@
-let accessToken = null;
+let accessToken: string | null = null;
 
-export const setAuthToken = (token) => {
+export const setAuthToken = (token: string) => {
   console.log("Token Manager: New token set.");
   accessToken = token;
 };

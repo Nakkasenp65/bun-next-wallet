@@ -8,10 +8,7 @@ const nextConfig = {
       },
     ],
   },
-  allowedDevOrigins: [
-    "https://rnhbf-58-136-254-209.a.free.pinggy.link",
-    "*.local-origin.dev",
-  ],
+
   reactStrictMode: false,
 };
 

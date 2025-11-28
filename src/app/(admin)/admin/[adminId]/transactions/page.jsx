@@ -181,11 +181,8 @@ export default function AdminTransactionsPage() {
   const router = useRouter();
 
   const { data: apiResponse, isLoading, isError, error } = useGetAdminTransactions(filters);
-
   const { mutate: deleteTransaction, isLoading: isDeleting } = useDeleteTransaction();
-
   const { mutate: updateTransaction, isLoading: isProcessing } = useUpdateTransaction();
-
   const { mutate: createTransaction, isLoading: isCreating } = useCreateTransaction();
 
   const transactions = apiResponse?.data || [];

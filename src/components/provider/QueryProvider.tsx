@@ -24,7 +24,6 @@ export default function QueryProvider({ children }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-
       {/* 1. เพิ่ม Devtools สำหรับช่วยดีบักในตอน Development */}
       {/* เครื่องมือนี้จะไม่ถูกรวมเข้าไปใน Production build โดยอัตโนมัติ */}
       <ReactQueryDevtools initialIsOpen={false} />

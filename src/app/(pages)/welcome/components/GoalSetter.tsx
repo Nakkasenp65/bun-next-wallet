@@ -245,6 +245,7 @@ export default function GoalSetter({
 
   const savingPlans = useMemo(() => {
     if (!selectedProduct) return [];
+
     const plansConfig = [
       {
         id: "daily",
@@ -275,10 +276,12 @@ export default function GoalSetter({
         unit: "งวด",
       },
     ];
+
     return plansConfig.map((plan) => {
       const calculatedAmount = Math.ceil(
         selectedProduct.downPaymentAmount / plan.divisor,
       );
+
       return {
         ...plan,
         displayValue: calculatedAmount.toLocaleString("en-US"),
@@ -288,6 +291,7 @@ export default function GoalSetter({
 
   useEffect(() => {
     const planData = savingPlans.find((p) => p.id === selectedPlan);
+
     if (selectedProduct?.id && planData?.planId && onGoalChange) {
       const goal: GoalKey = {
         mobileId: selectedProduct.id,
@@ -310,6 +314,7 @@ export default function GoalSetter({
 
       <div className="rounded-xl bg-white">
         <h1 className="text-bg-dark mb-2 font-bold">เลือกประเภทสินค้า</h1>
+
         <GridSelectorComponent
           name="condition"
           value={selectedCondition}
@@ -335,6 +340,7 @@ export default function GoalSetter({
             <h1 className="text-bg-dark mt-5 mb-2 font-bold">
               เลือกแบรนด์ที่ต้องการดาวน์
             </h1>
+
             <GridSelectorComponent
               labelClassName="text-bg-dark mb-2 block font-bold"
               name="brand"
@@ -345,6 +351,7 @@ export default function GoalSetter({
               itemClassName="hover:bg-pink-50/50 shadow-sm"
               activeItemClassName="border-pink-500 bg-pink-50"
             />
+
             <div className="my-5 flex h-48 items-center justify-center">
               {selectedProduct.imageUrl ? (
                 <Image
@@ -368,6 +375,7 @@ export default function GoalSetter({
                 <h1 className="text-bg-dark mb-1 font-black">
                   เลือกรุ่นที่ต้องการดาวน์
                 </h1>
+
                 <Select value={selectedModel} onValueChange={handleModelChange}>
                   <SelectTrigger
                     className={cn(
@@ -378,6 +386,7 @@ export default function GoalSetter({
                   >
                     <SelectValue placeholder="เลือกรุ่น" />
                   </SelectTrigger>
+
                   <SelectContent className="max-h-[200px]">
                     {models.map((model) => (
                       <SelectItem
@@ -423,6 +432,7 @@ export default function GoalSetter({
               {colors.length > 1 && (
                 <div className="flex flex-col items-start justify-between gap-2">
                   <span className="font-medium text-slate-600">สี:</span>
+
                   <div className="flex flex-wrap gap-2">
                     {colors.map((color) => (
                       <button

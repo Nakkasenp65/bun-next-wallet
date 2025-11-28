@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import toast from "react-hot-toast";
+import { Notification } from "@/types/prisma";
 
-export function useNotification(userId) {
+export function useNotification(userId: string | undefined) {
   return useQuery({
     queryKey: ["notification", userId],
     queryFn: async () => {
-      const { data } = await axios.get(`/notification/${userId}`);
+      const { data } = await axios.get<{ data: Notification[] }>(`/notification/${userId}`);
       return data.data;
     },
     enabled: !!userId,
@@ -18,17 +19,22 @@ export function useNotification(userId) {
  * A hook for marking a single notification as read.
  * This version is designed to work when notifications are nested inside a 'user' query object.
  */
+interface MarkReadVariables {
+  userId: string;
+  notificationId: string;
+}
+
 export function useMarkNotificationAsRead() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ userId, notificationId }) => {
+    mutationFn: async ({ userId, notificationId }: MarkReadVariables) => {
       const { data } = await axios.patch(
         `/notification/${notificationId}/read`,
       );
       return data;
     },
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries(["notification", variables.userId]);
+      queryClient.invalidateQueries({ queryKey: ["notification", variables.userId] });
     },
     onError: () => {
       toast.error("Failed to mark as read.");
@@ -40,10 +46,15 @@ export function useMarkNotificationAsRead() {
  * A hook for clearing notifications.
  * This version invalidates the entire 'user' query to refetch all data.
  */
+interface ClearNotificationsVariables {
+  type?: string;
+  userId: string;
+}
+
 export function useClearNotifications() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ type, userId }) => {
+    mutationFn: async ({ type, userId }: ClearNotificationsVariables) => {
       // userId is not needed in the API call itself
       const { data } = await axios.delete(`/notification/clear/${userId}`, {
         params: {
@@ -69,10 +80,14 @@ export function useClearNotifications() {
 /**
  * A hook for deleting a single notification.
  */
+interface DeleteNotificationVariables {
+  notificationId: string;
+}
+
 export function useDeleteNotification() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ notificationId }) => {
+    mutationFn: async ({ notificationId }: DeleteNotificationVariables) => {
       const { data } = await axios.delete(`/notification/${notificationId}`);
       return data;
     },

@@ -1,4 +1,10 @@
-export const BANK_DATA = [
+export interface BankData {
+  name_th: string;
+  short_name_en: string;
+  logo_url: string;
+}
+
+export const BANK_DATA: BankData[] = [
   {
     name_th: "ธนาคารกรุงเทพ",
     short_name_en: "BBL",

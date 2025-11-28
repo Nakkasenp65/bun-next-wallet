@@ -12,6 +12,10 @@ import {
   UploadCloud,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { Transaction } from "@/types/prisma";
+import { ApprovePayload, RejectPayload, UpdatePayload } from "@/hooks/useAdmin";
+
+
 
 // --- Helper Components ---
 const InfoRow = ({ icon, label, value, valueClassName = "text-slate-800" }) => (
@@ -53,13 +57,27 @@ const EditableField = ({
   </div>
 );
 
+interface VerficationModalProps {
+  transaction: Transaction;
+  onClose: () => void;
+  onUpdate: (id: string, payload: UpdatePayload) => void;
+  isProcessing: boolean;
+}
+
 export default function VerificationModal({
   transaction,
   onClose,
   onUpdate,
   isProcessing,
 }) {
-  const [formState, setFormState] = useState({});
+  const [formState, setFormState] = useState<UpdatePayload>({
+    amount: transaction.amount ?? "", // ใช้ ?? เพื่อรองรับค่า 0
+    from: transaction.from || "",
+    to: transaction.to || "",
+    description: transaction.description || "",
+    status: transaction.status || "PENDING",
+    type: transaction.type || "INCOME",
+  });
   const [isEditing, setIsEditing] = useState(false);
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -115,30 +133,39 @@ export default function VerificationModal({
       toast.error("กรุณากรอกจำนวนเงินที่ถูกต้อง");
       return;
     }
-    const payload = {
+    const payload: ApprovePayload = {
       status: "SUCCESS",
       amount: amount,
       description: `รายการได้รับการอนุมัติยอดเงิน ${amount} บาทโดยผู้ดูแล`,
     };
     onUpdate(transaction.id, payload);
+    setIsEditing(false);
+    setSelectedFile(null);
+    setPreviewUrl(null);
   };
 
   const handleRejectClick = () => {
-    const payload = {
+    const payload: RejectPayload = {
       status: "REJECTED",
       description: "รายการถูกปฏิเสธโดยผู้ดูแลระบบ",
     };
     onUpdate(transaction.id, payload);
-  };
+    setIsEditing(false);
+    setSelectedFile(null);
+    setPreviewUrl(null);
+      };
 
   const handleUpdateClick = () => {
-    const payload = {
+
+    
+
+    const payload: UpdatePayload = {
       from: formState.from,
       to: formState.to,
       description: formState.description,
       status: formState.status,
       type: formState.type,
-      amount: Number(formState.amount) || 0,
+      amount: formState.amount,
     };
 
     const formData = new FormData();

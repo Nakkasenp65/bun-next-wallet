@@ -237,7 +237,7 @@ export default function Profile({ user }) {
                 </SelectTrigger>
                 <SelectContent>
                   {OCCUPATION_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
+                    <SelectItem className="h-12" key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
                   ))}
@@ -281,7 +281,7 @@ export default function Profile({ user }) {
                 </SelectTrigger>
                 <SelectContent>
                   {AGE_RANGE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
+                    <SelectItem className="h-12" key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
                   ))}
