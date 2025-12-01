@@ -12,6 +12,7 @@ export type UserData = {
   isLocked: string;
   createdAt: string;
   role: string;
+  guideShown: boolean;
   wallet: {
     id: string;
     walletUniqueId: string;

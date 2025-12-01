@@ -47,7 +47,7 @@ export function useMarkNotificationAsRead() {
  * This version invalidates the entire 'user' query to refetch all data.
  */
 interface ClearNotificationsVariables {
-  type?: string;
+  type?: string | string[];
   userId: string;
 }
 

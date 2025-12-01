@@ -14,18 +14,20 @@ export type Product = {
 
 export const useGetProducts = (
   mode: "affordable" | "upgrade" | "all",
-  minPrice: number,
-  maxPrice: number,
+  minPrice: number | null,
+  maxPrice: number | null,
+  sort: "asc" | "desc" = "asc",
 ) => {
   return useQuery({
-    queryKey: ["products", mode, minPrice, maxPrice],
+    queryKey: ["products", mode, minPrice, maxPrice, sort],
     queryFn: async () => {
-      console.log(mode, minPrice, maxPrice);
+      console.log(mode, minPrice, maxPrice, sort);
       const { data } = await axios.get<Product[]>("/product", {
         params: {
           mode,
           minPrice,
           maxPrice,
+          sort,
         },
       });
 

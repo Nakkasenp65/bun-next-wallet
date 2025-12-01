@@ -81,8 +81,8 @@ export function useAdminGetMissionDetails(missionId: string | undefined, partici
 export function useUpdateAdminMission() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ payload }: { payload: Partial<Mission> }) => {
-      const { data } = await axios.patch(`/admin/missions`, payload);
+    mutationFn: async ({ missionId, payload }: { missionId: string; payload: Partial<Mission> }) => {
+      const { data } = await axios.patch(`/admin/missions/${missionId}`, payload);
       return data;
     },
     onSuccess: () => {

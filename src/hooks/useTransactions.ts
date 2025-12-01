@@ -137,7 +137,7 @@ export function useSearchRecipient() {
   });
 }
 
-export function useWalletTransaction(year: number, month: number, walletId: string | undefined) {
+export function useWalletTransaction(year: number, month: number, walletId: string | undefined, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["transactions", year, month, walletId],
     queryFn: async () => {
@@ -146,7 +146,7 @@ export function useWalletTransaction(year: number, month: number, walletId: stri
       );
       return response.data;
     },
-    enabled: !!walletId,
+    enabled: options?.enabled !== undefined ? options.enabled : !!walletId,
     staleTime: 10 * 1000,
   });
 }
