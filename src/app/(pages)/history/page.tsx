@@ -1,15 +1,14 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import React, { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faChevronLeft,
-  faChevronRight,
-  faDownload,
-  faArrowUp,
-  faArrowDown,
-  faReceipt,
-} from "@fortawesome/free-solid-svg-icons";
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  ArrowUp,
+  ArrowDown,
+  Receipt,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useWalletTransaction } from "@/hooks/useTransactions";
 import Transaction from "@/components/TransactionComponents/Transaction";
@@ -69,9 +68,9 @@ export default function HistoryPage() {
   const currentTransactions = transactions?.slice(startIndex, endIndex) || [];
 
   // Calculate summary
-  // Calculate summary
   const summary = React.useMemo(() => {
-    if (!transactions) return { income: 0, expense: 0 };
+    if (!transactions || !userData?.wallet?.id)
+      return { income: 0, expense: 0 };
     return transactions.reduce(
       (acc: { income: number; expense: number }, t: any) => {
         const rawAmount = t.amount;
@@ -79,7 +78,21 @@ export default function HistoryPage() {
 
         if (isNaN(amount)) return acc;
 
-        if (amount > 0) {
+        // Logic based on TransactionType and Wallet ID
+        let isIncome = false;
+
+        if (t.type === "TRANSFER") {
+          if (t.toWalletId === userData.wallet.id) {
+            isIncome = true;
+          } else {
+            isIncome = false;
+          }
+        } else {
+          const standardIncomeTypes = ["INCOME", "REWARD", "DEPOSIT"];
+          isIncome = standardIncomeTypes.includes(t.type);
+        }
+
+        if (isIncome) {
           acc.income += amount;
         } else {
           acc.expense += Math.abs(amount);
@@ -88,7 +101,7 @@ export default function HistoryPage() {
       },
       { income: 0, expense: 0 },
     );
-  }, [transactions]);
+  }, [transactions, userData]);
 
   const handlePrevMonth = () => {
     setCurrentDate((prev) => {
@@ -145,7 +158,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col bg-white">
+    <div className="fixed inset-0 z-40 flex flex-col bg-bg-dark">
       <DownloadModal
         open={openModal}
         onClose={() => setOpenModal(false)}
@@ -157,39 +170,40 @@ export default function HistoryPage() {
       <motion.header
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="flex flex-shrink-0 items-center px-6 pt-12 pb-6"
+        className="flex flex-shrink-0 items-center px-4 pt-6 pb-4 bg-bg-dark"
       >
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <button
           onClick={() => router.push("/")}
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-700 shadow-sm transition-all hover:shadow-md"
+          className="z-10 rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100"
+          aria-label="Back"
         >
-          <FontAwesomeIcon icon={faChevronLeft} className="text-lg" />
-        </motion.button>
+          <ChevronLeft size={28} />
+        </button>
 
-        <h2 className="flex-grow bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-center text-xl font-bold text-transparent">
+        <motion.h2
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
+          className="flex-grow bg-gradient-to-r from-primary-pink to-primary-orange bg-clip-text text-center text-xl font-bold text-transparent"
+        >
           ประวัติธุรกรรม
-        </h2>
+        </motion.h2>
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <button
           onClick={() => setOpenModal(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md"
+          className="z-10 rounded-full p-2 text-primary-pink transition-colors hover:bg-slate-100"
         >
-          <FontAwesomeIcon icon={faDownload} className="text-sm" />
-        </motion.button>
+          <Download size={24} />
+        </button>
       </motion.header>
 
       {/* Content */}
-      <div className="flex flex-grow flex-col overflow-y-auto px-6 pb-6">
+      <div className="flex flex-grow flex-col overflow-y-auto px-6 py-8 bg-white rounded-t-[32px]">
         {/* Month Selector */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="mb-4 flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm"
+          className="mb-4 flex items-center justify-between rounded-2xl p-4 "
         >
           <motion.button
             whileHover={{ scale: 1.1 }}
@@ -197,7 +211,7 @@ export default function HistoryPage() {
             onClick={handlePrevMonth}
             className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200"
           >
-            <FontAwesomeIcon icon={faChevronLeft} />
+            <ChevronLeft size={20} />
           </motion.button>
 
           <div className="text-center">
@@ -214,11 +228,10 @@ export default function HistoryPage() {
             disabled={isCurrentMonth}
             className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-30"
           >
-            <FontAwesomeIcon icon={faChevronRight} />
+            <ChevronRight size={20} />
           </motion.button>
         </motion.div>
 
-        {/* Summary Cards */}
         {/* Summary Cards */}
         {transactionLoading ? (
           <div className="mb-4 grid grid-cols-2 gap-3">
@@ -236,7 +249,7 @@ export default function HistoryPage() {
             >
               <div className="rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 p-4 shadow-lg">
                 <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-                  <FontAwesomeIcon icon={faArrowDown} className="text-white" />
+                  <ArrowDown size={20} className="text-white" />
                 </div>
                 <p className="text-xs text-white/80">รายรับ</p>
                 <p className="text-xl font-bold text-white">
@@ -249,7 +262,7 @@ export default function HistoryPage() {
 
               <div className="rounded-2xl bg-gradient-to-br from-red-500 to-pink-600 p-4 shadow-lg">
                 <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-                  <FontAwesomeIcon icon={faArrowUp} className="text-white" />
+                  <ArrowUp size={20} className="text-white" />
                 </div>
                 <p className="text-xs text-white/80">รายจ่าย</p>
                 <p className="text-xl font-bold text-white">
@@ -283,10 +296,7 @@ export default function HistoryPage() {
               className="flex flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-sm"
             >
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-                <FontAwesomeIcon
-                  icon={faReceipt}
-                  className="text-2xl text-red-500"
-                />
+                <Receipt size={32} className="text-red-500" />
               </div>
               <p className="text-center text-red-500">
                 เกิดข้อผิดพลาดในการโหลดข้อมูล
@@ -334,7 +344,7 @@ export default function HistoryPage() {
                     disabled={currentPage === 1}
                     className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm transition-all hover:shadow-md disabled:cursor-not-allowed disabled:opacity-30"
                   >
-                    <FontAwesomeIcon icon={faChevronLeft} className="text-sm" />
+                    <ChevronLeft size={16} />
                   </motion.button>
 
                   <div className="flex gap-2">
@@ -364,10 +374,7 @@ export default function HistoryPage() {
                     disabled={currentPage === totalPages}
                     className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm transition-all hover:shadow-md disabled:cursor-not-allowed disabled:opacity-30"
                   >
-                    <FontAwesomeIcon
-                      icon={faChevronRight}
-                      className="text-sm"
-                    />
+                    <ChevronRight size={16} />
                   </motion.button>
                 </motion.div>
               )}
@@ -385,10 +392,7 @@ export default function HistoryPage() {
               className="flex flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-sm"
             >
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
-                <FontAwesomeIcon
-                  icon={faReceipt}
-                  className="text-2xl text-slate-400"
-                />
+                <Receipt size={32} className="text-slate-400" />
               </div>
               <p className="text-center font-medium text-slate-600">
                 ไม่พบรายการในเดือนนี้

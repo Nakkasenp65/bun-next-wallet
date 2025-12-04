@@ -18,22 +18,27 @@ import { useRouter } from "next/navigation";
 // --- Mission Type Style Configuration ---
 const missionStyleMap = {
   ONBOARDING: {
+    gradient: "from-pink-500 via-purple-500 to-cyan-600",
     icon: <FaRocket className="h-5 w-5" />,
     name: "ครั้งแรก",
   },
   ACCUMULATION: {
+    gradient: "from-pink-500 via-purple-500 to-cyan-600",
     icon: <FaChartLine className="h-5 w-5" />,
     name: "สะสมเงิน",
   },
   STREAK: {
+    gradient: "from-orange-500 via-orange-600 to-red-600",
     icon: <FaFire className="h-5 w-5" />,
     name: "ออมต่อเนื่อง",
   },
   REFERRAL: {
+    gradient: "from-blue-600 to-indigo-500",
     icon: <FaUserPlus className="h-5 w-5" />,
     name: "เชิญเพื่อน",
   },
   default: {
+    gradient: "from-gray-700 to-gray-800",
     icon: <FaGift className="h-5 w-5" />,
     name: "ทั่วไป",
   },
@@ -86,8 +91,8 @@ const MyMissionCard = ({
   // Status-based gradient configuration
   const statusConfig = {
     ENROLLED: {
-      gradient: "from-purple-600 via-purple-500 to-pink-600",
-      ring: "ring-purple-400/30",
+      gradient: missionStyle.gradient, // Use dynamic gradient from mission type
+      ring: "ring-white/20",
     },
     AWAITING_CLAIM: {
       gradient: "from-yellow-400 via-orange-500 to-red-500",
@@ -122,7 +127,16 @@ const MyMissionCard = ({
             onClick={() => onDoMission(mission, usedOn)}
             whileTap={{ scale: 0.95 }}
             whileHover={{ scale: 1.02 }}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-bold text-purple-600 shadow-lg transition-all focus:ring-2 focus:ring-white/70 focus:outline-none"
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-bold shadow-lg transition-all focus:ring-2 focus:ring-white/70 focus:outline-none"
+            style={{
+              color: missionStyle.gradient.includes("pink")
+                ? "#d946ef"
+                : missionStyle.gradient.includes("blue")
+                  ? "#3b82f6"
+                  : missionStyle.gradient.includes("orange")
+                    ? "#ea580c"
+                    : "#4b5563",
+            }}
             aria-label="เริ่มทำภารกิจ"
           >
             <FaRocket className="h-4 w-4" aria-hidden />
@@ -218,17 +232,43 @@ const MyMissionCard = ({
         {mission?.description}
       </p>
 
-      {/* Progress Bar & Status */}
-      <div className="relative z-10 mt-4">
-        <div className="flex items-center justify-between text-xs font-medium text-white/80">
-          <span>ความคืบหน้า</span>
-          <span className="font-bold">
-            {currentProgress} / {completeProgress}
-          </span>
+      {/* Stats Container (Progress & Timer) */}
+      <div className="relative z-10 mt-4 rounded-2xl bg-black/20 p-3 ring-1 ring-white/10 backdrop-blur-sm">
+        {/* Top Row: Timer & Count */}
+        <div className="mb-2 flex items-center justify-between text-xs font-medium text-white/90">
+          {/* Timer / Status Text */}
+          <div className="flex items-center gap-1.5">
+            {showTimer && (
+              <>
+                {status === "AWAITING_CLAIM" ? (
+                  <>
+                    <AlertCircle className="h-3.5 w-3.5 text-yellow-300" />
+                    <span className="text-yellow-300">
+                      หมดเวลา: {timeLeft ?? "-"}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Clock className="h-3.5 w-3.5 text-amber-300" />
+                    <span>เหลือ {timeLeft ?? "-"}</span>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Progress Count */}
+          <div className="flex items-center gap-1 opacity-90">
+            <span>{currentProgress}</span>
+            <span className="opacity-50">/</span>
+            <span>{completeProgress}</span>
+          </div>
         </div>
-        <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-black/30 ring-1 ring-white/10 backdrop-blur-sm">
+
+        {/* Bottom Row: Progress Bar */}
+        <div className="h-2 w-full overflow-hidden rounded-full bg-black/20">
           <motion.div
-            className="h-2.5 rounded-full bg-gradient-to-r from-white to-amber-300"
+            className="h-full rounded-full bg-gradient-to-r from-white/90 to-white"
             initial={{ width: 0 }}
             animate={{ width: `${progressPercent}%` }}
             transition={{ duration: 0.8, ease: "easeInOut" }}
@@ -239,37 +279,6 @@ const MyMissionCard = ({
           />
         </div>
       </div>
-
-      {/* Time Left */}
-      {showTimer && (
-        <div
-          className="relative z-10 mt-4 flex items-center justify-center gap-2 rounded-xl bg-black/25 py-2.5 text-xs font-medium text-white/95 ring-1 ring-white/10 backdrop-blur-sm"
-          role="timer"
-          aria-live="polite"
-        >
-          {status === "AWAITING_CLAIM" ? (
-            <>
-              <AlertCircle className="h-4 w-4 text-yellow-300" aria-hidden />
-              <span>
-                หมดเวลาเคลม:{" "}
-                <span className="font-bold text-yellow-300">
-                  {timeLeft ?? "-"}
-                </span>
-              </span>
-            </>
-          ) : (
-            <>
-              <Clock className="h-4 w-4 text-amber-300" aria-hidden />
-              <span>
-                เวลาที่เหลือ:{" "}
-                <span className="font-bold text-amber-300">
-                  {timeLeft ?? "-"}
-                </span>
-              </span>
-            </>
-          )}
-        </div>
-      )}
 
       {/* Footer: Reward & CTA */}
       <div className="relative z-10 mt-5 flex items-end justify-between gap-4 border-t border-white/10 pt-4">

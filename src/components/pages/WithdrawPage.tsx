@@ -74,6 +74,7 @@ export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw, 
     });
 
   const handleSubmit = () => {
+    if (!formData.userId) return toast.error("เกิดข้อผิดพลาดไม่พบผู้ใช้ กรุณาติดต่อเจ้าหน้าที่");
     if (!amountNum || isNaN(amountNum)) return toast.error("กรุณาระบุจำนวนเงินที่ถูกต้อง");
     if (belowMin) return toast.error(`ขั้นต่ำในการถอนคือ ${fmtTHB(MIN_WITHDRAW)}`);
     if (exceedsBalance) return toast.error("ยอดถอนมากกว่ายอดเงินที่ใช้ได้");
@@ -81,6 +82,7 @@ export default function WithdrawPage({ userData, showWithdraw, setShowWithdraw, 
     if (!formData.accountNumber.trim()) return toast.error("กรุณากรอกเลขบัญชี");
 
     withdraw({
+      userId: userData.id,
       amount: amountNum,
       bank: formData.bank,
       accountNumber: formData.accountNumber,

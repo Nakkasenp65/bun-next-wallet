@@ -9,16 +9,9 @@ import { FaArrowRightLong } from "react-icons/fa6";
 import MissionSlider from "./MissionsSlider";
 
 export default function SavingMission({ missions, line_user_id, userId }) {
-  const handleSuccessAndReload = () => {
-    setTimeout(() => {
-      "Wait for 5 sec handle enroll success";
-    }, 300);
-    window.location.reload();
-  };
+  
 
-  const enrollMissionMutation = useEnrollMission({
-    onSuccessCallback: handleSuccessAndReload,
-  });
+  const enrollMissionMutation = useEnrollMission();
 
   const handleEnrollClick = (missionId) => {
     enrollMissionMutation.mutate({ missionId, userId });

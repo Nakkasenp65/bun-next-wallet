@@ -361,7 +361,7 @@ export default function MainPage({ liffProfile }) {
                   transactionError={transactionError}
                   currentWalletId={userData?.wallet.id}
                 />
-                <div id="tour-missions" className="w-full space-y-8">
+                <div id="tour-missions" className="flex flex-col gap-8 w-full space-y-8">
                   {myMissionLoading ? (
                     <MyMissionCardSkeleton />
                   ) : (

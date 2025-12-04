@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { Trash2 } from "lucide-react";
 import clsx from "clsx";
+import Image from "next/image";
 
 export default function PromoNotification({
   promo,
@@ -26,8 +27,8 @@ export default function PromoNotification({
     if (onClick) {
       onClick();
     }
-    // Only toggle expansion if there is a body to show
-    if (promo.body) {
+    // Only toggle expansion if there is a body to show or an image
+    if (promo.body || promo.imageUrl) {
       setIsExpanded(!isExpanded);
     }
   };
@@ -96,8 +97,8 @@ export default function PromoNotification({
               />
             )}
 
-            {/* Chevron (only if there's body content) */}
-            {promo.body && (
+            {/* Chevron (only if there's body content or image) */}
+            {(promo.body || promo.imageUrl) && (
               <FontAwesomeIcon
                 icon={faChevronDown}
                 className={clsx(
@@ -118,16 +119,28 @@ export default function PromoNotification({
           </div>
         </div>
 
-        {/* Expanded Details (The Promo Body) */}
+        {/* Expanded Details (The Promo Body & Image) */}
         <AnimatePresence>
-          {isExpanded && promo.body && (
+          {isExpanded && (promo.body || promo.imageUrl) && (
             <motion.div
               initial={{ opacity: 0, height: 0, marginTop: 0 }}
               animate={{ opacity: 1, height: "auto", marginTop: "12px" }}
               exit={{ opacity: 0, height: 0, marginTop: 0 }}
               className="overflow-hidden border-t border-gray-200 pt-3 pl-14 text-sm text-gray-700"
             >
-              <p className="whitespace-pre-wrap">{promo.body}</p>
+              {promo.body && (
+                <p className="whitespace-pre-wrap">{promo.body}</p>
+              )}
+              {promo.imageUrl && (
+                <div className="relative mt-3 h-56 w-full overflow-hidden rounded-lg bg-gray-50">
+                  <Image
+                    src={promo.imageUrl}
+                    alt={promo.title}
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

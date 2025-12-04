@@ -48,6 +48,7 @@ async function createInternalTransfer(payload: any) {
  * @param {string} payload.accountName - ชื่อบัญชี
  */
 interface WithdrawPayload {
+  userId: string;
   amount: number;
   bank: string;
   accountNumber: string;

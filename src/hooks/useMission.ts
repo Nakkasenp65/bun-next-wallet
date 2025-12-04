@@ -145,23 +145,24 @@ interface UseEnrollMissionOptions {
 
 export function useEnrollMission({ onSuccessCallback }: UseEnrollMissionOptions = {}) {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: enrollMission,
     onSuccess: (data, variables, context) => {
+      
       const { userId } = variables;
-      console.log("Enrolled data from backend (onSuccess): ", data);
       toast.success("เข้าร่วมภารกิจสำเร็จ!");
-      setTimeout(() => {
-        console.log("wait for 0.5 second");
-      }, 500);
-      queryClient.invalidateQueries({
+
+      queryClient.refetchQueries({
         queryKey: ["availableMissions", userId],
       });
-      queryClient.invalidateQueries({ queryKey: ["myMissions", userId] });
+
+      queryClient.refetchQueries({ queryKey: ["myMissions", userId] });
+
       if (onSuccessCallback)
         onSuccessCallback(data, variables, context);
     },
-  });
+  }); 
 }
 
 interface SubmitReferralVariables {
