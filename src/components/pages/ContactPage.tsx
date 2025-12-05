@@ -7,6 +7,7 @@ import { BsLine } from "react-icons/bs";
 import FramerDiv from "../framerComponents/FramerDiv";
 import { useLiff } from "../provider/LiffProvider";
 import DisposeFramerDiv from "../framerComponents/DisposeFramerDiv";
+import { Variants } from "framer-motion";
 
 const ContactItem = ({ icon: IconComponent, title, value, href }) => (
   <a
@@ -49,10 +50,30 @@ export default function ContactPage({ showContact, setShowContact }) {
     };
   }, [showContact]);
 
+  const slideUpVariants: Variants = {
+    hidden: {
+      y: "100%",
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+      },
+    },
+    visible: {
+      y: "0%",
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+      },
+    },
+  };
+
   return (
     <DisposeFramerDiv
       isOpen={showContact}
       className="fixed inset-0 z-50 flex items-end justify-center"
+      variants={slideUpVariants}
     >
       {/* ✅ Modal Bottom Sheet */}
       <div

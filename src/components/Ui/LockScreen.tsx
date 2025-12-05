@@ -58,59 +58,65 @@ export default function LockScreen() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/60 backdrop-blur-md"
+        className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/60 backdrop-blur-xl"
       >
         <motion.div
           // --- Interaction Choreographer: Entrance Animation ---
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 50, damping: 15 }}
-          className="flex w-11/12 max-w-sm flex-col items-center gap-6 rounded-2xl bg-white p-8 shadow-2xl"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="flex w-full max-w-xs flex-col items-center gap-8 p-8"
         >
-          <div className="from-primary-pink to-primary-orange rounded-full bg-gradient-to-br p-3 text-white">
-            <LockKeyhole size={32} />
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-orange-500 shadow-lg shadow-pink-500/30">
+              <LockKeyhole className="text-white" size={28} />
+            </div>
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-white tracking-tight">
+                ใส่รหัสผ่าน
+              </h1>
+              <p className="mt-2 text-sm font-medium text-white/60">
+                {isError
+                  ? "รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่"
+                  : "กรุณากรอกรหัส PIN 6 หลัก"}
+              </p>
+            </div>
           </div>
-          <h1 className="text-xl font-bold text-slate-800">กรุณาใส่รหัส PIN</h1>
 
-          {/* --- The Visual Transformation: From Input to PIN Cells --- */}
-          <div className="relative">
+          {/* --- The Visual Transformation: From Input to PIN Dots --- */}
+          <div className="relative w-full">
             <motion.div
               // --- Interaction Choreographer: Shake on Error ---
               animate={isError ? { x: [0, -10, 10, -10, 10, 0] } : { x: 0 }}
-              transition={{ duration: 0.5 }}
-              className="flex items-center justify-center gap-2"
+              transition={{ duration: 0.4 }}
+              className="flex items-center justify-center gap-6"
               onClick={() => inputRef.current?.focus()} // Focus input when clicking the container
             >
               {pinCells.map((_, index) => {
                 const hasValue = index < pin.length;
-                const isActive = index === pin.length;
                 return (
                   <div
                     key={index}
-                    className={`flex h-16 w-12 items-center justify-center rounded-lg border-2 text-2xl font-bold text-slate-800 transition-all duration-200 ${isError ? "border-red-500" : ""} ${isActive && !isError ? "scale-105 border-pink-500" : "border-slate-300"} ${hasValue && !isActive && !isError ? "border-slate-400" : ""} `}
-                  >
-                    {hasValue && "●"}
-                  </div>
+                    className={`h-4 w-4 rounded-full transition-all duration-300 ${
+                      hasValue
+                        ? "bg-gradient-to-br from-pink-500 to-orange-500 shadow-[0_0_10px_rgba(236,72,153,0.5)] scale-110"
+                        : "bg-white/20"
+                    } ${isError ? "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" : ""}`}
+                  />
                 );
               })}
             </motion.div>
 
             {/* Loading Spinner */}
             {isPending && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/70">
+              <div className="absolute inset-0 flex items-center justify-center">
                 <LoaderCircle
-                  className="animate-spin text-pink-500"
+                  className="animate-spin text-white"
                   size={32}
                 />
               </div>
             )}
           </div>
-
-          <p className="text-sm text-slate-500">
-            {isError
-              ? "รหัส PIN ไม่ถูกต้อง"
-              : "กรอกรหัส PIN 6 หลักเพื่อเข้าสู่ระบบ"}
-          </p>
 
           {/* --- The Hidden Input: The key to a seamless UX --- */}
           <input

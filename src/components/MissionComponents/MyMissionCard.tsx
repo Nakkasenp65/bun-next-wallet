@@ -193,7 +193,7 @@ const MyMissionCard = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       className={clsx(
-        "relative flex w-full flex-shrink-0 snap-start flex-col overflow-hidden rounded-3xl bg-gradient-to-br p-5 text-white transition-shadow",
+        "relative flex w-full flex-shrink-0 snap-start flex-col overflow-hidden rounded-3xl bg-gradient-to-br p-4 text-white transition-shadow",
         config.gradient,
         config.opacity,
         `ring-1 ${config.ring}`,
@@ -211,64 +211,63 @@ const MyMissionCard = ({
       <div className="relative z-10 flex items-start justify-between gap-3">
         <div className="flex flex-1 items-center gap-3">
           <div
-            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-black/25 ring-1 ring-white/10 backdrop-blur-sm"
+            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-black/25 ring-1 ring-white/10 backdrop-blur-sm"
             aria-hidden
           >
             {missionStyle.icon}
           </div>
+
           <div className="flex-1 overflow-hidden">
-            <h3 className="truncate text-base leading-tight font-bold tracking-tight">
+            <h3 className="truncate text-lg leading-tight font-bold tracking-tight">
               {mission?.title}
             </h3>
-            <span className="mt-0.5 inline-block rounded-full bg-black/20 px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase">
-              {missionStyle.name}
-            </span>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <span className="inline-block rounded-full bg-black/20 px-2.5 py-0.5 text-[10px] font-medium tracking-wide uppercase">
+                {missionStyle.name}
+              </span>
+              {showTimer && (
+                <div className="flex items-center gap-1 rounded-full bg-black/20 px-2 py-0.5 text-[10px] font-bold whitespace-nowrap backdrop-blur-sm">
+                  {status === "AWAITING_CLAIM" ? (
+                    <>
+                      <AlertCircle className="h-3 w-3 text-yellow-300" />
+                      <span className="text-yellow-300">
+                        {timeLeft ?? "หมดเวลา"}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <Clock className="h-3 w-3 text-amber-300" />
+                      <span className="text-white/90">{timeLeft ?? "-"}</span>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Description */}
-      <p className="relative z-10 mt-4 min-h-[40px] text-sm leading-relaxed text-white/95">
-        {mission?.description}
-      </p>
+      <div className="relative z-10 mt-4">
+        <p className="text-sm leading-relaxed text-white/90">
+          {mission?.description}
+        </p>
+      </div>
 
-      {/* Stats Container (Progress & Timer) */}
-      <div className="relative z-10 mt-4 rounded-2xl bg-black/20 p-3 ring-1 ring-white/10 backdrop-blur-sm">
-        {/* Top Row: Timer & Count */}
-        <div className="mb-2 flex items-center justify-between text-xs font-medium text-white/90">
-          {/* Timer / Status Text */}
-          <div className="flex items-center gap-1.5">
-            {showTimer && (
-              <>
-                {status === "AWAITING_CLAIM" ? (
-                  <>
-                    <AlertCircle className="h-3.5 w-3.5 text-yellow-300" />
-                    <span className="text-yellow-300">
-                      หมดเวลา: {timeLeft ?? "-"}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <Clock className="h-3.5 w-3.5 text-amber-300" />
-                    <span>เหลือ {timeLeft ?? "-"}</span>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Progress Count */}
-          <div className="flex items-center gap-1 opacity-90">
-            <span>{currentProgress}</span>
-            <span className="opacity-50">/</span>
-            <span>{completeProgress}</span>
+      {/* Progress Section (Clean Design) */}
+      <div className="relative z-10 mt-6 mb-2">
+        <div className="mb-2 flex items-end justify-between">
+          <span className="text-xs font-medium text-white/70">ความคืบหน้า</span>
+          <div className="flex items-baseline gap-1 font-semibold">
+            <span className="text-lg text-white">{currentProgress}</span>
+            <span className="text-sm text-white/50">/</span>
+            <span className="text-sm text-white/70">{completeProgress}</span>
           </div>
         </div>
 
-        {/* Bottom Row: Progress Bar */}
-        <div className="h-2 w-full overflow-hidden rounded-full bg-black/20">
+        <div className="h-2.5 w-full overflow-hidden rounded-full bg-black/20 ring-1 ring-white/10">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-white/90 to-white"
+            className="h-full rounded-full bg-gradient-to-r from-white/90 to-white shadow-[0_0_10px_rgba(255,255,255,0.5)]"
             initial={{ width: 0 }}
             animate={{ width: `${progressPercent}%` }}
             transition={{ duration: 0.8, ease: "easeInOut" }}
@@ -281,15 +280,15 @@ const MyMissionCard = ({
       </div>
 
       {/* Footer: Reward & CTA */}
-      <div className="relative z-10 mt-5 flex items-end justify-between gap-4 border-t border-white/10 pt-4">
+      <div className="relative z-10 mt-auto flex items-end justify-between gap-4 pt-4">
         <div className="flex flex-col">
           <span className="text-xs font-medium text-white/70">รางวัล</span>
-          <div className="mt-1 flex items-center gap-1.5 text-2xl font-bold text-amber-300">
-            <GrMoney className="h-5 w-5" aria-hidden />
+          <div className="mt-1 flex items-center gap-2 text-3xl font-bold text-amber-300 drop-shadow-sm">
+            <GrMoney className="h-6 w-6" aria-hidden />
             <span>{mission?.rewardAmount?.toLocaleString()}</span>
           </div>
         </div>
-        <div className="max-w-[140px] flex-1">{renderCTA()}</div>
+        <div className="w-[140px]">{renderCTA()}</div>
       </div>
     </motion.div>
   );

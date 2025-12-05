@@ -4,6 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Compass } from "lucide-react";
+import { FaArrowRightLong } from "react-icons/fa6";
 import MyMissionCard from "../MissionComponents/MyMissionCard";
 import MissionSlider from "./MissionsSlider";
 import Image from "next/image";
@@ -77,16 +78,16 @@ export default function MyMissions({
       <Link href={`/mission/${line_user_id}`} className="w-full">
         <header className="flex w-full items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-bold text-slate-800">
-            <div className="bg-primary-pink h-6 w-1 rounded-full" />
+            <div className="h-10 w-1 rounded-full bg-pink-500" />
             ภารกิจของฉัน
           </h2>
           <motion.div
             whileTap={{ scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 400, damping: 15 }}
-            className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+            transition={{ type: "spring", stiffness: 1000, damping: 20 }}
+            className="rounded-full bg-pink-500/5 p-3 text-pink-500 transition-colors hover:bg-pink-500/10"
             aria-label="View all missions"
           >
-            <ArrowRight size={20} />
+            <FaArrowRightLong size={16} />
           </motion.div>
         </header>
       </Link>

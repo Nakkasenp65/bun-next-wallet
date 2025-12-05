@@ -32,6 +32,7 @@ export enum TransactionType {
   DEPOSIT = 'DEPOSIT',
   REWARD = 'REWARD',
   TRANSFER = 'TRANSFER',
+  REDEEMED = 'REDEEMED',
 }
 
 export enum TransactionStatus {

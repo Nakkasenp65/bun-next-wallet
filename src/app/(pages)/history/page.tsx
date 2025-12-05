@@ -197,13 +197,13 @@ export default function HistoryPage() {
       </motion.header>
 
       {/* Content */}
-      <div className="flex flex-grow flex-col overflow-y-auto px-6 py-8 bg-white rounded-t-[32px]">
+      <div className="flex flex-grow flex-col overflow-y-auto px-4 py-8 bg-white rounded-t-[32px]">
         {/* Month Selector */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="mb-4 flex items-center justify-between rounded-2xl p-4 "
+          className="mb-4 flex items-center justify-between rounded-2xl pb-2"
         >
           <motion.button
             whileHover={{ scale: 1.1 }}

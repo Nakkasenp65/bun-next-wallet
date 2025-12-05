@@ -33,7 +33,7 @@ export default function Page() {
   const router = useRouter();
 
   // --- Hooks & Data ---
-  const { liffProfile, liffDecodedIdToken } = useLiff();
+  const { liffProfile, liffDecodedIdToken, actions } = useLiff();
 
   const { data: okMobileUser } = useCheckOkMobileUser(liffProfile?.userId);
   const { data: mainServerUserProfile } = useMainServerUser(
@@ -100,9 +100,10 @@ export default function Page() {
     setUiStep("main");
   };
 
-  const handleContactSupport = () => {
+  const handleContactSupport = async () => {
     // Logic to open support chat (e.g., LIFF openWindow or external link)
-    window.open("https://line.me/ti/p/@your_line_id", "_blank");
+    await actions.text("ติดต่อเจ้าหน้าที่");
+    actions.closeWindow();
   };
 
   // Create user with goal and server data

@@ -6,10 +6,16 @@ interface DisposeFramerDivProps {
   isOpen: boolean;
   children: React.ReactNode;
   className?: string;
+  variants?: Variants;
 }
 
-export default function DisposeFramerDiv({ isOpen, children, className }: DisposeFramerDivProps) {
-  const variants: Variants = {
+export default function DisposeFramerDiv({
+  isOpen,
+  children,
+  className,
+  variants,
+}: DisposeFramerDivProps) {
+  const defaultVariants: Variants = {
     hidden: {
       opacity: 0,
       transition: {
@@ -33,7 +39,7 @@ export default function DisposeFramerDiv({ isOpen, children, className }: Dispos
       {isOpen && (
         <motion.div
           className={className}
-          variants={variants}
+          variants={variants || defaultVariants}
           initial="hidden"
           animate="visible"
           exit="hidden"
