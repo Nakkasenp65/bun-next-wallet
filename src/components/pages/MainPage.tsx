@@ -1,0 +1,393 @@
+"use client";
+//REACT HOOKS AND LIBRARY IMPORT
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+
+// PROVIDERS AND HOOKS
+import { useGetUser } from "@/hooks/useUser";
+import { useGetMyMissions, useGetAvailableMissions, useClaimMission } from "@/hooks/useMission";
+import { useSuccessTransactions } from "@/hooks/useTransactions";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
+import { useUpdateGuide } from "@/hooks/useUpdateGuide";
+
+// UI & PAGE COMPONENTS
+import ErrorComponent from "../ui/ErrorComponent";
+import WalletHeader from "../ui/WalletHeader";
+import SavingsGoalCard from "../ui/SavingGoalCard";
+import ActionGrid from "../ui/ActionGrid";
+import SavingMission from "../ui/SavingMission";
+import BottomNav from "../ui/BottomNav";
+import MyMissions from "../ui/MyMissions";
+import MainTransactionList from "@/components/TransactionComponents/MainTransactionList";
+import RedeemConfirmationModal from "@/components/ui/RedeemConfirmation";
+import TransferPage from "./TransferPage";
+import WithdrawPage from "./WithdrawPage";
+import DepositPage from "./DepositPage";
+import GoalPage from "./GoalPage";
+import NotificationPage from "./NotificationPage";
+import ContactPage from "./ContactPage";
+
+// SKELETONS
+import WalletHeaderSkeleton from "@/components/SkeletonComponents/WalletHeaderSkeleton";
+import SavingsGoalCardSkeleton from "../SkeletonComponents/SavingGoalCardSkeleton";
+import { useNotification } from "@/hooks/useNotification";
+import { useRouter } from "next/navigation";
+import TransactionSkeleton from "../ui/TransactionSkeleton";
+import MyMissionCardSkeleton from "../SkeletonComponents/MyMissionCardSkeleton";
+import { useGetWallet } from "@/hooks/useWallet";
+import { useGetGoal } from "@/hooks/useGoal";
+
+export default function MainPage({ liffProfile }) {
+  const date = new Date();
+  const router = useRouter();
+
+  // ดึงข้อมูล user ทั้งหมด
+  const {
+    data: userData,
+    isLoading: isUserDataLoading,
+    error: isUserDataError,
+    refetch: refetchUserData,
+  } = useGetUser(liffProfile?.userId);
+
+  // ดึงข้อมูล wallet ของ user
+  const {
+    data: wallet,
+    isLoading: walletLoading,
+    error: walletError,
+    refetch: refetchWallet,
+  } = useGetWallet(liffProfile?.userId);
+
+  // ดึงข้อมูล goal ของ user
+  const { data: goal, isLoading: goalLoading, error: goalError } = useGetGoal(liffProfile?.userId);
+
+  // ดึงข้อมูลการแจ้งเตือนของ user
+  const { data: notificationData, isLoading: notificationLoading } = useNotification(userData?.id);
+
+  const claimRewardMutation = useClaimMission();
+  const updateGuide = useUpdateGuide();
+
+  // ดึงข้อมูลเส้นทางการเงิน (เฉพาะ success)
+  const {
+    data: transactions,
+    isLoading: transactionLoading,
+    error: transactionError,
+  } = useSuccessTransactions(date.getFullYear(), date.getMonth(), wallet?.id);
+
+  // ดึงข้อมูลภารกิจที่สามารถลงทะเบียนได้
+  const {
+    data: availableMission,
+    isLoading: missionLoading,
+    error: missionError,
+  } = useGetAvailableMissions(userData?.id);
+
+  // ดึงข้อมูลภารกิจที่ลงทะเบียนแล้ว
+  const {
+    data: myMission,
+    isLoading: myMissionLoading,
+    error: myMissionError,
+  } = useGetMyMissions(userData?.id);
+
+  const [showTransfer, setShowTransfer] = useState(false);
+  const [showRedeemModal, setShowRedeemModal] = useState(false);
+  const [showWithdraw, setShowWithdraw] = useState(false);
+  const [showDeposit, setShowDeposit] = useState(false);
+  const [showGoal, setShowGoal] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showContact, setShowContact] = useState(false);
+
+  // ดาวน์โทรศัพท์เมื่อยอดเงินถึงเป้าหมาย
+  const confirmAndProceedToRedeem = () => {
+    setShowRedeemModal(false);
+    window
+      .open(`http://app.no1.mobi/landing-page-installment/${userData?.line_user_id}`, "_blank")
+      ?.focus();
+  };
+
+  // เปลี่ยนเป้าหมายตอนสถึงยอดดาวน์
+  const handleChangeToCloserGoal = () => {
+    setShowRedeemModal(false);
+    toast("เก็บเงินเพิ่มอีกนิดเพื่อรางวัลที่ใหญ่กว่า!", { icon: "🚀" });
+    setShowGoal(true);
+  };
+
+  // ฟังก์ชันรับภารกิจ
+
+  // รับภารกิจ
+  const handleClaimMission = ({ userId, userMissionId }) => {
+    claimRewardMutation.mutate({ userId, userMissionId });
+  };
+
+  // ปุ่มรีเฟรชหน้า
+  const handleRefresh = async () => {
+    try {
+      await refetchWallet();
+    } catch (error) {
+      toast.error("Failed to refresh data.");
+    }
+  };
+
+  // กดทำภารกิจแบ่งตามประเภท
+  const handleDoMission = (mission, location) => {
+    if (!mission || !mission.type) return;
+
+    console.log(`Executing mission type: ${mission.type}`);
+
+    switch (mission.type) {
+      case "ONBOARDING":
+        if (location === "mainPage") setShowDeposit(true);
+        else router.push("/homePage");
+      case "ACCUMULATION":
+        if (location === "mainPage") setShowDeposit(true);
+        else router.push("/homePage");
+        break;
+      case "STREAK":
+        // For these types, we open the deposit page.
+        if (location === "mainPage") setShowDeposit(true);
+        else router.push("/homePage");
+        break;
+
+      case "REFERRAL":
+        // For this type, we construct a link and copy it to the clipboard.
+        const referralLink = `https://liff.line.me/2007338329-lwxe4k2Z`;
+        navigator.clipboard
+          .writeText(referralLink)
+          .then(() => {
+            toast.success("คัดลอกลิงก์แนะนำเพื่อนแล้ว!");
+          })
+          .catch((err) => {
+            console.error("Failed to copy text: ", err);
+            toast.error("ไม่สามารถคัดลอกลิงก์ได้");
+          });
+        break;
+
+      default:
+        // Optional: handle any other mission types or do nothing.
+        console.log(`No action defined for mission type: ${mission.type}`);
+        break;
+    }
+  };
+
+  // Driver.js Tour
+  useEffect(() => {
+    if (!userData || isUserDataLoading) return;
+
+    if (userData.guideShown === false) {
+      const driverObj = driver({
+        showProgress: true,
+        popoverClass: "driver-popover-theme",
+        stagePadding: 4,
+        nextBtnText: "ถัดไป",
+        prevBtnText: "ย้อนกลับ",
+        doneBtnText: "เสร็จสิ้น",
+        steps: [
+          {
+            element: "#tour-profile",
+            popover: {
+              title: "ข้อมูลโปรไฟล์",
+              description:
+                "คลิกที่รูปโปรไฟล์มุมซ้ายบนเพื่อแก้ไขเบอร์โทรศัพท์และข้อมูลส่วนตัวของคุณ",
+            },
+          },
+          {
+            element: "#tour-goal-card",
+            popover: {
+              title: "เป้าหมายและโบนัส",
+              description: "แสดงยอดเงินสะสมและโบนัสที่คุณได้รับจากการทำภารกิจ",
+            },
+          },
+          {
+            element: "#tour-action-grid",
+            popover: {
+              title: "เมนูทำรายการ",
+              description:
+                "ทำรายการฝาก ถอน โอน หรือเปลี่ยนเป้าหมายการออมได้ที่นี่",
+            },
+          },
+          {
+            element: "#tour-missions",
+            popover: {
+              title: "ภารกิจ",
+              description:
+                "ตรวจสอบภารกิจของคุณและลงทะเบียนภารกิจใหม่เพื่อรับของรางวัล",
+            },
+          },
+          {
+            element: "#tour-bottom-nav",
+            popover: {
+              title: "เมนูหลัก",
+              description:
+                "ใช้เมนูด้านล่างเพื่อดูรายละเอียดและสแกนโอนเงินระหว่างกระเป๋า",
+            },
+          },
+        ],
+        onDestroyStarted: () => {
+          if (
+            !driverObj.hasNextStep() ||
+            confirm("คุณต้องการจบการแนะนำการใช้งานใช่ไหม?")
+          ) {
+            driverObj.destroy();
+            updateGuide.mutate({
+              lineUserId: userData.line_user_id,
+              guideShown: true,
+            });
+          }
+        },
+      });
+      // Add a small delay to ensure elements are rendered
+      setTimeout(() => {
+        driverObj.drive();
+      }, 1000);
+    }
+  }, [userData, isUserDataLoading]);
+
+  if (isUserDataError || missionError || transactionError) return <ErrorComponent />;
+
+  return (
+    <>
+      {isUserDataLoading ? null : (
+        <>
+          <RedeemConfirmationModal
+            isOpen={showRedeemModal}
+            onClose={() => setShowRedeemModal(false)}
+            onConfirmRedeem={confirmAndProceedToRedeem}
+            onChangeGoal={handleChangeToCloserGoal}
+            currentBalance={wallet?.balance || 0}
+            goalProduct={goal?.product}
+          />
+          <NotificationPage
+            userId={userData?.id}
+            showNotifications={showNotifications}
+            setShowNotifications={setShowNotifications}
+            notificationData={notificationData}
+            notificationLoading={notificationLoading}
+          />
+          <TransferPage
+            balance={wallet?.balance}
+            userData={userData}
+            showTransfer={showTransfer}
+            setShowTransfer={setShowTransfer}
+          />
+          <WithdrawPage
+            userData={userData}
+            balance={wallet?.balance}
+            showWithdraw={showWithdraw}
+            setShowWithdraw={setShowWithdraw}
+          />
+          <DepositPage
+            userData={userData}
+            balance={wallet?.balance}
+            showDeposit={showDeposit}
+            setShowDeposit={setShowDeposit}
+          />
+          <GoalPage
+            userData={userData}
+            balance={wallet?.balance}
+            plan={goal?.plan}
+            product={goal?.product}
+            showGoal={showGoal}
+            setShowGoal={setShowGoal}
+          />
+          <ContactPage showContact={showContact} setShowContact={setShowContact} />
+        </>
+      )}
+
+      <div className="gradient-background font-main relative flex h-max min-h-dvh w-full flex-col overflow-x-hidden overflow-y-auto lg:mx-auto lg:max-w-[450px] lg:shadow-lg">
+        <main className="relative overflow-y-auto">
+          <section className="flex flex-col gap-10 px-4 py-4 pb-8">
+            {isUserDataLoading || walletLoading || goalLoading ? (
+              <>
+                <WalletHeaderSkeleton /> <SavingsGoalCardSkeleton />{" "}
+              </>
+            ) : (
+              <>
+                <div id="tour-profile" className="w-full">
+                  <WalletHeader
+                    userName={userData.line_display_name}
+                    profileUrl={userData.line_profile_url}
+                    setShowNotifications={setShowNotifications}
+                    notifications={notificationData}
+                    userLineId={userData.line_user_id}
+                  />
+                </div>
+                <div id="tour-goal-card" className="w-full">
+                  <SavingsGoalCard
+                    brand={goal?.product.brand}
+                    name={goal?.product.model}
+                    target={goal?.product.downPaymentAmount}
+                    balance={wallet?.balance}
+                    bonusBalance={wallet?.bonusBalance}
+                    imageUrl={goal?.product.imageUrl}
+                    handleRedeem={() => setShowRedeemModal(true)}
+                    isRefreshing={isUserDataLoading}
+                    onRefresh={handleRefresh}
+                  />
+                </div>
+              </>
+            )}
+            <div id="tour-action-grid" className="w-full">
+              <ActionGrid
+                setShowTransfer={setShowTransfer}
+                setShowWithdraw={setShowWithdraw}
+                setShowDeposit={setShowDeposit}
+                setShowGoal={setShowGoal}
+                role={userData?.role}
+                line_user_id={userData?.line_user_id}
+              />
+            </div>
+          </section>
+          <section className="relative flex min-h-[500px] flex-col items-center gap-8 rounded-t-3xl bg-white px-4 pt-10 pb-32 shadow-lg">
+            <div className="absolute top-3 flex h-4 w-full items-center justify-center">
+              <span className="h-1.5 w-10 rounded-full bg-gray-300" />
+            </div>
+            {isUserDataLoading ? (
+              <div className="grid h-56 w-full grid-cols-1 items-center justify-center">
+                <TransactionSkeleton />
+                <TransactionSkeleton />
+                <TransactionSkeleton />
+                <TransactionSkeleton />
+              </div>
+            ) : (
+              <>
+                <MainTransactionList
+                  transactions={transactions}
+                  transactionLoading={transactionLoading}
+                  transactionError={transactionError}
+                  currentWalletId={userData?.wallet.id}
+                />
+                <div id="tour-missions" className="flex flex-col gap-8 w-full space-y-8">
+                  {myMissionLoading ? (
+                    <MyMissionCardSkeleton />
+                  ) : (
+                    <MyMissions
+                      missions={myMission}
+                      line_user_id={userData?.line_user_id}
+                      userId={userData?.id}
+                      onDoMission={handleDoMission}
+                      onClaim={handleClaimMission}
+                    />
+                  )}
+                  {missionLoading ? (
+                    <MyMissionCardSkeleton />
+                  ) : (
+                    <SavingMission
+                      userId={userData?.id}
+                      line_user_id={userData?.line_user_id}
+                      missions={availableMission}
+                    />
+                  )}
+                </div>
+              </>
+            )}
+          </section>
+        </main>
+        <BottomNav
+          id="tour-bottom-nav"
+          // useLiff() ใช้แค่ useLiff ก็ได้
+          line_user_id={userData?.line_user_id}
+          setShowContact={setShowContact}
+        />
+      </div>
+    </>
+  );
+}
