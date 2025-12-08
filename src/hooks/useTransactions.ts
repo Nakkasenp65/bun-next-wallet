@@ -162,8 +162,7 @@ export function useSuccessTransactions(year: number, month: number, walletId: st
       return response.data;
     },
     enabled: !!walletId,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: "always",
+    staleTime: 1000 * 30, // Cache for 30 seconds
   });
 }
 

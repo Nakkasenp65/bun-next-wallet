@@ -33,11 +33,7 @@ import WalletHeaderSkeleton from "@/components/SkeletonComponents/WalletHeaderSk
 import SavingsGoalCardSkeleton from "../SkeletonComponents/SavingGoalCardSkeleton";
 import { useNotification } from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
-import { FcQuestions } from "react-icons/fc";
-import Loading from "../StatusComponents/Loading";
 import TransactionSkeleton from "../ui/TransactionSkeleton";
-import MissionCardSkeleton from "../SkeletonComponents/MissionCardSkeleton";
-import MissionGridSkeleton from "../SkeletonComponents/MissionGridSkeleton";
 import MyMissionCardSkeleton from "../SkeletonComponents/MyMissionCardSkeleton";
 import { useGetWallet } from "@/hooks/useWallet";
 import { useGetGoal } from "@/hooks/useGoal";
@@ -100,8 +96,6 @@ export default function MainPage({ liffProfile }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showContact, setShowContact] = useState(false);
 
-  console.log("userData main page: \n", userData);
-
   // ดาวน์โทรศัพท์เมื่อยอดเงินถึงเป้าหมาย
   const confirmAndProceedToRedeem = () => {
     setShowRedeemModal(false);
@@ -155,7 +149,7 @@ export default function MainPage({ liffProfile }) {
 
       case "REFERRAL":
         // For this type, we construct a link and copy it to the clipboard.
-        const referralLink = `https://lin.ee/0ab3Rcl`;
+        const referralLink = `https://liff.line.me/2007338329-lwxe4k2Z`;
         navigator.clipboard
           .writeText(referralLink)
           .then(() => {

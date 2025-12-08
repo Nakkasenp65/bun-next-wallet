@@ -141,15 +141,30 @@ export function LiffProvider({ children }: { children: ReactNode }) {
         if (liff.isLoggedIn()) {
           setIsLoggedIn(true);
           const decodedIdToken = liff.getDecodedIDToken();
-          const profile = await liff.getProfile();
-
-          setLiffProfile(profile);
-          setLiffDecodedIdToken(decodedIdToken);
+          
+          // Optimization: Use ID Token for immediate rendering
+          if (decodedIdToken && decodedIdToken.sub) {
+             const immediateProfile: LiffProfile = {
+                userId: decodedIdToken.sub,
+                displayName: decodedIdToken.name || "User",
+                pictureUrl: decodedIdToken.picture,
+             };
+             setLiffProfile(immediateProfile);
+             setLiffDecodedIdToken(decodedIdToken);
+          }
 
           const accessToken = liff.getAccessToken();
           console.log("Access token liff provider: ", accessToken);
           setLineAccessToken(accessToken || "");
+          
+          // Unblock UI immediately
           setIsLoading(false);
+
+          // Background update (optional, facilitates ensuring latest data)
+          liff.getProfile().then((profile) => {
+             setLiffProfile(profile);
+          }).catch(err => console.error("Background profile fetch failed", err));
+
         } else {
           liff.login();
         }

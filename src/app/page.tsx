@@ -14,10 +14,6 @@ import ErrorComponent from "@/components/ui/ErrorComponent";
 
 // MAINPAGE COMPONENT
 import MainPage from "@/components/pages/MainPage";
-import { useGetGoal } from "../hooks/useGoal";
-import { useGetWallet } from "../hooks/useWallet";
-import { useSuccessTransactions } from "../hooks/useTransactions";
-import { useGetAvailableMissions, useGetMyMissions } from "../hooks/useMission";
 
 export default function HomePage() {
   const router = useRouter();
@@ -34,48 +30,10 @@ export default function HomePage() {
     error: statusError,
   } = useUserStatus(liffProfile?.userId);
 
-  const {
-    data: userData,
-    isLoading: isUserDataLoading,
-    error: isUserDataError,
-    refetch: refetchUserData,
-  } = useGetUser(liffProfile?.userId);
-
-  // ดึงข้อมูล wallet ของ user
-  const {
-    data: wallet,
-    isLoading: walletLoading,
-    error: walletError,
-    refetch: refetchWallet,
-  } = useGetWallet(liffProfile?.userId);
-
-  // ดึงข้อมูล goal ของ user
-  const {
-    data: goal,
-    isLoading: goalLoading,
-    error: goalError,
-  } = useGetGoal(liffProfile?.userId);
-
-  const date = new Date();
-
-  const {
-    data: transactions,
-    isLoading: transactionLoading,
-    error: transactionError,
-  } = useSuccessTransactions(date.getFullYear(), date.getMonth(), wallet?.id);
-
-  const {
-    data: availableMission,
-    isLoading: missionLoading,
-    error: missionError,
-  } = useGetAvailableMissions(userData?.id);
-
-  // ดึงข้อมูลภารกิจที่ลงทะเบียนแล้ว
-  const {
-    data: myMission,
-    isLoading: myMissionLoading,
-    error: myMissionError,
-  } = useGetMyMissions(userData?.id);
+  /* 
+    Redundant data fetching removed. 
+    MainPage component handles fetching its own data.
+  */
 
   useEffect(() => {
     if (!isLoggedIn || isStatusLoading) {
