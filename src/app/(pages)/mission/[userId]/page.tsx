@@ -179,40 +179,50 @@ export default function MissionPage() {
   };
 
   return (
-    <div className="flex min-h-dvh flex-col bg-gray-50">
-      <header className="sticky top-0 z-20 bg-white text-white shadow-md">
-        <div className="from-primary-pink to-primary-orange bg-gradient-to-br">
-          <div className="flex items-center justify-between px-5 pt-10 pb-4">
-            <Link
-              href="/"
-              className="rounded-full p-1 transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </Link>
-            <h1 className="text-xl font-bold drop-shadow-md">ศูนย์ภารกิจ</h1>
-            <div className="w-6" />
-          </div>
-        </div>
-        <div className="flex border-b border-slate-200/80">
-          <TabBtn active={activeTab === "myMissions"} onClick={() => setActiveTab("myMissions")} count={counts.myAll}>
-            ภารกิจของฉัน
-          </TabBtn>
-          <TabBtn active={activeTab === "available"} onClick={() => setActiveTab("available")} count={counts.availAll}>
-            ภารกิจใหม่
-          </TabBtn>
-        </div>
-        <FilterRow
-          forTab={activeTab === "myMissions" ? "my" : "available"}
-          myMissionStatusFilter={myMissionStatusFilter}
-          setMyMissionStatusFilter={setMyMissionStatusFilter}
-          myMissionTypeFilter={myMissionTypeFilter}
-          setMyMissionTypeFilter={setMyMissionTypeFilter}
-          availableMissionTypeFilter={availableMissionTypeFilter}
-          setAvailableMissionTypeFilter={setAvailableMissionTypeFilter}
-        />
+    <div className="bg-bg-dark fixed inset-0 z-40 flex flex-col">
+      <header className="bg-bg-dark flex flex-shrink-0 items-center px-4 pt-6 pb-4">
+        <button
+          onClick={() => router.push("/")}
+          className="z-10 rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100/10"
+          aria-label="Back"
+        >
+          <ChevronLeft size={28} className="text-white" />
+        </button>
+        <h2 className="from-primary-pink to-primary-orange flex-grow bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
+          ศูนย์ภารกิจ
+        </h2>
+        <div className="w-10" /> {/* Spacer to balance the back button */}
       </header>
 
-      <main className="flex-grow px-4 py-4 pb-24">{activeTab === "myMissions" ? renderMy() : renderAvailable()}</main>
+      <main className="flex flex-grow flex-col overflow-y-auto rounded-t-[32px] bg-white px-4 py-8">
+        {/* Tabs & Filters moved inside Main Content */}
+        <div className="mb-6 flex flex-col gap-4">
+          <div className="flex border-b border-slate-200/80">
+            <TabBtn active={activeTab === "myMissions"} onClick={() => setActiveTab("myMissions")} count={counts.myAll}>
+              ภารกิจของฉัน
+            </TabBtn>
+            <TabBtn
+              active={activeTab === "available"}
+              onClick={() => setActiveTab("available")}
+              count={counts.availAll}
+            >
+              ภารกิจใหม่
+            </TabBtn>
+          </div>
+
+          <FilterRow
+            forTab={activeTab === "myMissions" ? "my" : "available"}
+            myMissionStatusFilter={myMissionStatusFilter}
+            setMyMissionStatusFilter={setMyMissionStatusFilter}
+            myMissionTypeFilter={myMissionTypeFilter}
+            setMyMissionTypeFilter={setMyMissionTypeFilter}
+            availableMissionTypeFilter={availableMissionTypeFilter}
+            setAvailableMissionTypeFilter={setAvailableMissionTypeFilter}
+          />
+        </div>
+
+        {activeTab === "myMissions" ? renderMy() : renderAvailable()}
+      </main>
     </div>
   );
 }

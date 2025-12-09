@@ -25,6 +25,15 @@ export default function LockScreen() {
     }
   }, [isError, reset]);
 
+  // --- Auto-focus on mount ---
+  useEffect(() => {
+    // Small timeout to ensure the animation or rendering is ready
+    const timer = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   const submit = (pinValue: string) => {
     if (!pinValue || pinValue.length !== 6 || !liffProfile?.userId) return;
     unlock({ line_user_id: liffProfile.userId, pin: pinValue });
@@ -40,9 +49,7 @@ export default function LockScreen() {
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
-    const pasted = (e.clipboardData.getData("text") || "")
-      .replace(/\D/g, "")
-      .slice(0, 6);
+    const pasted = (e.clipboardData.getData("text") || "").replace(/\D/g, "").slice(0, 6);
     setPin(pasted);
     if (pasted.length === 6 && !isPending) {
       submit(pasted);
@@ -59,6 +66,7 @@ export default function LockScreen() {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/60 backdrop-blur-xl"
+        onClick={() => inputRef.current?.focus()} // Ensure click anywhere focuses input
       >
         <motion.div
           // --- Interaction Choreographer: Entrance Animation ---
@@ -72,13 +80,9 @@ export default function LockScreen() {
               <LockKeyhole className="text-white" size={28} />
             </div>
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-white tracking-tight">
-                ใส่รหัสผ่าน
-              </h1>
+              <h1 className="text-2xl font-bold tracking-tight text-white">ใส่รหัสผ่าน</h1>
               <p className="mt-2 text-sm font-medium text-white/60">
-                {isError
-                  ? "รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่"
-                  : "กรุณากรอกรหัส PIN 6 หลัก"}
+                {isError ? "รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่" : "กรุณากรอกรหัส PIN 6 หลัก"}
               </p>
             </div>
           </div>
@@ -99,7 +103,7 @@ export default function LockScreen() {
                     key={index}
                     className={`h-4 w-4 rounded-full transition-all duration-300 ${
                       hasValue
-                        ? "bg-gradient-to-br from-pink-500 to-orange-500 shadow-[0_0_10px_rgba(236,72,153,0.5)] scale-110"
+                        ? "scale-110 bg-gradient-to-br from-pink-500 to-orange-500 shadow-[0_0_10px_rgba(236,72,153,0.5)]"
                         : "bg-white/20"
                     } ${isError ? "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" : ""}`}
                   />
@@ -110,10 +114,7 @@ export default function LockScreen() {
             {/* Loading Spinner */}
             {isPending && (
               <div className="absolute inset-0 flex items-center justify-center">
-                <LoaderCircle
-                  className="animate-spin text-white"
-                  size={32}
-                />
+                <LoaderCircle className="animate-spin text-white" size={32} />
               </div>
             )}
           </div>

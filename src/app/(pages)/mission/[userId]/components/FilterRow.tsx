@@ -1,6 +1,5 @@
 import { Filter } from "lucide-react";
-import Chip from "./Chip";
-import { useRef, useCallback } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 /* =========================================================
    Filter configs
@@ -29,124 +28,68 @@ export default function FilterRow({
   availableMissionTypeFilter,
   setAvailableMissionTypeFilter,
 }) {
-  const statusScrollRef = useRef(null);
-  const typeScrollRef = useRef(null);
-  const availableTypeScrollRef = useRef(null);
-
-  const handleStatusFilterChange = useCallback((newStatus) => {
-    if (!statusScrollRef.current) return;
-    const scrollPos = statusScrollRef.current.scrollLeft;
-    setMyMissionStatusFilter(newStatus);
-    // Double requestAnimationFrame ensures DOM is fully painted
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (statusScrollRef.current) {
-          statusScrollRef.current.scrollLeft = scrollPos;
-        }
-      });
-    });
-  }, []);
-
-  const handleTypeFilterChange = useCallback((newType) => {
-    if (!typeScrollRef.current) return;
-    const scrollPos = typeScrollRef.current.scrollLeft;
-    setMyMissionTypeFilter(newType);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (typeScrollRef.current) {
-          typeScrollRef.current.scrollLeft = scrollPos;
-        }
-      });
-    });
-  }, []);
-
-  const handleAvailableTypeFilterChange = useCallback((newType) => {
-    if (!availableTypeScrollRef.current) return;
-    const scrollPos = availableTypeScrollRef.current.scrollLeft;
-    setAvailableMissionTypeFilter(newType);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (availableTypeScrollRef.current) {
-          availableTypeScrollRef.current.scrollLeft = scrollPos;
-        }
-      });
-    });
-  }, []);
-
   return (
-    <div className="sticky top-[116px] z-10 border-b border-slate-200/60 bg-white/80 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <div className="sticky top-0 z-10 grid grid-cols-2 gap-3 bg-white pb-2">
       {forTab === "my" ? (
         <>
-          <div
-            ref={statusScrollRef}
-            className="scrollbar-hide -mx-1 flex items-center gap-2 overflow-x-auto px-1 py-1"
-            style={{
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-              scrollBehavior: "auto", // Prevent smooth scroll interfering
-              WebkitOverflowScrolling: "touch", // Better mobile experience
-            }}
-          >
-            <span className="inline-flex flex-shrink-0 items-center gap-1.5 text-xs font-semibold text-slate-600">
-              <Filter className="h-4 w-4" /> สถานะ
-            </span>
-            {STATUS_FILTERS.map(({ key, label }) => (
-              <Chip
-                key={key}
-                active={myMissionStatusFilter === key}
-                onClick={() => handleStatusFilterChange(key)}
-              >
-                {label}
-              </Chip>
-            ))}
-          </div>
-          <div
-            ref={typeScrollRef}
-            className="scrollbar-hide -mx-1 mt-2 flex items-center gap-2 overflow-x-auto px-1 py-1"
-            style={{
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-              scrollBehavior: "auto",
-              WebkitOverflowScrolling: "touch",
-            }}
-          >
-            <span className="inline-flex flex-shrink-0 items-center gap-1.5 text-xs font-semibold text-slate-600">
-              ประเภท
-            </span>
-            {TYPE_FILTERS.map(({ key, label }) => (
-              <Chip
-                key={key}
-                active={myMissionTypeFilter === key}
-                onClick={() => handleTypeFilterChange(key)}
-              >
-                {label}
-              </Chip>
-            ))}
-          </div>
+          {/* Status Filter */}
+          <Select value={myMissionStatusFilter} onValueChange={setMyMissionStatusFilter}>
+            <SelectTrigger className="h-10 rounded-xl border-slate-200 bg-slate-50 text-sm font-medium text-slate-600 focus:ring-2 focus:ring-pink-100">
+              <div className="flex items-center gap-2 truncate">
+                <Filter className="h-3.5 w-3.5 opacity-70" />
+                <span className="truncate">
+                  {STATUS_FILTERS.find((f) => f.key === myMissionStatusFilter)?.label || "สถานะ"}
+                </span>
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_FILTERS.map((filter) => (
+                <SelectItem key={filter.key} value={filter.key}>
+                  {filter.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Type Filter */}
+          <Select value={myMissionTypeFilter} onValueChange={setMyMissionTypeFilter}>
+            <SelectTrigger className="h-10 rounded-xl border-slate-200 bg-slate-50 text-sm font-medium text-slate-600 focus:ring-2 focus:ring-pink-100">
+              <div className="flex items-center gap-2 truncate">
+                <Filter className="h-3.5 w-3.5 opacity-70" />
+                <span className="truncate">
+                  {TYPE_FILTERS.find((f) => f.key === myMissionTypeFilter)?.label || "ประเภท"}
+                </span>
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              {TYPE_FILTERS.map((filter) => (
+                <SelectItem key={filter.key} value={filter.key}>
+                  {filter.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </>
       ) : (
-        <div
-          ref={availableTypeScrollRef}
-          className="scrollbar-hide -mx-1 flex items-center gap-2 overflow-x-auto px-1 py-1"
-          style={{
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-            scrollBehavior: "auto",
-            WebkitOverflowScrolling: "touch",
-          }}
-        >
-          <span className="inline-flex flex-shrink-0 items-center gap-1.5 text-xs font-semibold text-slate-600">
-            <Filter className="h-4 w-4" /> ประเภท
-          </span>
-          {TYPE_FILTERS.map(({ key, label }) => (
-            <Chip
-              key={key}
-              active={availableMissionTypeFilter === key}
-              onClick={() => handleAvailableTypeFilterChange(key)}
-            >
-              {label}
-            </Chip>
-          ))}
+        /* Available Missions - Only Type Filter */
+        <div className="col-span-2">
+          <Select value={availableMissionTypeFilter} onValueChange={setAvailableMissionTypeFilter}>
+            <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 bg-slate-50 text-sm font-medium text-slate-600 focus:ring-2 focus:ring-pink-100">
+              <div className="flex items-center gap-2">
+                <Filter className="h-3.5 w-3.5 opacity-70" />
+                <span className="truncate">
+                  {TYPE_FILTERS.find((f) => f.key === availableMissionTypeFilter)?.label || "ประเภทภารกิจ"}
+                </span>
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              {TYPE_FILTERS.map((filter) => (
+                <SelectItem key={filter.key} value={filter.key}>
+                  {filter.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
     </div>
