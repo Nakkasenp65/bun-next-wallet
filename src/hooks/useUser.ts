@@ -3,13 +3,7 @@ import axios from "@/lib/axios";
 import externalLinkAxios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import {
-  CheckOkMobileUser,
-  MainServerUser,
-  UserData,
-  UserLockStatus,
-} from "@/types/user";
-import { CreateGoalPayload } from "../types/goal";
+import { CheckOkMobileUser, MainServerUser, UserData, UserLockStatus } from "@/types/user";
 
 // --- Interfaces ---
 
@@ -24,11 +18,6 @@ interface AdminUserFilters {
 interface UpdateAdminUserParams {
   userId: string;
   payload: Record<string, any>;
-}
-
-interface UpdateGoalDTO {
-  userId: string;
-  [key: string]: any;
 }
 
 interface UpdateUserParams {
@@ -133,9 +122,7 @@ export function useLockStatus(lineUserId: string | undefined) {
     queryKey: ["lockStatus", lineUserId],
     queryFn: async () => {
       if (!lineUserId) return null;
-      const { data } = await axios.get<UserLockStatus>(
-        `/user/lock/${lineUserId}`,
-      );
+      const { data } = await axios.get<UserLockStatus>(`/user/lock/${lineUserId}`);
       return data;
     },
     enabled: !!lineUserId,
@@ -174,9 +161,7 @@ export function useMainServerUser(line_user_id: string | undefined) {
       const mainUserApiUrl = process.env.NEXT_PUBLIC_MAIN_USER_API;
       try {
         if (!mainUserApiUrl) throw new Error("mainUserApiUrl is not defined");
-        const { data } = await externalLinkAxios.get<MainServerUser>(
-          `${mainUserApiUrl}${line_user_id}`,
-        );
+        const { data } = await externalLinkAxios.get<MainServerUser>(`${mainUserApiUrl}${line_user_id}`);
         return data;
       } catch (error) {
         console.log("Error fetchUserfromMainServer", error);
@@ -184,68 +169,6 @@ export function useMainServerUser(line_user_id: string | undefined) {
       }
     },
     enabled: !!line_user_id,
-  });
-}
-
-export function useCreateGoal() {
-  const queryClient = useQueryClient();
-  const router = useRouter();
-  return useMutation({
-    mutationFn: async (goalData: CreateGoalPayload) => {
-      const { data } = await axios.post(`/user`, goalData);
-      return data;
-    },
-    onSuccess: async (data) => {
-      toast.success("สร้างเป้าหมายการออมเงินสำเร็จ!");
-      setTimeout(() => {
-        console.log("wait for 1 second");
-      }, 500);
-      await queryClient.invalidateQueries({
-        queryKey: ["users", data.line_user_id],
-      });
-
-      // Update cache manually if needed
-      await queryClient.setQueryData(["userStatus", data.line_user_id], {
-        isNewUser: false,
-      });
-      router.push("/");
-    },
-    onError: (error: AxiosError<any>) => {
-      console.error("Error creating goal:", error);
-      const errorMessage =
-        error.response?.data?.message || "สร้างเป้าหมายการออมเงินไม่สำเร็จ";
-      toast.error(errorMessage);
-    },
-  });
-}
-
-export function useUpdateGoal() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (goalData: UpdateGoalDTO) => {
-      const { userId, ...payload } = goalData;
-      const { data } = await axios.patch(`/goal/${userId}`, payload);
-      return data;
-    },
-    onSuccess: (data, variables) => {
-      toast.success("เปลี่ยนเป้าหมายสำเร็จ!");
-      setTimeout(() => {
-        console.log("wait for 0.5 second (race condition)");
-      }, 500);
-
-      // Note: variables.line_user_id might not exist on UpdateGoalDTO based on how you call it,
-      // check if you need to pass it or if userId is actually the line_user_id
-      const queryKey = variables["line_user_id"]
-        ? ["goal", variables["line_user_id"]]
-        : ["goal", variables.userId];
-
-      queryClient.invalidateQueries({ queryKey });
-    },
-    onError: (error: AxiosError<any>) => {
-      toast.error(
-        error.response?.data?.message || "ไม่สามารถเปลี่ยนเป้าหมายได้",
-      );
-    },
   });
 }
 
@@ -265,9 +188,7 @@ export function useUpdateUser() {
       router.back();
     },
     onError: (error: AxiosError<any>) => {
-      toast.error(
-        error.response?.data?.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
-      );
+      toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล");
     },
   });
 }

@@ -13,7 +13,7 @@ import {
 
 // --- Types ---
 interface AgeStepProps {
-  data: Record<string, string>; // Assuming data values are strings
+  data: Record<string, string>;
   onChange: (e: { target: { name: string; value: string } }) => void;
   onValidationChange: (isValid: boolean) => void;
 }

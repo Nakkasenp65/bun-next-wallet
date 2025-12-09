@@ -5,12 +5,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import { ChevronLeft, Sparkles } from "lucide-react";
 
-import {
-  useGetAvailableMissions,
-  useGetMyMissions,
-  useEnrollMission,
-  useClaimMission,
-} from "@/hooks/useMission";
+import { useGetAvailableMissions, useGetMyMissions, useEnrollMission, useClaimMission } from "@/hooks/useMission";
 import { useGetUser } from "@/hooks/useUser";
 
 import MyMissionCard from "@/components/MissionComponents/MyMissionCard";
@@ -44,20 +39,13 @@ export default function MissionPage() {
   const [activeTab, setActiveTab] = useState("myMissions");
   const [myMissionStatusFilter, setMyMissionStatusFilter] = useState("ALL");
   const [myMissionTypeFilter, setMyMissionTypeFilter] = useState("ALL");
-  const [availableMissionTypeFilter, setAvailableMissionTypeFilter] =
-    useState("ALL");
+  const [availableMissionTypeFilter, setAvailableMissionTypeFilter] = useState("ALL");
 
-  const { data: userData, isLoading: isUserLoading } = useGetUser(
-    params.userId as string,
-  );
+  const { data: userData, isLoading: isUserLoading } = useGetUser(params.userId as string);
   const userId = userData?.id;
 
-  const { data: myMissions, isLoading: myMissionsLoading } = useGetMyMissions(
-    userId,
-    "all",
-  );
-  const { data: availableMissions, isLoading: availableMissionsLoading } =
-    useGetAvailableMissions(userId);
+  const { data: myMissions, isLoading: myMissionsLoading } = useGetMyMissions(userId, "all");
+  const { data: availableMissions, isLoading: availableMissionsLoading } = useGetAvailableMissions(userId);
 
   const { mutate: enroll, isPending: isEnrolling } = useEnrollMission();
   const { mutate: claim, isPending: isClaiming } = useClaimMission();
@@ -67,12 +55,9 @@ export default function MissionPage() {
     return myMissions
       .filter((m) => {
         if (myMissionStatusFilter === "ALL") return true;
-        if (myMissionStatusFilter === "AWAITING_CLAIM")
-          return m.status === "AWAITING_CLAIM";
-        if (myMissionStatusFilter === "COMPLETED")
-          return m.status === "CLAIMED";
-        if (myMissionStatusFilter === "EXPIRED")
-          return m.status === "EXPIRED" || m.status === "CLAIM_EXPIRED";
+        if (myMissionStatusFilter === "AWAITING_CLAIM") return m.status === "AWAITING_CLAIM";
+        if (myMissionStatusFilter === "COMPLETED") return m.status === "CLAIMED";
+        if (myMissionStatusFilter === "EXPIRED") return m.status === "EXPIRED" || m.status === "CLAIM_EXPIRED";
         return true;
       })
       .filter((m) => {
@@ -83,10 +68,14 @@ export default function MissionPage() {
 
   const filteredAvailableMissions = useMemo(() => {
     if (!availableMissions) return [];
-    if (availableMissionTypeFilter === "ALL") return availableMissions;
-    return availableMissions.filter(
-      (m) => m?.type === availableMissionTypeFilter,
-    );
+    const now = new Date();
+    const activeMissions = availableMissions.filter((m) => {
+      if (!m?.webExpiresAt) return true;
+      return new Date(m.webExpiresAt) > now;
+    });
+
+    if (availableMissionTypeFilter === "ALL") return activeMissions;
+    return activeMissions.filter((m) => m?.type === availableMissionTypeFilter);
   }, [availableMissions, availableMissionTypeFilter]);
 
   const counts = useMemo(
@@ -97,8 +86,7 @@ export default function MissionPage() {
     [myMissions, availableMissions],
   );
 
-  const isLoading =
-    isUserLoading || myMissionsLoading || availableMissionsLoading;
+  const isLoading = isUserLoading || myMissionsLoading || availableMissionsLoading;
 
   const handleEnrollClick = (missionId) => {
     if (!userId) return;
@@ -206,18 +194,10 @@ export default function MissionPage() {
           </div>
         </div>
         <div className="flex border-b border-slate-200/80">
-          <TabBtn
-            active={activeTab === "myMissions"}
-            onClick={() => setActiveTab("myMissions")}
-            count={counts.myAll}
-          >
+          <TabBtn active={activeTab === "myMissions"} onClick={() => setActiveTab("myMissions")} count={counts.myAll}>
             ภารกิจของฉัน
           </TabBtn>
-          <TabBtn
-            active={activeTab === "available"}
-            onClick={() => setActiveTab("available")}
-            count={counts.availAll}
-          >
+          <TabBtn active={activeTab === "available"} onClick={() => setActiveTab("available")} count={counts.availAll}>
             ภารกิจใหม่
           </TabBtn>
         </div>
@@ -232,9 +212,7 @@ export default function MissionPage() {
         />
       </header>
 
-      <main className="flex-grow px-4 py-4 pb-24">
-        {activeTab === "myMissions" ? renderMy() : renderAvailable()}
-      </main>
+      <main className="flex-grow px-4 py-4 pb-24">{activeTab === "myMissions" ? renderMy() : renderAvailable()}</main>
     </div>
   );
 }

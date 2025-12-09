@@ -6,7 +6,7 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import CtaButton from "../ui/CtaButton";
 import FramerDiv from "../framerComponents/FramerDiv";
 import GoalSetter from "../../app/(pages)/welcome/components/GoalSetter";
-import { useUpdateGoal } from "@/hooks/useUser";
+import { useUpdateGoal } from "@/hooks/useGoal";
 import { useGetProducts } from "@/hooks/useProduct"; // <-- 1. Import Hook ที่ถูกต้อง
 import toast from "react-hot-toast";
 
@@ -98,12 +98,7 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData, bala
     isLoading: isFetching,
     isError,
     error,
-  } = useGetProducts(
-    productQuery.mode,
-    productQuery.minPrice,
-    productQuery.maxPrice,
-    productQuery.sort,
-  ); // เปิดใช้งาน Hook นี้ก็ต่อเมื่อ Component นี้กำลังถูกแสดงผล
+  } = useGetProducts(productQuery.mode, productQuery.minPrice, productQuery.maxPrice, productQuery.sort); // เปิดใช้งาน Hook นี้ก็ต่อเมื่อ Component นี้กำลังถูกแสดงผล
 
   console.log(productsData);
 
@@ -183,17 +178,10 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData, bala
   const hasProducts = !isFetching && Array.isArray(suggestedPhone) && suggestedPhone.length > 0;
 
   return (
-    <FramerDiv
-      isOpen={isEditing}
-      id="change-goal-overlay"
-      className="fixed inset-0 z-50 flex flex-col bg-white p-2"
-    >
+    <FramerDiv isOpen={isEditing} id="change-goal-overlay" className="fixed inset-0 z-50 flex flex-col bg-white p-2">
       {/* Header */}
       <header className="flex flex-shrink-0 items-center border-b border-gray-200 px-5 pt-4 pb-4">
-        <button
-          onClick={closePage}
-          className="text-2xl text-gray-600 transition-colors hover:text-gray-800"
-        >
+        <button onClick={closePage} className="text-2xl text-gray-600 transition-colors hover:text-gray-800">
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
         <h2 className="flex-grow text-center text-xl font-bold text-gray-800">แก้ไขเป้าหมาย</h2>
@@ -211,10 +199,7 @@ export default function ChangeGoalPage({ isEditing, setIsEditing, userData, bala
       </div>
 
       {/* Mode Switch */}
-      <ModeSwitch
-        mode={productQuery.mode}
-        onChange={(m) => setProductQuery((q) => ({ ...q, mode: m }))}
-      />
+      <ModeSwitch mode={productQuery.mode} onChange={(m) => setProductQuery((q) => ({ ...q, mode: m }))} />
 
       {/* Content */}
       <div className="relative flex-grow overflow-y-auto">

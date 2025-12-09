@@ -8,6 +8,8 @@ import useCountdown from "@/hooks/useCountdown";
 import clsx from "clsx";
 import Image from "next/image";
 
+import { Mission } from "@/types/prisma";
+
 // --- 1. Style Mapping for Mission Types ---
 // We define the visual properties for each mission type here.
 // This includes the gradient and a specific icon for better visual distinction.
@@ -38,15 +40,6 @@ const missionStyleMap = {
     name: "ทั่วไป",
   },
 };
-
-interface Mission {
-  id: string;
-  webExpiresAt: string | Date;
-  type: string;
-  title: string;
-  description: string;
-  rewardAmount: number;
-}
 
 interface AvailableMissionCardProps {
   mission: Mission;
@@ -80,7 +73,7 @@ const AvailableMissionCard = ({ mission, onEnroll, isEnrolling }: AvailableMissi
         styles.gradient,
       )}
       role="article"
-      aria-label={`ภารกิจ: ${mission.title}`}
+      aria-label={`ภารกิจ: ${mission.title || ""}`}
     >
       {/* Subtle overlay for depth */}
       <div
@@ -98,9 +91,7 @@ const AvailableMissionCard = ({ mission, onEnroll, isEnrolling }: AvailableMissi
             {styles.icon}
           </div>
           <div className="flex-1 overflow-hidden">
-            <h3 className="truncate text-base leading-tight font-bold tracking-tight">
-              {mission.title}
-            </h3>
+            <h3 className="truncate text-base leading-tight font-bold tracking-tight">{mission.title || "ภารกิจ"}</h3>
             <span className="mt-0.5 inline-block rounded-full bg-black/20 px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase">
               {styles.name}
             </span>
@@ -110,7 +101,7 @@ const AvailableMissionCard = ({ mission, onEnroll, isEnrolling }: AvailableMissi
 
       {/* Description */}
       <p className="relative z-10 mt-4 min-h-[40px] text-sm leading-relaxed text-white/95">
-        {mission.description}
+        {mission.description || ""}
       </p>
 
       {/* Countdown Timer */}
@@ -132,7 +123,7 @@ const AvailableMissionCard = ({ mission, onEnroll, isEnrolling }: AvailableMissi
           <span className="text-xs font-medium text-white/70">รางวัล</span>
           <div className="mt-1 flex items-center gap-1.5 text-2xl font-bold text-amber-300">
             <GrMoney className="h-5 w-5" aria-hidden />
-            <span>{mission.rewardAmount.toLocaleString()}</span>
+            <span>{(mission.rewardAmount || 0).toLocaleString()}</span>
           </div>
         </div>
         <motion.button

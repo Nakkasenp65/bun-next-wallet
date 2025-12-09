@@ -44,6 +44,29 @@ export interface UpdatePayload {
   amount: string;
 }
 
+interface ProductFilters {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  brand?: string;
+  sort?: string;
+  [key: string]: any;
+}
+
+interface TransactionFilters {
+  page?: number;
+  pageSize?: number;
+  status?: string;
+  [key: string]: any;
+}
+
+interface BroadcastFilters {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  [key: string]: any;
+}
+
 async function updateMission({ missionId, payload }: UpdateMissionPayload) {
   console.log("payload:", missionId);
   const { data } = await axios.patch(`/admin/missions/${missionId}`, payload);
@@ -89,18 +112,8 @@ export function useUpdateAdminMission() {
       toast.success("บันทึกการเปลี่ยนแปลงสำเร็จ!");
       queryClient.invalidateQueries({ queryKey: ["adminMissions"] });
     },
-    onError: (err: AxiosError<any>) =>
-      toast.error(err.response?.data?.message || "อัปเดตภารกิจไม่สำเร็จ"),
+    onError: (err: AxiosError<any>) => toast.error(err.response?.data?.message || "อัปเดตภารกิจไม่สำเร็จ"),
   });
-}
-
-// TRANSACTION
-
-interface TransactionFilters {
-  page?: number;
-  pageSize?: number;
-  status?: string;
-  [key: string]: any;
 }
 
 export function useGetAdminTransactions(filters: TransactionFilters) {
@@ -134,9 +147,7 @@ export function useDeleteTransaction() {
   return useMutation({
     // mutationFn จะรับ transactionId ที่ต้องการลบ
     mutationFn: async (transactionId: string) => {
-      const { data } = await axios.delete(
-        `/admin/transactions/${transactionId}`,
-      );
+      const { data } = await axios.delete(`/admin/transactions/${transactionId}`);
       return data;
     },
     onSuccess: () => {
@@ -153,11 +164,14 @@ export function useDeleteTransaction() {
 export function useUpdateTransaction() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ transactionId, payload }: { transactionId: string; payload: UpdatePayload | ApprovePayload | RejectPayload }) => {
-      const { data } = await axios.patch(
-        `/admin/transactions/${transactionId}`,
-        payload,
-      );
+    mutationFn: async ({
+      transactionId,
+      payload,
+    }: {
+      transactionId: string;
+      payload: UpdatePayload | ApprovePayload | RejectPayload;
+    }) => {
+      const { data } = await axios.patch(`/admin/transactions/${transactionId}`, payload);
       return data;
     },
     onSuccess: (data) => {
@@ -169,8 +183,6 @@ export function useUpdateTransaction() {
     },
   });
 }
-
-// NOTIFICATION
 
 interface NotificationFilters {
   page?: number;
@@ -207,9 +219,7 @@ export function useAdminCreateSystemNotification() {
       queryClient.invalidateQueries({ queryKey: ["adminSystemNotifications"] });
     },
     onError: (error: AxiosError<any>) => {
-      toast.error(
-        error.response?.data?.message || "เกิดข้อผิดพลาดในการสร้างการแจ้งเตือน",
-      );
+      toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการสร้างการแจ้งเตือน");
     },
   });
 }
@@ -220,10 +230,7 @@ export function useAdminEditNotification() {
     // mutationFn จะได้รับ object ที่มีทั้ง notificationId และ payload
     mutationFn: async ({ notificationId, payload }: { notificationId: string; payload: Partial<Notification> }) => {
       // PATCH /admin/notifications/:notificationId
-      const { data } = await axios.patch(
-        `/admin/notifications/${notificationId}`,
-        payload,
-      );
+      const { data } = await axios.patch(`/admin/notifications/${notificationId}`, payload);
       return data;
     },
     onSuccess: () => {
@@ -243,9 +250,7 @@ export function useAdminDeleteNotification() {
     // mutationFn จะได้รับ notificationId ที่ต้องการลบ
     mutationFn: async (notificationId: string) => {
       // DELETE /admin/notifications/:notificationId
-      const { data } = await axios.delete(
-        `/admin/notifications/${notificationId}`,
-      );
+      const { data } = await axios.delete(`/admin/notifications/${notificationId}`);
       return data;
     },
     onSuccess: () => {
@@ -257,15 +262,6 @@ export function useAdminDeleteNotification() {
       toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการลบ");
     },
   });
-}
-
-// BROADCAST
-
-interface BroadcastFilters {
-  page?: number;
-  pageSize?: number;
-  search?: string;
-  [key: string]: any;
 }
 
 export function useAdminGetBroadcasts(filters: BroadcastFilters) {
@@ -305,10 +301,7 @@ export function useAdminUpdateBroadcast() {
   return useMutation({
     mutationFn: async ({ broadcastId, payload }: { broadcastId: string; payload: Partial<Broadcast> }) => {
       // PATCH /admin/broadcasts/:broadcastId
-      const { data } = await axios.patch(
-        `/admin/broadcasts/${broadcastId}`,
-        payload,
-      );
+      const { data } = await axios.patch(`/admin/broadcasts/${broadcastId}`, payload);
       return data;
     },
     onSuccess: () => {
@@ -343,9 +336,7 @@ export function useAdminSendBroadcast() {
   return useMutation({
     mutationFn: async (broadcastId: string) => {
       // POST /admin/broadcasts/:broadcastId/send
-      const { data } = await axios.post(
-        `/admin/broadcasts/${broadcastId}/send`,
-      );
+      const { data } = await axios.post(`/admin/broadcasts/${broadcastId}/send`);
       return data;
     },
     onSuccess: (data) => {
@@ -357,19 +348,6 @@ export function useAdminSendBroadcast() {
       toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการส่ง");
     },
   });
-}
-
-/**
- * Hook สำหรับดึงข้อมูล Products ทั้งหมดแบบแบ่งหน้าสำหรับ Admin
- * @param {object} filters - State ของตัวกรองจากหน้า Page (page, pageSize, search, brand, sort)
- */
-interface ProductFilters {
-  page?: number;
-  pageSize?: number;
-  search?: string;
-  brand?: string;
-  sort?: string;
-  [key: string]: any;
 }
 
 export function useAdminGetProducts(filters: ProductFilters) {
@@ -398,9 +376,7 @@ export function useAdminCreateProduct() {
       queryClient.invalidateQueries({ queryKey: ["adminProducts"] });
     },
     onError: (error: AxiosError<any>) => {
-      toast.error(
-        error.response?.data?.message || "เกิดข้อผิดพลาดในการสร้างสินค้า",
-      );
+      toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการสร้างสินค้า");
     },
   });
 }
@@ -410,10 +386,7 @@ export function useAdminEditProduct() {
   return useMutation({
     mutationFn: async ({ productId, payload }: { productId: string; payload: Partial<Product> }) => {
       // PATCH /admin/products/:productId
-      const { data } = await axios.patch(
-        `/admin/products/${productId}`,
-        payload,
-      );
+      const { data } = await axios.patch(`/admin/products/${productId}`, payload);
       return data;
     },
     onSuccess: () => {
@@ -438,9 +411,7 @@ export function useAdminDeleteProduct() {
       queryClient.invalidateQueries({ queryKey: ["adminProducts"] });
     },
     onError: (error: AxiosError<any>) => {
-      toast.error(
-        error.response?.data?.message || "เกิดข้อผิดพลาดในการลบสินค้า",
-      );
+      toast.error(error.response?.data?.message || "เกิดข้อผิดพลาดในการลบสินค้า");
     },
   });
 }

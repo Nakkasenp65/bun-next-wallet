@@ -82,11 +82,7 @@ export default function MainPage({ liffProfile }) {
   } = useGetAvailableMissions(userData?.id);
 
   // ดึงข้อมูลภารกิจที่ลงทะเบียนแล้ว
-  const {
-    data: myMission,
-    isLoading: myMissionLoading,
-    error: myMissionError,
-  } = useGetMyMissions(userData?.id);
+  const { data: myMission, isLoading: myMissionLoading, error: myMissionError } = useGetMyMissions(userData?.id);
 
   const [showTransfer, setShowTransfer] = useState(false);
   const [showRedeemModal, setShowRedeemModal] = useState(false);
@@ -99,9 +95,7 @@ export default function MainPage({ liffProfile }) {
   // ดาวน์โทรศัพท์เมื่อยอดเงินถึงเป้าหมาย
   const confirmAndProceedToRedeem = () => {
     setShowRedeemModal(false);
-    window
-      .open(`http://app.no1.mobi/landing-page-installment/${userData?.line_user_id}`, "_blank")
-      ?.focus();
+    window.open(`http://app.no1.mobi/landing-page-installment/${userData?.line_user_id}`, "_blank")?.focus();
   };
 
   // เปลี่ยนเป้าหมายตอนสถึงยอดดาวน์
@@ -185,8 +179,7 @@ export default function MainPage({ liffProfile }) {
             element: "#tour-profile",
             popover: {
               title: "ข้อมูลโปรไฟล์",
-              description:
-                "คลิกที่รูปโปรไฟล์มุมซ้ายบนเพื่อแก้ไขเบอร์โทรศัพท์และข้อมูลส่วนตัวของคุณ",
+              description: "คลิกที่รูปโปรไฟล์มุมซ้ายบนเพื่อแก้ไขเบอร์โทรศัพท์และข้อมูลส่วนตัวของคุณ",
             },
           },
           {
@@ -200,32 +193,26 @@ export default function MainPage({ liffProfile }) {
             element: "#tour-action-grid",
             popover: {
               title: "เมนูทำรายการ",
-              description:
-                "ทำรายการฝาก ถอน โอน หรือเปลี่ยนเป้าหมายการออมได้ที่นี่",
+              description: "ทำรายการฝาก ถอน โอน หรือเปลี่ยนเป้าหมายการออมได้ที่นี่",
             },
           },
           {
             element: "#tour-missions",
             popover: {
               title: "ภารกิจ",
-              description:
-                "ตรวจสอบภารกิจของคุณและลงทะเบียนภารกิจใหม่เพื่อรับของรางวัล",
+              description: "ตรวจสอบภารกิจของคุณและลงทะเบียนภารกิจใหม่เพื่อรับของรางวัล",
             },
           },
           {
             element: "#tour-bottom-nav",
             popover: {
               title: "เมนูหลัก",
-              description:
-                "ใช้เมนูด้านล่างเพื่อดูรายละเอียดและสแกนโอนเงินระหว่างกระเป๋า",
+              description: "ใช้เมนูด้านล่างเพื่อดูรายละเอียดและสแกนโอนเงินระหว่างกระเป๋า",
             },
           },
         ],
         onDestroyStarted: () => {
-          if (
-            !driverObj.hasNextStep() ||
-            confirm("คุณต้องการจบการแนะนำการใช้งานใช่ไหม?")
-          ) {
+          if (!driverObj.hasNextStep() || confirm("คุณต้องการจบการแนะนำการใช้งานใช่ไหม?")) {
             driverObj.destroy();
             updateGuide.mutate({
               lineUserId: userData.line_user_id,
@@ -355,7 +342,7 @@ export default function MainPage({ liffProfile }) {
                   transactionError={transactionError}
                   currentWalletId={userData?.wallet.id}
                 />
-                <div id="tour-missions" className="flex flex-col gap-8 w-full space-y-8">
+                <div id="tour-missions" className="flex w-full flex-col gap-8 space-y-8">
                   {myMissionLoading ? (
                     <MyMissionCardSkeleton />
                   ) : (
@@ -373,7 +360,10 @@ export default function MainPage({ liffProfile }) {
                     <SavingMission
                       userId={userData?.id}
                       line_user_id={userData?.line_user_id}
-                      missions={availableMission}
+                      missions={availableMission?.filter((m) => {
+                        if (!m?.webExpiresAt) return true;
+                        return new Date(m.webExpiresAt) > new Date();
+                      })}
                     />
                   )}
                 </div>

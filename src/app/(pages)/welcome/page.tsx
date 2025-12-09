@@ -13,12 +13,9 @@ import Loading from "@/components/StatusComponents/Loading";
 
 // --- Hooks ---
 import { useLiff } from "@/components/provider/LiffProvider";
-import {
-  useCheckOkMobileUser,
-  useCreateGoal,
-  useMainServerUser,
-} from "../../../hooks/useUser";
+import { useCheckOkMobileUser, useMainServerUser } from "../../../hooks/useUser";
 import { useGetWelcomeProduct } from "../../../hooks/useProduct";
+import { useCreateGoal } from "../../../hooks/useGoal";
 
 // --- Types ---
 interface GoalState {
@@ -36,13 +33,10 @@ export default function Page() {
   const { liffProfile, liffDecodedIdToken, actions } = useLiff();
 
   const { data: okMobileUser } = useCheckOkMobileUser(liffProfile?.userId);
-  const { data: mainServerUserProfile } = useMainServerUser(
-    liffProfile?.userId,
-  );
+  const { data: mainServerUserProfile } = useMainServerUser(liffProfile?.userId);
 
   // Assuming useCreateGoal returns standard React Query object
-  const { mutate: createGoalMutate, isPending: createGoalPending } =
-    useCreateGoal();
+  const { mutate: createGoalMutate, isPending: createGoalPending } = useCreateGoal();
 
   // --- Local State ---
   const [isUserChecked, setIsUserChecked] = useState<boolean>(false);
@@ -68,26 +62,20 @@ export default function Page() {
 
   // --- Handlers ---
 
-  const handleGoalUpdate = useCallback(
-    (newGoal: { mobileId: string; planId: string }) => {
-      setGoal((prev) => ({
-        ...prev,
-        mobileId: newGoal.mobileId,
-        planId: newGoal.planId,
-      }));
-    },
-    [],
-  );
+  const handleGoalUpdate = useCallback((newGoal: { mobileId: string; planId: string }) => {
+    setGoal((prev) => ({
+      ...prev,
+      mobileId: newGoal.mobileId,
+      planId: newGoal.planId,
+    }));
+  }, []);
 
-  const handleInputComplete = useCallback(
-    (finalDataFromWizard: UserInputData) => {
-      setUserInputData(finalDataFromWizard);
-      const calculatedMaxPrice = Number(finalDataFromWizard.monthlyPayment) * 6;
-      setMaxPrice(calculatedMaxPrice);
-      setUiStep("main");
-    },
-    [],
-  );
+  const handleInputComplete = useCallback((finalDataFromWizard: UserInputData) => {
+    setUserInputData(finalDataFromWizard);
+    const calculatedMaxPrice = Number(finalDataFromWizard.monthlyPayment) * 6;
+    setMaxPrice(calculatedMaxPrice);
+    setUiStep("main");
+  }, []);
 
   const goBack = useCallback(() => {
     setTimeout(() => {
@@ -115,18 +103,12 @@ export default function Page() {
       return;
     }
 
-    const {
-      userId: line_user_id,
-      displayName: line_display_name,
-      pictureUrl: line_profile_url,
-    } = liffProfile || {};
+    const { userId: line_user_id, displayName: line_display_name, pictureUrl: line_profile_url } = liffProfile || {};
 
     const { mobileId, planId } = goal;
 
     const finalOccupation =
-      userInputData.occupation === "อื่นๆ"
-        ? userInputData.customOccupation
-        : userInputData.occupation;
+      userInputData.occupation === "อื่นๆ" ? userInputData.customOccupation : userInputData.occupation;
 
     const { fullname, phone, pin, chat_url } = mainServerUserProfile || {};
 
@@ -222,9 +204,7 @@ export default function Page() {
 
           <div className="space-y-2">
             <h1 className="text-3xl font-bold">เกิดข้อผิดพลาด</h1>
-            <p className="text-gray-300">
-              ไม่สามารถโหลดข้อมูลได้ในขณะนี้ กรุณาติดต่อเจ้าหน้าที่
-            </p>
+            <p className="text-gray-300">ไม่สามารถโหลดข้อมูลได้ในขณะนี้ กรุณาติดต่อเจ้าหน้าที่</p>
           </div>
 
           <button
@@ -248,10 +228,7 @@ export default function Page() {
   }
 
   return (
-    <main
-      id="setup-page"
-      className="flex min-h-dvh flex-col justify-center overflow-x-hidden"
-    >
+    <main id="setup-page" className="flex min-h-dvh flex-col justify-center overflow-x-hidden">
       {/* STEP 1: User Input Wizard */}
       {uiStep === "input" && (
         <UserInputMonthly
@@ -262,37 +239,26 @@ export default function Page() {
       )}
 
       {/* STEP 2: Goal Setter */}
-      {uiStep === "main" &&
-        Array.isArray(productsData) &&
-        productsData.length > 0 && (
-          <div className="flex flex-col bg-white">
-            <header className="from-primary-pink to-primary-orange flex flex-col items-center justify-center gap-2 rounded-b-4xl bg-gradient-to-br p-6 pt-14 text-white drop-shadow-lg">
-              <h1 className="text-2xl font-bold text-white drop-shadow-md drop-shadow-black/30">
-                ตั้งค่าเป้าหมายการออม
-              </h1>
-              <p className="text-xs">
-                เลือกสิ่งที่คุณอยากได้ แล้วมาเริ่มวางแผนการออมกัน!
-              </p>
-            </header>
+      {uiStep === "main" && Array.isArray(productsData) && productsData.length > 0 && (
+        <div className="flex flex-col bg-white">
+          <header className="from-primary-pink to-primary-orange flex flex-col items-center justify-center gap-2 rounded-b-4xl bg-gradient-to-br p-6 pt-14 text-white drop-shadow-lg">
+            <h1 className="text-2xl font-bold text-white drop-shadow-md drop-shadow-black/30">ตั้งค่าเป้าหมายการออม</h1>
+            <p className="text-xs">เลือกสิ่งที่คุณอยากได้ แล้วมาเริ่มวางแผนการออมกัน!</p>
+          </header>
 
-            <GoalSetter
-              products={productsData}
-              onGoalChange={handleGoalUpdate}
-              onBack={goBack}
-              showBack={true}
-            />
+          <GoalSetter products={productsData} onGoalChange={handleGoalUpdate} onBack={goBack} showBack={true} />
 
-            <footer className="flex w-full items-center justify-center bg-white p-6 pb-12 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-              <CtaButton
-                onClick={handleSetGoal}
-                disabled={createGoalPending || !goal.mobileId || !goal.planId}
-                className="z-10 w-48 rounded-xl p-4 text-lg font-bold"
-              >
-                {createGoalPending ? "กำลังบันทึก..." : "เริ่มต้นการออม"}
-              </CtaButton>
-            </footer>
-          </div>
-        )}
+          <footer className="flex w-full items-center justify-center bg-white p-6 pb-12 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+            <CtaButton
+              onClick={handleSetGoal}
+              disabled={createGoalPending || !goal.mobileId || !goal.planId}
+              className="z-10 w-48 rounded-xl p-4 text-lg font-bold"
+            >
+              {createGoalPending ? "กำลังบันทึก..." : "เริ่มต้นการออม"}
+            </CtaButton>
+          </footer>
+        </div>
+      )}
 
       {/* STEP 3: Final / Loading State */}
       {uiStep === "final" && <Loading message="กำลังประมวลผล..." />}

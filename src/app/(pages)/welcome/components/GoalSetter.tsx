@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils"; // Assuming you have this utility from shadcn setup
+import { cn } from "@/lib/utils";
 
 interface GoalSetterProps {
   products: Product[]; // Updated to use the Product type
